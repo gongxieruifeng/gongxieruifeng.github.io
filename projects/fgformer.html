@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FGFormer - 相位感知时空预测 Transformer | 龚谢蕊烽</title>
+    <meta name="description" content="FGFormer: Phase-aware Spatio-Temporal Prediction Transformer - 通过相位旋转位置编码让时间注意力具备运动方向感知能力。">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --accent-soft: #eaf1ff;
+            --rust: #d97757;
+            --ink: #141414;
+            --muted: #667085;
+            --hairline: #dbe2ea;
+            --panel: #f7f9fc;
+            --screen-bg: #eef2f7;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Nav */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 900px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none;
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--accent); }
+
+        /* Page */
+        .page {
+            max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+
+        /* Hero */
+        .project-hero {
+            margin-bottom: 40px;
+        }
+        .project-badge {
+            display: inline-block;
+            font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent);
+            padding: 3px 10px; border-radius: 4px;
+            margin-bottom: 14px;
+        }
+        .project-title {
+            font-size: 36px; font-weight: 900; line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        .project-title i {
+            font-style: italic; color: var(--accent);
+        }
+        .project-subtitle {
+            font-size: 17px; color: var(--muted); margin-bottom: 20px;
+        }
+        .project-links {
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .btn-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s;
+            border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+        }
+        .btn-link:hover {
+            border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+            transform: translateY(-1px);
+        }
+        .btn-link.primary {
+            background: #101828; border-color: #101828; color: #fff;
+        }
+        .btn-link.primary:hover {
+            background: var(--accent); border-color: var(--accent); color: #fff;
+        }
+
+        /* Metrics bar */
+        .metrics-bar {
+            display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0;
+            padding: 16px 20px; background: var(--panel);
+            border: 1px solid var(--hairline); border-radius: 10px;
+        }
+        .metric {
+            text-align: center; flex: 1; min-width: 110px;
+        }
+        .metric-value {
+            font-size: 22px; font-weight: 900; color: var(--accent);
+        }
+        .metric-label {
+            font-size: 12px; color: var(--muted); font-weight: 600;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 36px;
+        }
+        .section h2 {
+            font-size: 20px; font-weight: 800; color: var(--ink);
+            margin-bottom: 16px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before {
+            content: ""; display: inline-block;
+            width: 5px; height: 20px; background: var(--accent); border-radius: 2px;
+        }
+        .section h3 {
+            font-size: 16px; font-weight: 800; color: var(--ink);
+            margin: 20px 0 10px;
+        }
+        .section p {
+            font-size: 15px; color: var(--ink); margin-bottom: 12px;
+        }
+        .section strong {
+            font-weight: 800;
+        }
+        .section ul {
+            padding-left: 20px; margin-bottom: 12px;
+        }
+        .section li {
+            font-size: 15px; margin-bottom: 8px;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: var(--accent-soft);
+            border-left: 4px solid var(--accent);
+            padding: 14px 18px; border-radius: 0 8px 8px 0;
+            margin: 16px 0; font-size: 14.5px;
+        }
+        .highlight-box.orange {
+            background: #fff7ed; border-left-color: var(--rust);
+        }
+
+        /* Code block */
+        pre {
+            background: var(--code-bg); color: var(--code-text);
+            padding: 18px 20px; border-radius: 8px;
+            overflow-x: auto; font-size: 13px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.6; margin: 12px 0 16px;
+        }
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+        pre code {
+            background: none; padding: 0; color: var(--code-text);
+        }
+
+        /* Table */
+        table {
+            width: 100%; border-collapse: collapse; margin: 14px 0 18px;
+            font-size: 14px;
+        }
+        th {
+            background: var(--accent); color: #fff;
+            padding: 10px 12px; text-align: left; font-weight: 700;
+        }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td {
+            padding: 10px 12px; border-bottom: 1px solid var(--hairline);
+        }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+        tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+        .best { color: var(--accent); font-weight: 800; }
+
+        /* Tag cloud */
+        .tag-cloud {
+            display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;
+        }
+        .tag {
+            font-size: 12px; background: var(--accent-soft); color: var(--accent);
+            padding: 3px 10px; border-radius: 4px; font-weight: 600;
+        }
+        .tag.rust { background: #fef3ee; color: var(--rust); }
+
+        /* Flow chart */
+        .flow-box {
+            background: var(--panel); border: 1px solid var(--hairline);
+            border-radius: 10px; padding: 20px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px; line-height: 1.8; overflow-x: auto;
+            white-space: pre; margin: 14px 0;
+        }
+
+        /* Back link */
+        .back-home {
+            text-align: center; margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--hairline);
+        }
+        .back-home a {
+            color: var(--accent); font-weight: 700; text-decoration: none;
+            font-size: 14px;
+        }
+        .back-home a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .project-title { font-size: 26px; }
+            .project-subtitle { font-size: 15px; }
+            .metric-value { font-size: 18px; }
+            .metrics-bar { padding: 12px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">龚谢蕊烽</a>
+            <a href="../index.html" class="nav-back">← 返回主页</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Hero -->
+        <div class="project-hero">
+            <span class="project-badge">时空预测 · 视频帧预测 · 核心创新</span>
+            <h1 class="project-title"><i>FGFormer</i>: Phase-aware Spatio-Temporal Prediction Transformer</h1>
+            <p class="project-subtitle">相位感知时空预测 Transformer —— 让时间注意力具备运动方向感知能力</p>
+            <div class="project-links">
+                <a href="https://github.com/gongxieruifeng/FGFormer" target="_blank" rel="noopener noreferrer" class="btn-link primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub 仓库
+                </a>
+                <a href="#quickstart" class="btn-link">快速开始</a>
+                <a href="#results" class="btn-link">实验结果</a>
+            </div>
+
+            <div class="metrics-bar">
+                <div class="metric">
+                    <div class="metric-value">23.00</div>
+                    <div class="metric-label">MMNIST MSE ↓</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">0.9483</div>
+                    <div class="metric-label">SSIM ↑</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">−34.5%</div>
+                    <div class="metric-label">MSE 降低</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">~2.5M</div>
+                    <div class="metric-label">参数量</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">+8</div>
+                    <div class="metric-label">新增参数/层</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="section">
+            <h2>项目概述</h2>
+            <p>FGFormer 是一个面向视频时空预测的 Transformer 模型，通过在时间注意力中引入<strong>相位旋转位置编码（Phase-RoPE）</strong>，让模型具备感知运动方向的能力。</p>
+            <p>标准时间注意力只能判断"两帧长得像不像"，无法区分"同向运动"和"反向运动"，导致预测模糊。FGFormer 通过对 Q/K 施加随帧号变化的旋转，将注意力矩阵从"外观相似度过滤器"升级为"运动节奏过滤器"，<strong>在不增加任何 FLOPs 的前提下</strong>显著提升预测精度。</p>
+            <div class="highlight-box">
+                <strong>核心洞察：</strong>匀速运动在空间域中的表现，等价于频域中每个频率分量的相位线性递进（傅里叶移位定理）。FGFormer 将这一物理先验直接编码到注意力机制中。
+            </div>
+        </div>
+
+        <!-- Innovation 1 -->
+        <div class="section">
+            <h2>创新点一：Phase-RoPE 时间注意力</h2>
+            <h3>问题背景</h3>
+            <p>标准时间注意力 <code>Score = Q·K^T</code> 只编码像素内容相似度。一个白球在第 1 帧向右运动、第 5 帧回到同一位置（向左运动），两帧像素内容几乎一致，标准注意力会给它们高分，导致模型被"方向冲突"的历史帧干扰，预测出模糊残影。</p>
+
+            <h3>解决方案</h3>
+            <p>在计算 Q·K 之前，对每一帧的 Q 和 K 乘上随帧号 <code>t</code> 线性增长的旋转矩阵 <code>R(t·θ)</code>：</p>
+<pre><code>Q'(t) = R(t·θ) · Q(t)
+K'(t) = R(t·θ) · K(t)
+Score(i, j) ≈ content_similarity × cos((j-i)·θ)</code></pre>
+            <ul>
+                <li><strong>同向运动</strong> → 相位对齐 → <code>cos ≈ 1</code> → 注意力保留</li>
+                <li><strong>反向运动</strong> → 相位失配 → <code>cos ≈ 0</code> → 注意力抑制</li>
+                <li><strong>V 不旋转</strong>：内容信息通过 Value 原样传递，旋转仅过滤注意力权重</li>
+            </ul>
+
+            <h3>两种参数化模式</h3>
+            <table>
+                <thead>
+                    <tr><th>模式</th><th>公式</th><th>参数/层</th><th>设计动机</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>v1 (free)</td>
+                        <td><code>θ[head, pair]</code> 独立可学习</td>
+                        <td>128</td>
+                        <td>通用近似能力强，每个 pair 独立匹配不同运动速度</td>
+                    </tr>
+                    <tr>
+                        <td>v2 (velocity)</td>
+                        <td><code>θ = ω[pair] × v[head]</code></td>
+                        <td class="best">8</td>
+                        <td>基于傅里叶移位定理：相移 = 空间频率 × 速度 × 时间，参数极少且物理可解释</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Innovation 2 -->
+        <div class="section">
+            <h2>创新点二：时间差分嵌入（Temporal-Difference Embedding）</h2>
+            <p>在 Patch 嵌入阶段，除原始图像嵌入外，额外计算帧间差分 <code>diff[t] = x[t] - x[t-1]</code>，通过独立的线性层映射到同一特征空间后与内容嵌入逐元素相加：</p>
+<pre><code>Token = embed(x) + embed_diff(x[t] - x[t-1])</code></pre>
+            <ul>
+                <li>内容嵌入学习"物体长什么样"，差分嵌入学习"物体怎么变化"</li>
+                <li>两者解耦，降低模型从零发现运动模式的学习难度</li>
+            </ul>
+        </div>
+
+        <!-- Innovation 3 -->
+        <div class="section">
+            <h2>创新点三：STS 三段式架构</h2>
+            <p>Space → Time → Space 三段式门控 Transformer Block，继承 PredFormer 架构：</p>
+            <ul>
+                <li><strong>Space First/Second</strong>：帧内 64 个 Patch 做自注意力 + SwiGLU FFN</li>
+                <li><strong>Temporal</strong>：同一 Patch 跨帧做 Phase-RoPE Attention + SwiGLU FFN</li>
+                <li>堆叠 6 层，实现局部空间模式和全局时间动态的解耦建模</li>
+            </ul>
+        </div>
+
+        <!-- Architecture Flow -->
+        <div class="section">
+            <h2>架构数据流</h2>
+            <div class="flow-box">Input (B=4, T=10, C=1, H=64, W=64)
+  │
+  ├── Patch Embedding (8×8 patches) ──── (4, 10, 64, 256)
+  ├── Diff Embedding ─────────────────── (4, 10, 64, 256)
+  │           └── tok = embed(x) + embed_diff(diff)
+  │
+  ├── × 6 STS Layers:
+  │   ├── Space First  (40, 64, 256) → Attention + SwiGLU
+  │   ├── Temporal     (256, 10, 256) → Phase-RoPE Attention + SwiGLU
+  │   └── Space Second (40, 64, 256) → Attention + SwiGLU
+  │
+  └── MLP Reconstruction → Output (4, 10, 1, 64, 64)</div>
+        </div>
+
+        <!-- Results -->
+        <div class="section" id="results">
+            <h2>量化结果</h2>
+            <h3>Moving MNIST（机制验证）</h3>
+            <table>
+                <thead>
+                    <tr><th>配置</th><th>MSE ↓</th><th>SSIM ↑</th><th>相对提升</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Baseline (PredFormer backbone)</td><td>35.13</td><td>0.9175</td><td>—</td></tr>
+                    <tr><td>+ Phase-RoPE only (100ep)</td><td>31.69</td><td>0.9272</td><td>−9.8%</td></tr>
+                    <tr><td>+ Phase-RoPE only (200ep)</td><td>26.20</td><td>0.9407</td><td>−25.4%</td></tr>
+                    <tr><td class="best">+ Phase-RoPE + Diff (200ep)</td><td class="best">23.00</td><td class="best">0.9483</td><td class="best">−34.5%</td></tr>
+                </tbody>
+            </table>
+
+            <h3>TaxiBJ（效率验证）</h3>
+            <table>
+                <thead>
+                    <tr><th>模型</th><th>参数量</th><th>FLOPs</th><th>MSE</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>PFGNet (ST-Conv)</td><td>1.9M</td><td>0.60G</td><td>0.2881</td></tr>
+                    <tr><td class="best">FGFormer-d160</td><td class="best">~2.5M</td><td class="best">~0.62G</td><td>0.273–0.302</td></tr>
+                    <tr><td>PredFormer-d256</td><td>6.40M</td><td>1.66G</td><td>0.2675</td></tr>
+                </tbody>
+            </table>
+            <div class="highlight-box orange">
+                <strong>效率结论：</strong>FGFormer 以 <strong>2.5×</strong> 更少的参数量和 <strong>2.7×</strong> 更少的 FLOPs 达到与 PredFormer-d256 相当的精度。
+            </div>
+        </div>
+
+        <!-- Differentiators -->
+        <div class="section">
+            <h2>核心优势</h2>
+            <ul>
+                <li><strong>零计算量增加：</strong>Phase-RoPE 在推理时仅是对 Q/K 做旋转矩阵乘法，不改变张量形状，不增加 FLOPs，仅增加 128（v1）或 8（v2）个可学习参数。</li>
+                <li><strong>物理可解释性：</strong>v2 模式基于傅里叶移位定理设计，每个 attention head 的速度参数 <code>v</code> 直接对应物理运动速度，可正可负，支持可视化分析。</li>
+                <li><strong>消融验证完备：</strong>通过 base（无创新）→ rope（仅 RoPE）→ ropediff（完整模型）的渐进消融，量化每个创新点的独立贡献。</li>
+                <li><strong>工程化程度高：</strong>完整的配置系统、自动化数据集下载脚本、一键环境搭建脚本、Conda 环境管理，支持从零复现全部实验。</li>
+            </ul>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="section">
+            <h2>技术栈</h2>
+            <div class="tag-cloud">
+                <span class="tag">PyTorch 2.1.1</span>
+                <span class="tag">Transformer</span>
+                <span class="tag">RoPE</span>
+                <span class="tag">SwiGLU</span>
+                <span class="tag">AdamW</span>
+                <span class="tag rust">Moving MNIST</span>
+                <span class="tag rust">TaxiBJ</span>
+                <span class="tag rust">KTH Action</span>
+                <span class="tag rust">Human3.6M</span>
+                <span class="tag">MSE / MAE / SSIM / PSNR</span>
+                <span class="tag">Python 3.10.8</span>
+                <span class="tag">Conda</span>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="section" id="quickstart">
+            <h2>快速开始</h2>
+<pre><code># 环境搭建
+conda env create -f environment.yml
+conda activate fgformer
+
+# 下载数据集
+bash tools/prepare_data/download_all_datasets.sh
+
+# 在 MMNIST 上训练完整 FGFormer
+python tools/train.py -d mmnist \
+  --config_file configs/mmnist/FGF_MM_ropediff.py \
+  --epoch 2000 --seed 42 \
+  --opt adamw --weight_decay 1e-2 \
+  --ex_name mmnist_fgformer_s42</code></pre>
+        </div>
+
+        <!-- File Structure -->
+        <div class="section">
+            <h2>项目结构</h2>
+            <div class="flow-box">FGFormer/
+├── openstl/
+│   ├── models/fgformer_model.py    # 核心模型实现
+│   ├── methods/fgf.py              # 训练方法
+│   ├── api/exp.py                  # 实验框架
+│   ├── datasets/                   # 数据加载器
+│   ├── modules/                    # 层模块 & 骨干网络
+│   └── utils/                      # 指标计算、可视化
+├── configs/
+│   ├── mmnist/                     # 5 组消融实验配置
+│   └── taxibj/                     # 3 组配置
+├── tools/
+│   ├── train.py                    # 训练入口
+│   ├── test.py                     # 测试入口
+│   └── prepare_data/               # 数据集下载脚本
+├── environment.yml                 # Conda 环境
+├── setup.py                        # 包安装
+└── README.md                       # 项目文档</div>
+        </div>
+
+        <!-- Theory -->
+        <div class="section">
+            <h2>理论基础</h2>
+            <p>Phase-RoPE 的设计基于<strong>傅里叶移位定理</strong>（Fourier Shift Theorem）：匀速运动在空间域中的表现，等价于频域中每个频率分量的相位线性递进（相移 = 空间频率 × 运动速度 × 时间）。v2 模式将这一物理先验直接编码到注意力机制中：</p>
+            <ul>
+                <li><code>ω[pair]</code>（固定）：不同空间尺度的固有频率，类似 FFT 的基函数</li>
+                <li><code>v[head]</code>（可学习）：每个 head 锁定一种运动速度，正负号代表方向</li>
+            </ul>
+            <div class="highlight-box">
+                FGFormer 不是一个纯黑盒模型，而是具有明确物理意义的"运动感知器"。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../index.html">← 返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>
