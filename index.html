@@ -1240,10 +1240,13 @@
                             <span class="metric-tag">节省 74.8% Token</span>
                             <span class="metric-tag">P95 54.2s</span>
                         </div>
-                        <div class="project-tech">LangGraph · RAG · FTS5 · Blueprint 编译 · 语义缓存 · Pydantic</div>
+                        <div class="project-tech">LangGraph · PostgreSQL · pgvector · 多模型切换 · Blueprint 编译 · 语义缓存</div>
                         <div class="project-links-row">
                             <a href="projects/compilelight.html" class="project-link">📄 查看详情</a>
-                            <span class="project-lock" data-tip="企业项目，源码受保密协议约束暂不公开">🔒 企业项目私有</span>
+                            <a href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer" class="project-link secondary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                GitHub
+                            </a>
                         </div>
                     </div>
 
@@ -1330,7 +1333,7 @@
                         </div>
                         <p class="summary">项目描述：针对<strong>企业客服 Agent</strong>在高频任务中重复检索、推理与执行不可审计的痛点，设计 <strong>"Trace-Registry-Retrieval-Control-Execution"</strong> 闭环，对已知子目标优先复用资产，对未知缺口触发有界推理，降低推理开销并提升执行可控性。</p>
                         <ul>
-                            <li><strong>控制与编译：</strong>提出 <strong>"LLM 提议、代码批准"</strong> 原则，构建 <strong>Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译</strong> 流水线，采用 FTS5 + pgvector 多路召回与 RRF 融合；引入<strong>语义缓存（Hot Cache）</strong>对相似意图复用历史 Blueprint，命中率达 <strong>68%</strong>，命中请求 P95 由 8.7s 降至 <strong>580ms</strong>；通过 <strong>编译门禁</strong>（Schema / 权限 / 风险 / 预算）约束模型提议，对其执行确定性校验。</li>
+                            <li><strong>控制与编译：</strong>提出 <strong>"LLM 提议、代码批准"</strong> 原则，构建 <strong>Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译</strong> 流水线，采用 PostgreSQL FTS + pgvector 多路召回与 RRF 融合；引入<strong>语义缓存（Hot Cache）</strong>对相似意图复用历史 Blueprint，命中率达 <strong>68%</strong>，命中请求 P95 由 8.7s 降至 <strong>580ms</strong>；通过 <strong>编译门禁</strong>（Schema / 权限 / 风险 / 预算）约束模型提议，对其执行确定性校验。</li>
                             <li><strong>执行与路由：</strong>基于 LangGraph 实现确定性 <strong>Meta-Executor</strong>，支持 <strong>REUSE / HYBRID / NEW</strong> 三模式路由、自动重试 / 补偿与人工 Checkpoint 恢复；<strong>NEW 模式在低置信度时切换受控探索策略</strong>——在受控白名单内深度探索，受控推理引擎按"冻结上下文-缺口分类-有限推理-输出验证"流程执行，配合 <strong>预算门禁</strong> 防止无限循环与越权调用。</li>
                             <li><strong>资产工程：</strong>将成功 Trace 异步沉淀为可复用资产，设计 <strong>Header 召回 + Contract 匹配</strong>两级索引与 DRAFT-ACTIVE 生命周期，沉淀 <strong>5 类 Kind</strong>（Tool/FSM/DAEF/Adapter/Validator），支持检索一跳扩展与执行视图冻结，避免执行中版本漂移。</li>
                             <li><strong>量化结果：</strong>在 <strong>10,284 次</strong>真实流量回放中，综合成功率达 <strong>89.4%</strong>，全任务端到端 P95 为 <strong>54.2s</strong>，较 ReAct 基线节省 <strong>74.8% Token</strong>；经审计无越权调用与重复副作用，编译门禁全通过，形成<strong>可回放、可审计、可持续</strong>资产抽取闭环。</li>

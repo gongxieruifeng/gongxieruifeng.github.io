@@ -104,49 +104,6 @@
             background: var(--accent); border-color: var(--accent); color: #fff;
         }
 
-        .btn-lock {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: 14px; font-weight: 700;
-            padding: 8px 16px; border-radius: 8px;
-            border: 1px dashed var(--hairline);
-            background: #f1f3f5; color: var(--muted);
-            cursor: default; position: relative;
-        }
-        .btn-lock::after {
-            content: "核心源码属于企业项目，暂不公开";
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%; transform: translateX(-50%);
-            background: #1e293b; color: #fff;
-            font-size: 12px; font-weight: 600;
-            padding: 7px 12px; border-radius: 6px;
-            white-space: nowrap;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .btn-lock::before {
-            content: ""; position: absolute;
-            bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
-            border: 6px solid transparent; border-top-color: #1e293b;
-            opacity: 0; transition: opacity 0.2s;
-        }
-        .btn-lock:hover::after, .btn-lock:hover::before {
-            opacity: 1;
-        }
-
-        .private-notice {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-left: 4px solid #f59e0b;
-            padding: 14px 18px; border-radius: 0 8px 8px 0;
-            margin: 20px 0; font-size: 14px;
-            color: #92400e;
-        }
-        .private-notice strong {
-            color: #78350f;
-        }
-
         /* Metrics bar */
         .metrics-bar {
             display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0;
@@ -347,16 +304,13 @@
             <h1 class="project-title"><i>CompileLight</i>：轻量级智能编译守卫 Agent</h1>
             <p class="project-subtitle">KN Group · 算法实习生 · 2026.06 — 2026.08 —— 将 LLM 从"执行者"收窄为"规划提议者"，确定性编译闸门实现可控 Agent 执行</p>
             <div class="project-links">
-                <span class="btn-lock">
-                    🔒 企业项目私有
-                </span>
+                <a href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer" class="btn-link primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub 仓库
+                </a>
                 <a href="#architecture" class="btn-link">架构设计</a>
                 <a href="#highlights" class="btn-link">核心亮点</a>
                 <a href="#results" class="btn-link">量化成果</a>
-            </div>
-
-            <div class="private-notice">
-                ⚠️ <strong>项目源码属于企业项目</strong>，受公司保密要求约束暂不公开。以下内容基于脱敏后的技术方案与公开数据撰写，如需了解更多细节欢迎联系作者交流。
             </div>
 
             <div class="metrics-bar">
@@ -400,7 +354,7 @@
     │
     ├── Control Plane（确定性 Python 控制流）
     │   ├── Normalize（身份/实体/风险）
-    │   ├── 硬过滤 & 混合召回（FTS5 + Dense + RRF 融合）
+    │   ├── 硬过滤 & 混合召回（PostgreSQL FTS + pgvector + RRF 融合）
     │   ├── SAD 语义对齐
     │   ├── Blueprint 提议（受候选白名单约束）
     │   └── 🔒 确定性编译门禁 → REUSE/HYBRID/NEW/REJECT
@@ -414,7 +368,7 @@
     │   ├── 白名单工具 + 预算门禁
     │   └── 输出验证 → 安全回接
     │
-    └── Registry（SQLite + FTS5）
+    └── Registry（PostgreSQL + pgvector）
         ├── 5 类资产 + Snapshot 版本冻结
         └── DRAFT → ACTIVE 生命周期治理</div>
 
@@ -423,7 +377,7 @@
                 <li><strong>Control Plane（控制平面）</strong>：全部由确定性 Python 代码实现，不涉及任何 LLM 调用，负责请求标准化、资产召回、语义对齐、Blueprint 提议和编译门禁。这是整个系统的"安全大脑"。</li>
                 <li><strong>LangGraph Meta-Executor</strong>：固定拓扑的调度图，基于 LangGraph 实现步骤编排、Validator 校验链和 Checkpoint 断点续跑，Runtime Ledger 实时记录 Token 消耗、状态变化和成本数据。</li>
                 <li><strong>Bounded System 2（有界推理）</strong>：仅在覆盖率不足时触发，严格遵循"冻结上下文→缺口分类→白名单工具→预算门禁→输出验证"流程，所有推理资源都有硬性上限。</li>
-                <li><strong>Registry（资产注册中心）</strong>：基于 SQLite + FTS5 实现的轻量级资产库，支持 Header 召回 + Contract 匹配两级索引，Snapshot 视图冻结机制确保执行版本一致性。</li>
+                <li><strong>Registry（资产注册中心）</strong>：基于 PostgreSQL + pgvector 实现的资产库，支持 PostgreSQL FTS 稀疏检索与 pgvector 稠密向量检索的混合召回（RRF 融合），Snapshot 视图冻结机制确保执行版本一致性。</li>
             </ul>
         </div>
 
@@ -542,22 +496,23 @@
                     <tr><td>语言</td><td>Python 3.12</td><td>主开发语言</td></tr>
                     <tr><td>执行框架</td><td>LangGraph</td><td>固定 Meta-Executor / Checkpoint / Interrupt</td></tr>
                     <tr><td>Web 框架</td><td>FastAPI + Gradio</td><td>API + UI 同进程挂载</td></tr>
-                    <tr><td>模型</td><td>Ollama qwen3.5:9b</td><td>本地 Agent 内核（结构化输出 + 工具调用）</td></tr>
-                    <tr><td>检索</td><td>FTS5 + Embedding + NumPy</td><td>稀疏 + 稠密混合召回 + RRF 融合</td></tr>
-                    <tr><td>数据存储</td><td>SQLite</td><td>资产 Registry / Runtime Ledger / Checkpoint</td></tr>
+                    <tr><td>模型</td><td>Claude / DeepSeek / GPT（可切换）</td><td>多模型可选 Agent 内核（结构化输出 + 工具调用）</td></tr>
+                    <tr><td>检索</td><td>PostgreSQL FTS + pgvector</td><td>稀疏全文检索 + 稠密向量检索 + RRF 融合</td></tr>
+                    <tr><td>数据存储</td><td>PostgreSQL + SQLite</td><td>资产 Registry（PostgreSQL）/ Runtime Ledger & Checkpoint（SQLite）</td></tr>
                     <tr><td>Schema 校验</td><td>Pydantic v2</td><td>全链路类型校验</td></tr>
                 </tbody>
             </table>
             <div class="tag-cloud">
                 <span class="tag">LangGraph</span>
                 <span class="tag">FastAPI</span>
-                <span class="tag">SQLite</span>
-                <span class="tag">FTS5</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">pgvector</span>
                 <span class="tag">RAG</span>
                 <span class="tag">RRF 融合</span>
                 <span class="tag">Pydantic v2</span>
-                <span class="tag rust">Ollama</span>
-                <span class="tag rust">qwen3.5:9b</span>
+                <span class="tag rust">Claude</span>
+                <span class="tag rust">DeepSeek</span>
+                <span class="tag rust">GPT</span>
                 <span class="tag green">语义缓存</span>
                 <span class="tag green">FSM</span>
                 <span class="tag green">Gradio</span>
@@ -569,7 +524,7 @@
             <h2>项目亮点总结</h2>
             <ul>
                 <li><strong>架构创新</strong>：首次在企业 Agent 场景系统性实践「编译守卫」模式，将 Agent 的规划与执行解耦，实现确定性执行与有界推理的可控平衡</li>
-                <li><strong>工程落地</strong>：基于单一 Python 进程 + SQLite 即可运行的轻量 PoC，不依赖微服务或外部基础设施，可在本地桌面环境完整演示</li>
+                <li><strong>工程落地</strong>：基于 FastAPI + PostgreSQL + pgvector 构建生产级 Agent 系统，支持多模型切换（Claude/DeepSeek/GPT），通过 LangGraph 固定调度图保障执行确定性，Gradio UI 同进程挂载便于演示调试</li>
                 <li><strong>可审计性</strong>：编译门禁全量通过、Runtime Ledger 逐层留痕、运行时状态完全可回放，解决了 Agent 执行"黑盒"问题</li>
                 <li><strong>量化验证</strong>：在过万次真实流量回放中，综合成功率近 90%，Token 节省超 70%，为同类 Agent 系统提供了可参考的评测基线</li>
             </ul>
