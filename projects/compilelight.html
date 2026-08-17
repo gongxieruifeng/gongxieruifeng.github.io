@@ -222,6 +222,355 @@
             white-space: pre; margin: 14px 0;
         }
 
+        /* Architecture Diagram */
+        .arch-diagram {
+            background: #fff;
+            border: 1px solid var(--hairline);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0 28px;
+            overflow-x: auto;
+        }
+        .arch-layer {
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .arch-layer:last-child {
+            margin-bottom: 0;
+        }
+        .arch-layer-title {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .arch-layer-title .layer-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* Control Plane - Blue */
+        .arch-layer.control {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #93c5fd;
+        }
+        .arch-layer.control .arch-layer-title {
+            color: #1d4ed8;
+        }
+        .arch-layer.control .layer-badge {
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        /* Execution Plane - Green */
+        .arch-layer.execution {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #6ee7b7;
+        }
+        .arch-layer.execution .arch-layer-title {
+            color: #047857;
+        }
+        .arch-layer.execution .layer-badge {
+            background: #047857;
+            color: #fff;
+        }
+
+        /* System 2 - Orange/Red */
+        .arch-layer.system2 {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 2px dashed #fdba74;
+        }
+        .arch-layer.system2 .arch-layer-title {
+            color: #c2410c;
+        }
+        .arch-layer.system2 .layer-badge {
+            background: #c2410c;
+            color: #fff;
+        }
+
+        /* Registry - Indigo */
+        .arch-layer.registry {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border: 2px solid #c4b5fd;
+        }
+        .arch-layer.registry .arch-layer-title {
+            color: #6d28d9;
+        }
+        .arch-layer.registry .layer-badge {
+            background: #6d28d9;
+            color: #fff;
+        }
+
+        .arch-components {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .arch-node {
+            background: #fff;
+            border: 1.5px solid;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+        .arch-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+        .arch-layer.control .arch-node {
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+        .arch-layer.execution .arch-node {
+            border-color: #6ee7b7;
+            color: #065f46;
+        }
+        .arch-layer.system2 .arch-node {
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+        .arch-layer.registry .arch-node {
+            border-color: #c4b5fd;
+            color: #5b21b6;
+        }
+
+        .arch-node.highlight {
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .arch-layer.control .arch-node.highlight {
+            background: #1d4ed8;
+            color: #fff;
+            border-color: #1d4ed8;
+        }
+        .arch-layer.execution .arch-node.highlight {
+            background: #047857;
+            color: #fff;
+            border-color: #047857;
+        }
+        .arch-layer.system2 .arch-node.highlight {
+            background: #c2410c;
+            color: #fff;
+            border-color: #c2410c;
+        }
+        .arch-layer.registry .arch-node.highlight {
+            background: #6d28d9;
+            color: #fff;
+            border-color: #6d28d9;
+        }
+
+        .arch-arrow {
+            color: #94a3b8;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .arch-arrow-down {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 20px;
+            margin: 4px 0;
+            line-height: 1;
+        }
+
+        /* Model/Resource side panels */
+        .arch-side-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            align-items: stretch;
+        }
+        .arch-side-panel {
+            width: 140px;
+            border-radius: 10px;
+            padding: 12px;
+            flex-shrink: 0;
+        }
+        .arch-side-panel.model {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #86efac;
+        }
+        .arch-side-panel.resource {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fcd34d;
+        }
+        .arch-side-title {
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .arch-side-panel.model .arch-side-title {
+            color: #15803d;
+        }
+        .arch-side-panel.resource .arch-side-title {
+            color: #b45309;
+        }
+        .arch-side-item {
+            font-size: 11px;
+            background: #fff;
+            border-radius: 5px;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .arch-side-panel.model .arch-side-item {
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .arch-side-panel.resource .arch-side-item {
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .arch-main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .arch-flow-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            text-align: center;
+            margin: 2px 0;
+        }
+
+        /* IO nodes */
+        .arch-io-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .arch-io {
+            background: #1e293b;
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .arch-io-arrow {
+            flex: 1;
+            height: 3px;
+            background: linear-gradient(90deg, #1e293b 0%, #94a3b8 50%, #1e293b 100%);
+            margin: 0 16px;
+            position: relative;
+        }
+        .arch-io-arrow::after {
+            content: "▶";
+            position: absolute;
+            right: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        /* Guard badge */
+        .arch-guard {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1.5px solid #86efac;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Mode Router special */
+        .mode-router {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            background: #fff;
+            border: 2px solid #1d4ed8;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .mode-router-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #1d4ed8;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .mode-option {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .mode-option.reuse { background: #dcfce7; color: #166534; }
+        .mode-option.hybrid { background: #fef3c7; color: #92400e; }
+        .mode-option.new { background: #fee2e2; color: #991b1b; }
+
+        /* Compiler gates */
+        .gates-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #c7d2fe;
+        }
+        .gate-item {
+            font-size: 11px;
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            border: 1px solid #c7d2fe;
+        }
+
+        @media (max-width: 700px) {
+            .arch-side-row {
+                flex-direction: column;
+            }
+            .arch-side-panel {
+                width: 100%;
+            }
+            .arch-components {
+                justify-content: center;
+            }
+            .arch-io-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .arch-io-arrow {
+                width: 3px;
+                height: 24px;
+                background: linear-gradient(180deg, #1e293b 0%, #94a3b8 50%, #1e293b 100%);
+                margin: 0;
+            }
+            .arch-io-arrow::after {
+                right: 50%;
+                top: auto;
+                bottom: -2px;
+                transform: translateX(50%) rotate(90deg);
+            }
+        }
+
         /* Mode cards */
         .mode-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
@@ -350,27 +699,147 @@
         <!-- Architecture -->
         <div class="section" id="architecture">
             <h2>架构设计</h2>
-            <div class="flow-box">用户请求 → Application Facade
-    │
-    ├── Control Plane（确定性 Python 控制流）
-    │   ├── Normalize（身份/实体/风险）
-    │   ├── 硬过滤 & 混合召回（PostgreSQL FTS + pgvector + RRF 融合）
-    │   ├── SAD 语义对齐
-    │   ├── Blueprint 提议（受候选白名单约束）
-    │   └── 🔒 确定性编译门禁 → REUSE/HYBRID/NEW/REJECT
-    │
-    ├── LangGraph Meta-Executor（固定调度图）
-    │   ├── Step 调度 + Validator 链 + Checkpoint
-    │   └── Runtime Ledger（Token/状态/成本审计）
-    │
-    ├── Bounded System 2（有界受控推理）
-    │   ├── 冻结上下文 → 缺口分类
-    │   ├── 白名单工具 + 预算门禁
-    │   └── 输出验证 → 安全回接
-    │
-    └── Registry（PostgreSQL + pgvector）
-        ├── 5 类资产 + Snapshot 版本冻结
-        └── DRAFT → ACTIVE 生命周期治理</div>
+
+            <!-- Visual Architecture Diagram -->
+            <div class="arch-diagram">
+                <!-- Input / Output -->
+                <div class="arch-io-row">
+                    <div class="arch-io">📥 用户请求 / API</div>
+                    <div class="arch-io-arrow"></div>
+                    <div class="arch-guard">🛡️ Guard 校验</div>
+                    <div class="arch-io-arrow"></div>
+                    <div class="arch-io">📤 系统输出 / 响应</div>
+                </div>
+
+                <!-- Control Plane -->
+                <div class="arch-layer control">
+                    <div class="arch-layer-title">
+                        🎛️ Dify Control Plane（控制平面）
+                        <span class="layer-badge">确定性 Python · 0 LLM 调用</span>
+                    </div>
+                    <div class="arch-components">
+                        <div class="arch-node">Task Normalizer</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node">硬过滤</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node highlight">Capability Retrieval</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node">SAD 语义对齐</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node">Plan Proposer</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node highlight">🔒 Blueprint Compiler</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="mode-router">
+                            <div class="mode-router-title">Mode Router</div>
+                            <div class="mode-option reuse">REUSE</div>
+                            <div class="mode-option hybrid">HYBRID</div>
+                            <div class="mode-option new">NEW</div>
+                        </div>
+                    </div>
+                    <div class="gates-list">
+                        <span class="gate-item">Schema 门禁</span>
+                        <span class="gate-item">权限门禁</span>
+                        <span class="gate-item">风险门禁</span>
+                        <span class="gate-item">预算门禁</span>
+                    </div>
+                </div>
+
+                <div class="arch-arrow-down">↓</div>
+                <div class="arch-flow-label">路由分发</div>
+
+                <!-- Execution + System2 side by side -->
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <!-- LangGraph Execution Plane -->
+                    <div class="arch-layer execution" style="flex: 1; min-width: 280px; margin-bottom: 0;">
+                        <div class="arch-layer-title">
+                            ⚡ LangGraph Execution Plane（执行平面）
+                            <span class="layer-badge">固定调度图</span>
+                        </div>
+                        <div class="arch-components" style="flex-direction: column; align-items: stretch; gap: 6px;">
+                            <div class="arch-node highlight" style="text-align: center;">Meta-Executor</div>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">Step 调度</div>
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">Validator 链</div>
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">Checkpoint</div>
+                            </div>
+                            <div class="arch-node" style="text-align: center; font-size: 12px;">📊 Runtime Ledger（Token/状态/成本审计）</div>
+                        </div>
+                    </div>
+
+                    <!-- Bounded System 2 -->
+                    <div class="arch-layer system2" style="flex: 1; min-width: 280px; margin-bottom: 0;">
+                        <div class="arch-layer-title">
+                            🧠 Bounded System 2（有界受控推理）
+                            <span class="layer-badge">仅 NEW/HYBRID 触发</span>
+                        </div>
+                        <div class="arch-components" style="flex-direction: column; align-items: stretch; gap: 6px;">
+                            <div style="display: flex; gap: 6px;">
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">❄️ 冻结上下文</div>
+                                <div class="arch-arrow" style="display: flex; align-items: center;">→</div>
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">🔍 缺口分类</div>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">🔧 白名单工具</div>
+                                <div class="arch-arrow" style="display: flex; align-items: center;">→</div>
+                                <div class="arch-node" style="flex: 1; text-align: center; font-size: 12px;">💰 预算门禁</div>
+                            </div>
+                            <div class="arch-node highlight" style="text-align: center; font-size: 12px;">✅ 输出验证 → 安全回接</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-arrow-down">↑↓ 双向交互</div>
+
+                <!-- Registry -->
+                <div class="arch-layer registry">
+                    <div class="arch-layer-title">
+                        🗄️ Registry（资产注册中心）
+                        <span class="layer-badge">PostgreSQL + pgvector</span>
+                    </div>
+                    <div class="arch-components" style="margin-bottom: 8px;">
+                        <div class="arch-node" style="background: #6d28d9; color: #fff; border-color: #6d28d9;">PostgreSQL FTS（稀疏检索）</div>
+                        <span class="arch-arrow">+</span>
+                        <div class="arch-node" style="background: #6d28d9; color: #fff; border-color: #6d28d9;">pgvector（稠密向量）</div>
+                        <span class="arch-arrow">→</span>
+                        <div class="arch-node highlight">RRF 融合召回</div>
+                    </div>
+                    <div class="arch-components" style="gap: 6px;">
+                        <div class="arch-node" style="font-size: 12px;">🔧 Tool</div>
+                        <div class="arch-node" style="font-size: 12px;">🔄 FSM</div>
+                        <div class="arch-node" style="font-size: 12px;">🦴 DAEF</div>
+                        <div class="arch-node" style="font-size: 12px;">🔌 Adapter</div>
+                        <div class="arch-node" style="font-size: 12px;">✅ Validator</div>
+                        <div class="arch-node" style="font-size: 12px; background: #ede9fe; color: #6d28d9; border-color: #a78bfa;">📦 Snapshot 版本冻结</div>
+                        <div class="arch-node" style="font-size: 12px; background: #ede9fe; color: #6d28d9; border-color: #a78bfa;">🔄 DRAFT→ACTIVE 生命周期</div>
+                    </div>
+                </div>
+
+                <!-- Side panels: Model Services & Resource Base -->
+                <div style="display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap;">
+                    <div class="arch-side-panel model">
+                        <div class="arch-side-title">🤖 Model Services</div>
+                        <div class="arch-side-item">Embedding M</div>
+                        <div class="arch-side-item">Rerank (Bi-encoder)</div>
+                        <div class="arch-side-item">Router M</div>
+                        <div class="arch-side-item" style="background: #dcfce7; font-weight: 700;">Claude / DeepSeek / GPT</div>
+                    </div>
+                    <div class="arch-side-panel resource">
+                        <div class="arch-side-title">📚 Resource Base</div>
+                        <div class="arch-side-item">Database</div>
+                        <div class="arch-side-item">Internal API</div>
+                        <div class="arch-side-item">Knowledge</div>
+                        <div class="arch-side-item">Files / Jira / ERP</div>
+                        <div class="arch-side-item">Hot Cache（语义缓存）</div>
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <div style="text-align: center; color: var(--muted); font-size: 13px; line-height: 1.8;">
+                            <strong style="color: var(--ink);">设计原则：</strong>「LLM 提议，代码批准」<br>
+                            <span style="font-size: 12px;">控制平面确定性决策 · 执行平面固定拓扑 · System 2 有界推理 · Registry 资产治理</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <h3>架构分层解读</h3>
             <ul>
