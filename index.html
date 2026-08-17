@@ -572,23 +572,37 @@
         }
 
         .entry-head {
-            align-items: start;
-            display: grid;
-            font-size: 15px;
-            grid-template-columns: 1.25fr 1fr 1fr;
-            line-height: 1.3;
-            margin-bottom: 6px;
-            gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .entry-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .entry-head strong {
             font-weight: 800;
+            font-size: 15.5px;
+            line-height: 1.4;
+        }
+
+        .entry-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .entry-head .entry-time {
             color: var(--muted);
             font-weight: 700;
-            text-align: right;
             font-size: 14px;
         }
 
@@ -770,15 +784,20 @@
                 padding: 5px 10px;
             }
 
-            .education-grid,
-            .entry-head {
+            .education-grid {
                 grid-template-columns: 1fr;
                 row-gap: 4px;
             }
 
-            .education-grid div:nth-child(3n),
-            .entry-head .entry-time {
+            .education-grid div:nth-child(3n) {
                 text-align: left;
+            }
+
+            .entry-title-row,
+            .entry-meta-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
             }
 
             .projects-grid {
@@ -933,12 +952,9 @@
                     专业技能
                 </h2>
                 <ul class="skills-list">
-                    <li><strong>Agent 系统：</strong>熟悉 LangChain、LangGraph、AutoGen 等框架及 ReAct 范式，掌握 MCP、Function Calling、工具调用编排机制</li>
-                    <li><strong>检索增强：</strong>掌握全链路 RAG 优化，包括多路召回、Rerank、向量检索（pgvector）、元数据过滤与引用溯源</li>
-                    <li><strong>模型微调：</strong>熟练使用 LLaMA-Factory 进行 SFT 与 LoRA/QLoRA 等 PEFT 微调，熟悉 DPO、GRPO 等对齐方法</li>
-                    <li><strong>深度学习：</strong>深入理解 Transformer 架构及 MHA/GQA、Flash Attention、RoPE、KV Cache 等关键机制</li>
-                    <li><strong>时空建模：</strong>熟悉时空依赖建模、相位注意力、差分表征及视频帧预测相关技术</li>
-                    <li><strong>工程能力：</strong>熟练使用 PyTorch，具备 FastAPI、Docker 部署能力，熟悉 Git 与开源协作流程</li>
+                    <li><strong>Agent 系统与检索增强：</strong>熟悉 LangChain、<strong>LangGraph</strong>、AutoGen 等 Agent 框架及 ReAct 范式，掌握 <strong>MCP、Function Calling</strong> 等工具调用机制，具备多 Agent 编排与状态管理能力；掌握全链路 <strong>RAG</strong> 优化，包括混合召回、Rerank 与 Self/CRAG，并具备 FastAPI、Docker 等工程化部署经验。</li>
+                    <li><strong>模型微调与对齐：</strong>熟练使用 <strong>LLaMA-Factory</strong> 进行 SFT 与 LoRA/QLoRA 等 PEFT 高效微调，熟悉 RLHF 及 <strong>DPO、GRPO</strong> 等对齐方法，了解模型蒸馏，并能结合 Prompt Engineering 优化复杂任务表现。</li>
+                    <li><strong>深度学习与算法基础：</strong>深入理解 <strong>Transformer</strong> 架构及 MHA/MQA/GQA、Flash Attention 与 <strong>KV Cache</strong> 等关键机制；熟悉 PyTorch 训练与模型优化流程，掌握回归、聚类、决策树、随机森林等经典机器学习算法。</li>
                 </ul>
             </section>
         </div>
@@ -1038,49 +1054,57 @@
                 <div class="resume-panel active" id="panel-agent">
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>CompileLight —— 轻量级智能编译守卫 Agent</strong>
-                            <span class="entry-role">算法实习生</span>
-                            <span class="entry-time">KN Group · 2026.06 — 2026.08</span>
+                            <div class="entry-title-row">
+                                <strong><i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">KN Group · 算法实习生</span>
+                                <span class="entry-time">2026.06 — 2026.08</span>
+                            </div>
                         </div>
-                        <h3>企业级 Agent 控制与编译系统 | 核心开发</h3>
-                        <p class="summary">项目背景：针对企业客服 Agent 在高频任务中重复检索、推理与执行不可审计的痛点，设计可复用资产优先的闭环执行框架。</p>
+                        <p class="summary">项目描述：针对<strong>企业客服 Agent</strong>在高频任务中重复检索、推理与执行不可审计的痛点，设计 <strong>"Trace-Registry-Retrieval-Control-Execution"</strong> 闭环，对已知子目标优先复用资产，对未知缺口触发有界推理，降低推理开销并提升执行可控性。</p>
                         <ul>
-                            <li><strong>控制与编译：</strong>提出「LLM 提议、代码批准」原则，构建 Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译流水线，引入语义缓存 Hot Cache 命中率达 68%，命中 P95 由 8.7s 降至 580ms。</li>
-                            <li><strong>执行与路由：</strong>基于 LangGraph 实现 Meta-Executor，支持 REUSE/HYBRID/NEW 三模式路由，NEW 模式低置信度时切换受控探索策略，配合预算门禁防止无限循环与越权调用。</li>
-                            <li><strong>资产工程：</strong>设计 Header 召回 + Contract 匹配两级索引与 DRAFT-ACTIVE 生命周期，沉淀 5 类可复用资产，支持检索一跳扩展与执行视图冻结。</li>
-                            <li><strong>量化结果：</strong>10,284 次真实回放成功率 89.4%，端到端 P95 54.2s，较 ReAct 节省 74.8% Token，无越权调用与重复副作用。</li>
+                            <li><strong>控制与编译：</strong>提出 <strong>"LLM 提议、代码批准"</strong> 原则，构建 <strong>Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译</strong> 流水线，采用 FTS5 + pgvector 多路召回与 RRF 融合；引入<strong>语义缓存（Hot Cache）</strong>对相似意图复用历史 Blueprint，命中率达 <strong>68%</strong>，命中请求 P95 由 8.7s 降至 <strong>580ms</strong>；通过 <strong>编译门禁</strong>（Schema / 权限 / 风险 / 预算）约束模型提议，对其执行确定性校验。</li>
+                            <li><strong>执行与路由：</strong>基于 LangGraph 实现确定性 <strong>Meta-Executor</strong>，支持 <strong>REUSE / HYBRID / NEW</strong> 三模式路由、自动重试 / 补偿与人工 Checkpoint 恢复；<strong>NEW 模式在低置信度时切换受控探索策略</strong>——在受控白名单内深度探索，受控推理引擎按"冻结上下文-缺口分类-有限推理-输出验证"流程执行，配合 <strong>预算门禁</strong> 防止无限循环与越权调用。</li>
+                            <li><strong>资产工程：</strong>将成功 Trace 异步沉淀为可复用资产，设计 <strong>Header 召回 + Contract 匹配</strong>两级索引与 DRAFT-ACTIVE 生命周期，沉淀 <strong>5 类 Kind</strong>（Tool/FSM/DAEF/Adapter/Validator），支持检索一跳扩展与执行视图冻结，避免执行中版本漂移。</li>
+                            <li><strong>量化结果：</strong>在 <strong>10,284 次</strong>真实流量回放中，综合成功率达 <strong>89.4%</strong>，全任务端到端 P95 为 <strong>54.2s</strong>，较 ReAct 基线节省 <strong>74.8% Token</strong>；经审计无越权调用与重复副作用，编译门禁全通过，形成<strong>可回放、可审计、可持续</strong>资产抽取闭环。</li>
                         </ul>
                     </div>
 
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>GeoME —— 多阶段辩论与特征规避的视觉地理溯因推理框架</strong>
-                            <span class="entry-role">项目负责人</span>
-                            <span class="entry-time">2025.07 — 2026.02</span>
+                            <div class="entry-title-row">
+                                <strong><i>GeoME</i> —— 多阶段辩论与特征规避的视觉地理溯因推理框架</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">项目负责人 · 一作在投</span>
+                                <span class="entry-time">2025.07 — 2026.02</span>
+                            </div>
                         </div>
-                        <h3>零训练多轮溯因地理定位 | 一作在投</h3>
-                        <p class="summary">项目背景：针对大规模视觉语言模型在地理定位中的「先验主导」幻觉问题，设计无需微调的推理框架。</p>
+                        <p class="summary">项目描述：针对大规模视觉语言模型（LVLMs）在地理定位中的<strong>"先验主导"</strong>幻觉问题，设计零训练多轮溯因推理框架，以候选假设的对抗验证与动态特征规避抑制误导性视觉先验。</p>
                         <ul>
-                            <li><strong>四阶段闭环：</strong>提出 Candidate-Debate-Judge-Reflect 架构，通过「恶魔代言人」机制引导模型挖掘双向证据（E⁺/E⁻），避免单边确认偏差。</li>
-                            <li><strong>不确定性建模：</strong>引入信念熵作为不确定性度量驱动 Reflection 阶段，动态决定是否需要进一步推理。</li>
-                            <li><strong>特征规避机制：</strong>设计动态特征规避策略抑制误导性高频视觉特征，迫使模型聚焦地域唯一性长尾证据。</li>
-                            <li><strong>量化结果：</strong>IM2GPS3K 测试准确率 94.19%（SOTA 提升 10%-15%），Haversine 地理误差降低 68.1%。</li>
+                            <li><strong>架构设计：</strong>提出了 <strong>"Candidate-Debate-Judge-Reflect"</strong> 的四阶段闭环架构，将视觉匹配重构为证据链驱动的溯因推理。通过"恶魔代言人"机制，引导模型主动寻找支持与反驳的<strong>双向证据（E⁺/E⁻）</strong>，缓解视觉歧义与早期先验锚定。</li>
+                            <li><strong>反思与候选更新：</strong>在辩论阶段引入 <strong>信念熵（Belief Entropy）</strong>作为不确定性度量，驱动模型进行元推理（Reflection）。通过动态剔除弱证据假设、重新进行采样，降低 Agent 在歧义场景中陷入局部最优的风险。</li>
+                            <li><strong>特征规避机制：</strong>设计了动态特征规避机制（Feature Evasion），自动识别并抑制误导性高频特征，推动模型挖掘具有<strong>高地域判别性的"长尾证据"</strong>，实现候选空间的迭代修正。</li>
+                            <li><strong>量化结果：</strong>在 IM2GPS3K 测试中，框架与基础 LVLM 结合达 <strong>94.19%</strong> 准确率，提升 <strong>10%–15%</strong>，Haversine 误差降低 <strong>68.1%</strong>。同时，自建 <strong>GeoReplica-200</strong> 测试集验证了框架在复杂视觉歧义环境中的鲁棒性。</li>
                         </ul>
                     </div>
 
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>GeoGR² —— 图推理驱动的零样本地理空间预测框架</strong>
-                            <span class="entry-role">项目负责人</span>
-                            <span class="entry-time">2025.09 — 2026.01</span>
+                            <div class="entry-title-row">
+                                <strong><i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">项目负责人</span>
+                                <span class="entry-time">2025.09 — 2026.01</span>
+                            </div>
                         </div>
-                        <h3>图结构协同零样本预测 | 项目负责人</h3>
-                        <p class="summary">项目背景：针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调的图推理框架。</p>
+                        <p class="summary">项目描述：针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调、基于图结构协同推理的自主推理框架，通过真实观测数据 Grounding 与邻域协同推理提升预测一致性。</p>
                         <ul>
-                            <li><strong>双重拓扑构建：</strong>通过物理近邻 + 语义类比构建图结构，引入真实观测数据作为物理锚点 Grounding。</li>
-                            <li><strong>三阶段工作流：</strong>设计 Topology-Feature-Update 流程，实现邻域信息传播与协同推理。</li>
-                            <li><strong>迭代修正闭环：</strong>设计 Refine Reasoning 多轮迭代，约束预测满足地理空间一致性，缓解长尾数据偏见。</li>
-                            <li><strong>量化结果：</strong>GDP、温度、降水预测中 Spearman ρ 最高提升 67.9%，区域 Bias 最高降低 87.5%。</li>
+                            <li><strong>架构设计：</strong>构建 <strong>"Topology-Feature-Update"</strong> 三阶段循环工作流，通过 <strong>物理近邻+语义类比</strong>双重拓扑算子引入真实数据作为"物理锚点"，并利用 <strong>Feature 算子</strong>驱动 LLM 自主筛选任务相关协变量，将孤立点预测转变为图上的协同推理。</li>
+                            <li><strong>迭代推理：</strong>设计 <strong>Refine Reasoning</strong> 闭环，由 LLM 担任空间协调员，通过对比目标点与邻域节点的特征/数值偏差，进行多轮（K&lt;N）迭代修正，强制模型满足地理空间一致性约束，显著<strong>缓解长尾数据预测偏见</strong>。</li>
+                            <li><strong>量化结果：</strong>在 GDP、温度、降水等预测任务中，Spearman ρ 最高提升 <strong>67.9%</strong>，区域 Bias 最高降低 <strong>87.5%</strong>，显著缓解长尾地区的预测偏差。</li>
                         </ul>
                     </div>
                 </div>
@@ -1089,45 +1113,56 @@
                 <div class="resume-panel" id="panel-tsf">
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>FGFormer —— 相位感知时空预测 Transformer</strong>
-                            <span class="entry-role">项目负责人</span>
-                            <span class="entry-time">2026.07 — 2026.12</span>
+                            <div class="entry-title-row">
+                                <strong><i>FGFormer</i> —— 相位感知时空预测 Transformer</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">项目负责人</span>
+                                <span class="entry-time">2026.07 — 2026.12</span>
+                            </div>
                         </div>
-                        <h3>相位注意力时空预测模型 | 项目负责人</h3>
-                        <p class="summary">项目背景：针对时空 Transformer 主要依赖内容相似度、难以区分外观相似但运动趋势相反序列的问题，提出相位感知注意力机制。</p>
+                        <p class="summary">项目描述：针对时空 Transformer 主要依赖内容相似度、难以区分<strong>外观相似但运动趋势相反</strong>序列的问题，提出 FGFormer；基于傅里叶移位定理将<strong>相位信息</strong>显式注入时间注意力，并结合帧间差分表征增强动态模式建模。</p>
                         <ul>
-                            <li><strong>相位感知时间注意力（Phase-RoPE）：</strong>基于傅里叶移位定理对 Q/K 施加随时间步递进的相位旋转，使注意力同时建模内容相关性与相对相位差，支持自由频率与速度耦合双模式。</li>
-                            <li><strong>时间差分表征：</strong>构建独立差分分支，将 Δx_t = x_t - x_{t-1} 与原始帧分别映射后融合，实现静态内容与动态信息解耦。</li>
-                            <li><strong>轻量化设计：</strong>在保持预测精度的同时显著降低模型复杂度，适用于资源受限场景。</li>
-                            <li><strong>量化结果：</strong>MMNIST 上 MSE 23.00（SSIM 0.9483），较 Transformer 基线降低 34.5%；TaxiBJ 上以 2.5M 参数/0.62G FLOPs 达到 PredFormer-d256 同等精度，参数量与计算量降低 61% 与 63%。</li>
+                            <li><strong>相位感知时间注意力（Phase-RoPE）：</strong>基于傅里叶移位定理，对 Q/K 施加随时间步递进的相位旋转，使注意力同时建模内容相关性与相对相位差，抑制运动方向不一致帧间的错误关联；支持自由频率与速度耦合两种模式，后者通过 θ=ωv 显式编码运动速度，每层仅引入 <strong>8 个可学习参数</strong>。</li>
+                            <li><strong>时间差分表征（Diff Embedding）：</strong>构建独立差分分支，将 Δx<sub>t</sub>=x<sub>t</sub>-x<sub>t-1</sub> 与原始帧分别映射后融合，在输入端显式编码局部变化趋势，实现<strong>静态内容与动态信息解耦</strong>，增强模型对短期运动变化的感知能力。</li>
+                            <li><strong>时空建模骨干：</strong>构建 Space→Time→Space 三阶段 Gated Transformer，分别建模帧内空间关系与跨帧时间依赖，并结合 SwiGLU、残差连接完成多层时空交互，在保持轻量化的同时强化长期动态建模。</li>
+                            <li><strong>量化结果：</strong>MMNIST 上 MSE <strong>23.00</strong>、SSIM <strong>0.9483</strong>，较纯 Transformer 基线（MSE 35.13）降低 <strong>34.5%</strong>；TaxiBJ 上以 <strong>2.5M</strong> 参数 / <strong>0.62G FLOPs</strong> 达到 PredFormer-d256（6.4M / 1.66G）同等精度，参数量与计算量降低 <strong>61%</strong> 与 <strong>63%</strong>。</li>
                         </ul>
                     </div>
 
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>GeoGR² —— 图推理驱动的零样本地理空间预测框架</strong>
-                            <span class="entry-role">项目负责人</span>
-                            <span class="entry-time">2025.09 — 2026.01</span>
+                            <div class="entry-title-row">
+                                <strong><i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">项目负责人</span>
+                                <span class="entry-time">2025.09 — 2026.01</span>
+                            </div>
                         </div>
-                        <h3>图结构协同零样本预测 | 项目负责人</h3>
+                        <p class="summary">项目描述：针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调、基于图结构协同推理的自主推理框架，通过真实观测数据 Grounding 与邻域协同推理提升预测一致性。</p>
                         <ul>
-                            <li><strong>双重拓扑构建：</strong>通过物理近邻 + 语义类比构建图结构，引入真实观测数据作为锚点。</li>
-                            <li><strong>三阶段工作流：</strong>Topology-Feature-Update 实现邻域信息协同推理。</li>
-                            <li><strong>迭代修正：</strong>Refine Reasoning 多轮闭环约束空间一致性。</li>
-                            <li><strong>量化结果：</strong>Spearman ρ 最高提升 67.9%，区域 Bias 最高降低 87.5%。</li>
+                            <li><strong>架构设计：</strong>构建 <strong>"Topology-Feature-Update"</strong> 三阶段循环工作流，通过 <strong>物理近邻+语义类比</strong>双重拓扑算子引入真实数据作为"物理锚点"，并利用 <strong>Feature 算子</strong>驱动 LLM 自主筛选任务相关协变量，将孤立点预测转变为图上的协同推理。</li>
+                            <li><strong>迭代推理：</strong>设计 <strong>Refine Reasoning</strong> 闭环，由 LLM 担任空间协调员，通过对比目标点与邻域节点的特征/数值偏差，进行多轮（K&lt;N）迭代修正，强制模型满足地理空间一致性约束，显著<strong>缓解长尾数据预测偏见</strong>。</li>
+                            <li><strong>量化结果：</strong>在 GDP、温度、降水等预测任务中，Spearman ρ 最高提升 <strong>67.9%</strong>，区域 Bias 最高降低 <strong>87.5%</strong>，显著缓解长尾地区的预测偏差。</li>
                         </ul>
                     </div>
 
                     <div class="experience">
                         <div class="entry-head">
-                            <strong>CompileLight —— 轻量级智能编译守卫 Agent</strong>
-                            <span class="entry-role">算法实习生</span>
-                            <span class="entry-time">KN Group · 2026.06 — 2026.08</span>
+                            <div class="entry-title-row">
+                                <strong><i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">KN Group · 算法实习生</span>
+                                <span class="entry-time">2026.06 — 2026.08</span>
+                            </div>
                         </div>
-                        <h3>企业级 Agent 系统 | 核心开发</h3>
+                        <p class="summary">项目描述：针对企业客服 Agent 在高频任务中重复检索、推理与执行不可审计的痛点，设计可复用资产优先的闭环执行框架。</p>
                         <ul>
-                            <li>基于 LangGraph 构建三模式路由、自动重试/补偿与 Checkpoint 恢复机制。</li>
-                            <li>设计混合召回与编译门禁流水线，10,284 次回放成功率 89.4%，节省 74.8% Token。</li>
+                            <li><strong>执行框架：</strong>基于 LangGraph 实现确定性 Meta-Executor，支持 REUSE/HYBRID/NEW 三模式路由、自动重试/补偿与 Checkpoint 恢复机制，配合预算门禁防止无限循环与越权调用。</li>
+                            <li><strong>检索与编译：</strong>设计 FTS5+pgvector 混合召回与 RRF 融合，构建编译门禁流水线（Schema/权限/风险/预算）进行确定性校验；引入语义缓存 Hot Cache 命中率达 68%。</li>
+                            <li><strong>量化结果：</strong>10,284 次真实流量回放成功率 89.4%，端到端 P95 54.2s，较 ReAct 基线节省 74.8% Token，无越权调用与重复副作用。</li>
                         </ul>
                     </div>
                 </div>
