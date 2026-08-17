@@ -8,7 +8,10 @@
     <style>
         :root {
             --accent: #2563eb;
+            --accent-purple: #7c3aed;
             --accent-soft: #eaf1ff;
+            --accent-purple-soft: #f3e8ff;
+            --gradient-primary: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
             --rust: #d97757;
             --ink: #141414;
             --muted: #667085;
@@ -19,6 +22,12 @@
             --success-soft: #ecfdf5;
             --warning: #9a3412;
             --warning-soft: #fff7ed;
+            --orange: #f97316;
+            --orange-soft: #fff7ed;
+            --purple: #7c3aed;
+            --purple-soft: #f5f3ff;
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         * {
@@ -38,6 +47,21 @@
             line-height: 1.5;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+        }
+
+        body.page-loaded {
+            animation: pageFadeIn 0.6s var(--ease-smooth) forwards;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .icon-sprite {
@@ -64,16 +88,17 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid transparent;
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-smooth);
         }
 
         .navbar.scrolled {
-            border-bottom-color: var(--hairline);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border-bottom-color: rgba(219, 226, 234, 0.6);
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+            background: rgba(255,255,255,0.88);
         }
 
         .nav-inner {
@@ -91,6 +116,24 @@
             font-size: 1.05rem;
             color: var(--ink);
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
         .nav-links {
@@ -104,7 +147,7 @@
             font-size: 0.9rem;
             font-weight: 700;
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: color 0.2s var(--ease-smooth);
         }
 
         .nav-links a:hover {
@@ -125,7 +168,7 @@
             height: 2px;
             background: var(--ink);
             margin: 5px 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-smooth);
             border-radius: 1px;
         }
 
@@ -137,26 +180,45 @@
         .hero-page {
             background: #fff;
             border: 1px solid rgba(148, 163, 184, 0.22);
-            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.14);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(15, 23, 42, 0.06);
             margin: 0 auto;
             max-width: 1080px;
             padding: 38px 46px 46px;
             width: min(calc(100vw - 48px), 1080px);
-            border-radius: 4px;
-            border-top: 4px solid #111827;
+            border-radius: 12px;
+            border-top: 4px solid;
+            border-image: var(--gradient-primary) 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-page::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.04) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         .resume-header {
             align-items: stretch;
             background: #fff;
             border: 1px solid var(--hairline);
-            border-radius: 4px;
-            border-top: 4px solid #111827;
+            border-radius: 12px;
+            border-top: 4px solid transparent;
+            border-image: var(--gradient-primary) 1;
             display: grid;
             gap: 26px;
             grid-template-columns: 1fr;
             padding: 28px 32px;
             text-align: left;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 32px;
         }
 
         .profile-main {
@@ -164,6 +226,8 @@
             flex-direction: column;
             justify-content: center;
             min-width: 0;
+            position: relative;
+            z-index: 1;
         }
 
         .eyebrow {
@@ -190,6 +254,10 @@
             letter-spacing: -0.02em;
             line-height: 1.05;
             margin: 0;
+            background: linear-gradient(135deg, #141414 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .availability-badge {
@@ -241,19 +309,31 @@
             align-items: center;
             background: #f8fafc;
             border: 1px solid var(--hairline);
-            border-radius: 4px;
+            border-radius: 8px;
             color: #1f2937;
             display: inline-flex;
             gap: 8px;
             min-height: 34px;
             padding: 6px 12px;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .contact-line a:hover {
-            border-color: rgba(37, 99, 235, 0.35);
+            border-color: rgba(37, 99, 235, 0.4);
             color: var(--accent);
+            background: var(--accent-soft);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .contact-line a:hover .icon {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .contact-line a .icon {
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .hero-bio {
@@ -271,13 +351,13 @@
         .page {
             background: #fff;
             border: 1px solid rgba(148, 163, 184, 0.22);
-            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.14);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(15, 23, 42, 0.06);
             margin: 0 auto;
             max-width: 1080px;
             overflow: visible;
             padding: 38px 46px 46px;
             width: min(calc(100vw - 48px), 1080px);
-            border-radius: 4px;
+            border-radius: 12px;
         }
 
         .section {
@@ -301,7 +381,7 @@
         }
 
         .section h2::after {
-            background: linear-gradient(90deg, var(--accent) 0%, rgba(37, 99, 235, 0.12) 100%);
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-purple) 50%, rgba(124, 58, 237, 0.12) 100%);
             content: "";
             flex: 1;
             height: 2px;
@@ -309,12 +389,17 @@
         }
 
         .section-icon {
-            background: var(--accent-soft);
+            background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-purple-soft) 100%);
             border-radius: 8px;
             color: var(--accent);
             height: 28px;
             padding: 6px;
             width: 28px;
+            transition: transform 0.3s var(--ease-bounce);
+        }
+
+        .section-icon:hover {
+            transform: rotate(12deg) scale(1.1);
         }
 
         /* ========== Education Cards ========== */
@@ -328,8 +413,35 @@
         .edu-card {
             background: var(--panel);
             border: 1px solid var(--hairline);
-            border-radius: 10px;
-            padding: 14px 18px;
+            border-radius: 12px;
+            padding: 14px 18px 14px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s var(--ease-smooth);
+        }
+
+        .edu-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .edu-card.master::before {
+            background: linear-gradient(180deg, var(--accent) 0%, var(--accent-purple) 100%);
+        }
+
+        .edu-card.bachelor::before {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+        }
+
+        .edu-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            border-color: rgba(37, 99, 235, 0.2);
         }
 
         .edu-card-head {
@@ -375,13 +487,13 @@
             background: var(--accent-soft);
             color: var(--accent);
             padding: 2px 8px;
-            border-radius: 4px;
+            border-radius: 999px;
             font-weight: 700;
         }
 
         .edu-tag.orange {
             background: #fef3ee;
-            color: var(--accent2);
+            color: var(--rust);
         }
 
         .edu-tag.green {
@@ -426,15 +538,15 @@
         .skill-card {
             background: var(--panel);
             border: 1px solid var(--hairline);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 16px 18px;
-            transition: all 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .skill-card:hover {
-            border-color: rgba(37, 99, 235, 0.3);
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
+            transform: translateY(-3px);
         }
 
         .skill-card-title {
@@ -444,7 +556,7 @@
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .skill-card-title::before {
@@ -452,25 +564,38 @@
             display: inline-block;
             width: 4px;
             height: 14px;
-            background: var(--accent);
+            background: var(--gradient-primary);
             border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .skill-emoji {
+            font-size: 18px;
         }
 
         .skill-keywords {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 6px;
             margin-bottom: 10px;
         }
 
         .skill-kw {
             font-size: 11px;
-            background: #eff6ff;
+            background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
             color: #1d4ed8;
-            padding: 2px 7px;
-            border-radius: 3px;
+            padding: 4px 10px;
+            border-radius: 999px;
             font-weight: 600;
             white-space: nowrap;
+            border: 1px solid rgba(37, 99, 235, 0.1);
+            transition: all 0.2s var(--ease-smooth);
+        }
+
+        .skill-kw:hover {
+            background: var(--accent-soft);
+            border-color: rgba(37, 99, 235, 0.25);
+            transform: scale(1.05);
         }
 
         .skill-card p {
@@ -490,9 +615,9 @@
         .project-card {
             background: var(--panel);
             border: 1px solid var(--hairline);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 20px;
-            transition: all 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
             position: relative;
             overflow: hidden;
         }
@@ -504,19 +629,49 @@
             left: 0;
             width: 3px;
             height: 100%;
-            background: var(--accent);
+            background: var(--gradient-primary);
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .project-card:hover {
             border-color: rgba(37, 99, 235, 0.3);
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-            transform: translateY(-1px);
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1), 0 6px 16px rgba(15, 23, 42, 0.06);
+            transform: translateY(-3px);
         }
 
         .project-card:hover::before {
             opacity: 1;
+            width: 5px;
+        }
+
+        .project-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.3px;
+        }
+
+        .project-badge.internship {
+            background: var(--orange-soft);
+            color: var(--orange);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .project-badge.research {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .project-badge.research-purple {
+            background: var(--purple-soft);
+            color: var(--purple);
+            border: 1px solid rgba(124, 58, 237, 0.2);
         }
 
         .project-head {
@@ -527,12 +682,20 @@
             line-height: 1.3;
             margin-bottom: 8px;
             gap: 8px;
+            padding-right: 60px;
         }
 
         .project-name {
             font-weight: 800;
             font-size: 16px;
             color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .project-emoji {
+            font-size: 18px;
         }
 
         .project-role {
@@ -542,7 +705,7 @@
             white-space: nowrap;
             background: var(--accent-soft);
             padding: 3px 10px;
-            border-radius: 4px;
+            border-radius: 999px;
         }
 
         .project-desc {
@@ -555,17 +718,27 @@
         .project-metrics {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
             margin-bottom: 10px;
         }
 
         .metric-tag {
             font-size: 12px;
             font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 4px;
-            background: var(--success-soft);
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--success-soft) 0%, #d1fae5 100%);
             color: var(--success);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid rgba(5, 150, 105, 0.15);
+            transition: all 0.2s var(--ease-smooth);
+        }
+
+        .metric-tag:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
         }
 
         .project-tech {
@@ -590,24 +763,28 @@
         .project-link {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             font-size: 12.5px;
             font-weight: 700;
             color: var(--accent);
             text-decoration: none;
-            padding: 4px 10px;
-            border-radius: 5px;
-            background: var(--accent-soft);
-            transition: all 0.15s ease;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent-soft) 0%, #dbeafe 100%);
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .project-link:hover {
-            background: var(--accent);
+            background: var(--gradient-primary);
             color: #fff;
+            border-color: transparent;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
         }
 
         .project-link.secondary {
-            background: transparent;
+            background: #fff;
             color: var(--muted);
             border: 1px solid var(--hairline);
         }
@@ -616,6 +793,7 @@
             border-color: var(--accent);
             color: var(--accent);
             background: var(--accent-soft);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
         }
 
         .project-lock {
@@ -625,8 +803,8 @@
             font-size: 12.5px;
             font-weight: 600;
             color: var(--muted);
-            padding: 4px 10px;
-            border-radius: 5px;
+            padding: 6px 14px;
+            border-radius: 999px;
             background: #f1f3f5;
             border: 1px dashed var(--hairline);
             cursor: default;
@@ -644,11 +822,11 @@
             font-size: 11.5px;
             font-weight: 600;
             padding: 6px 10px;
-            border-radius: 5px;
+            border-radius: 8px;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s;
+            transition: opacity 0.25s var(--ease-smooth);
             z-index: 10;
         }
 
@@ -670,26 +848,30 @@
             gap: 4px;
             background: var(--panel);
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 12px;
             border: 1px solid var(--hairline);
         }
 
         .resume-tab {
             padding: 8px 20px;
-            border-radius: 6px;
+            border-radius: 10px;
             border: none;
             background: transparent;
             font-size: 14px;
             font-weight: 700;
             color: var(--muted);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
+        }
+
+        .resume-tab:hover {
+            color: var(--accent);
         }
 
         .resume-tab.active {
             background: #fff;
             color: var(--accent);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
         }
 
         .resume-panel {
@@ -709,7 +891,7 @@
         }
 
         .experience::before {
-            background: var(--accent);
+            background: var(--gradient-primary);
             border: 3px solid #fff;
             border-radius: 999px;
             box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
@@ -811,7 +993,8 @@
             color: var(--ink);
             margin: 24px 0 12px;
             padding-bottom: 6px;
-            border-bottom: 2px solid var(--accent);
+            border-bottom: 2px solid;
+            border-image: var(--gradient-primary) 1;
             display: inline-block;
         }
 
@@ -825,21 +1008,33 @@
         .honor-tag {
             font-size: 12.5px;
             background: #fef3ee;
-            color: var(--accent2);
-            padding: 4px 12px;
-            border-radius: 6px;
+            color: var(--rust);
+            padding: 5px 14px;
+            border-radius: 999px;
             font-weight: 600;
             border: 1px solid #fde2d4;
+            transition: all 0.2s var(--ease-smooth);
+        }
+
+        .honor-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(217, 119, 87, 0.15);
         }
 
         .cert-tag {
             font-size: 12.5px;
             background: var(--accent-soft);
             color: var(--accent);
-            padding: 4px 12px;
-            border-radius: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
             font-weight: 600;
             border: 1px solid #dbeafe;
+            transition: all 0.2s var(--ease-smooth);
+        }
+
+        .cert-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
         }
 
         .undergrad-divider {
@@ -872,7 +1067,7 @@
             align-items: center;
             background: #fff;
             border: 1px solid var(--hairline);
-            border-radius: 8px;
+            border-radius: 12px;
             color: #1f2937;
             display: inline-flex;
             font-size: 14px;
@@ -881,27 +1076,27 @@
             min-height: 44px;
             padding: 0 20px;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.25s var(--ease-smooth);
         }
 
         .contact-btn:hover {
             border-color: rgba(37, 99, 235, 0.35);
             color: var(--accent);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+            transform: translateY(-2px);
         }
 
         .contact-btn.primary {
-            background: #101828;
-            border-color: #101828;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #1e293b;
             color: #fff;
         }
 
         .contact-btn.primary:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--gradient-primary);
+            border-color: transparent;
             color: #fff;
-            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.3);
         }
 
         /* ========== Footer ========== */
@@ -929,16 +1124,33 @@
                 top: 56px;
                 left: 0;
                 right: 0;
-                background: #fff;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
                 flex-direction: column;
-                padding: 16px 24px;
-                gap: 16px;
-                border-bottom: 1px solid var(--hairline);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+                padding: 8px 16px 16px;
+                gap: 4px;
+                border-bottom: none;
+                box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
             }
 
             .nav-links.open {
                 display: flex;
+            }
+
+            .nav-links li a {
+                display: block;
+                padding: 12px 16px;
+                border-radius: 10px;
+                font-size: 15px;
+                color: var(--muted);
+                transition: all 0.2s var(--ease-smooth);
+            }
+
+            .nav-links li a:hover,
+            .nav-links li a:active {
+                background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(124, 58, 237, 0.06) 100%);
+                color: var(--accent);
             }
 
             .nav-mobile-toggle {
@@ -962,7 +1174,12 @@
             }
 
             .hero-page {
-                border-top: 3px solid #111827;
+                border-top: 3px solid;
+                border-image: var(--gradient-primary) 1;
+            }
+
+            .hero-page::before {
+                display: none;
             }
 
             .resume-header {
@@ -985,6 +1202,10 @@
             .contact-line a {
                 font-size: 13px;
                 padding: 5px 10px;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .edu-card-head {
@@ -1072,7 +1293,7 @@
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-inner">
-            <a href="#home" class="nav-logo">龚谢蕊烽</a>
+            <a href="#home" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
             <button class="nav-mobile-toggle" id="navToggle" aria-label="菜单">
                 <span></span>
                 <span></span>
@@ -1127,10 +1348,10 @@
                     教育背景
                 </h2>
                 <div class="edu-cards">
-                    <div class="edu-card">
+                    <div class="edu-card master">
                         <div class="edu-card-head">
                             <div class="edu-card-school">
-                                四川大学
+                                🎓 四川大学
                                 <span class="edu-tag">985</span>
                                 <span class="edu-tag">211</span>
                                 <span class="edu-tag">双一流</span>
@@ -1145,10 +1366,10 @@
                             <p><strong>主修课程：</strong>深度学习、时序模型、Agent 智能</p>
                         </div>
                     </div>
-                    <div class="edu-card">
+                    <div class="edu-card bachelor">
                         <div class="edu-card-head">
                             <div class="edu-card-school">
-                                四川农业大学
+                                🎓 四川农业大学
                                 <span class="edu-tag">211</span>
                                 <span class="edu-tag">双一流</span>
                             </div>
@@ -1173,7 +1394,7 @@
                 </h2>
                 <div class="skills-grid">
                     <div class="skill-card">
-                        <div class="skill-card-title">Agent 系统与检索增强</div>
+                        <div class="skill-card-title"><span class="skill-emoji">🤖</span>Agent 系统与检索增强</div>
                         <div class="skill-keywords">
                             <span class="skill-kw">LangGraph</span>
                             <span class="skill-kw">LangChain</span>
@@ -1188,7 +1409,7 @@
                         <p>熟悉主流 Agent 框架及 ReAct 范式，掌握多 Agent 编排与状态管理；掌握全链路 RAG 优化（混合召回/Rerank/Self-CRAG），具备工程化部署经验。</p>
                     </div>
                     <div class="skill-card">
-                        <div class="skill-card-title">模型微调与对齐</div>
+                        <div class="skill-card-title"><span class="skill-emoji">🧠</span>模型微调与对齐</div>
                         <div class="skill-keywords">
                             <span class="skill-kw">LLaMA-Factory</span>
                             <span class="skill-kw">SFT</span>
@@ -1202,7 +1423,7 @@
                         <p>熟练使用 LLaMA-Factory 进行 PEFT 高效微调，熟悉 RLHF 及 DPO/GRPO 等对齐方法，了解模型蒸馏，能结合 Prompt Engineering 优化复杂任务。</p>
                     </div>
                     <div class="skill-card">
-                        <div class="skill-card-title">深度学习与算法基础</div>
+                        <div class="skill-card-title"><span class="skill-emoji">⚡</span>深度学习与算法基础</div>
                         <div class="skill-keywords">
                             <span class="skill-kw">Transformer</span>
                             <span class="skill-kw">MHA/MQA/GQA</span>
@@ -1228,17 +1449,18 @@
                 </h2>
                 <div class="projects-grid">
                     <div class="project-card">
+                        <span class="project-badge internship">实习</span>
                         <div class="project-head">
-                            <div class="project-name">CompileLight</div>
+                            <div class="project-name"><span class="project-emoji">⚡</span>CompileLight</div>
                             <div class="project-role">KN Group · 实习</div>
                         </div>
                         <p class="project-desc">
                             轻量级智能编译守卫 Agent。设计「Trace-Registry-Retrieval-Control-Execution」闭环，对已知子目标优先复用资产，对未知缺口触发有界推理，解决高频任务重复检索与执行不可审计问题。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag">成功率 89.4%</span>
-                            <span class="metric-tag">节省 74.8% Token</span>
-                            <span class="metric-tag">P95 54.2s</span>
+                            <span class="metric-tag">📈 成功率 89.4%</span>
+                            <span class="metric-tag">📈 节省 74.8% Token</span>
+                            <span class="metric-tag">📈 P95 54.2s</span>
                         </div>
                         <div class="project-tech">LangGraph · PostgreSQL · pgvector · 多模型切换 · Blueprint 编译 · 语义缓存</div>
                         <div class="project-links-row">
@@ -1251,47 +1473,50 @@
                     </div>
 
                     <div class="project-card">
+                        <span class="project-badge research">科研</span>
                         <div class="project-head">
-                            <div class="project-name">GeoME</div>
+                            <div class="project-name"><span class="project-emoji">🌍</span>GeoME</div>
                             <div class="project-role">项目负责人</div>
                         </div>
                         <p class="project-desc">
                             多阶段辩论与特征规避的视觉地理溯因推理框架。通过「恶魔代言人」机制引导双向证据挖掘，引入信念熵驱动反思与动态特征规避，抑制 VLM 地理定位中的「先验主导」幻觉。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag">准确率 94.19%</span>
-                            <span class="metric-tag">误差 ↓68.1%</span>
+                            <span class="metric-tag">📈 准确率 94.19%</span>
+                            <span class="metric-tag">📈 误差 ↓68.1%</span>
                         </div>
                         <div class="project-tech">多模态推理 · 溯因推理 · 信念熵 · 特征规避 · LLM Agent</div>
                     </div>
 
                     <div class="project-card">
+                        <span class="project-badge research">科研</span>
                         <div class="project-head">
-                            <div class="project-name">GeoGR²</div>
+                            <div class="project-name"><span class="project-emoji">🗺️</span>GeoGR²</div>
                             <div class="project-role">项目负责人</div>
                         </div>
                         <p class="project-desc">
                             图推理驱动的零样本地理空间预测框架。构建物理近邻+语义类比双重拓扑，引入真实观测数据作为锚点，通过 Refine Reasoning 闭环迭代修正，缓解空间孤立与区域分布偏差问题。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag">Spearman ρ ↑67.9%</span>
-                            <span class="metric-tag">区域 Bias ↓87.5%</span>
+                            <span class="metric-tag">📈 Spearman ρ ↑67.9%</span>
+                            <span class="metric-tag">📈 区域 Bias ↓87.5%</span>
                         </div>
                         <div class="project-tech">图推理 · 零样本预测 · 空间一致性 · Refine Reasoning</div>
                     </div>
 
                     <div class="project-card">
+                        <span class="project-badge research-purple">科研</span>
                         <div class="project-head">
-                            <div class="project-name">FGFormer</div>
+                            <div class="project-name"><span class="project-emoji">⏱️</span>FGFormer</div>
                             <div class="project-role">项目负责人</div>
                         </div>
                         <p class="project-desc">
                             相位感知时空预测 Transformer。基于傅里叶移位定理将相位信息显式注入时间注意力，结合帧间差分表征增强动态模式建模，解决外观相似但运动趋势相反序列的混淆问题。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag">MSE 23.00</span>
-                            <span class="metric-tag">参数量 ↓61%</span>
-                            <span class="metric-tag">FLOPs ↓63%</span>
+                            <span class="metric-tag">📈 MSE 23.00</span>
+                            <span class="metric-tag">📈 参数量 ↓61%</span>
+                            <span class="metric-tag">📈 FLOPs ↓63%</span>
                         </div>
                         <div class="project-tech">Transformer · 相位注意力 · RoPE · 时空预测 · 视频帧预测</div>
                         <div class="project-links-row">
@@ -1324,7 +1549,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
+                                <strong>⚡ <i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">KN Group · 算法实习生</span>
@@ -1343,7 +1568,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>GeoME</i> —— 多阶段辩论与特征规避的视觉地理溯因推理框架</strong>
+                                <strong>🌍 <i>GeoME</i> —— 多阶段辩论与特征规避的视觉地理溯因推理框架</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人 · 一作在投</span>
@@ -1362,7 +1587,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
+                                <strong>🗺️ <i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
@@ -1383,7 +1608,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong>基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
+                                <strong>🏛️ 基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">四川农业大学</span>
@@ -1402,7 +1627,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong>基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
+                                <strong>💚 基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">四川农业大学</span>
@@ -1433,7 +1658,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>FGFormer</i> —— 相位感知时空预测 Transformer</strong>
+                                <strong>⏱️ <i>FGFormer</i> —— 相位感知时空预测 Transformer</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
@@ -1452,7 +1677,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
+                                <strong>🗺️ <i>GeoGR²</i> —— 图推理驱动的零样本地理空间预测框架</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
@@ -1470,7 +1695,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong><i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
+                                <strong>⚡ <i>CompileLight</i> —— 轻量级智能编译守卫 Agent</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">KN Group · 算法实习生</span>
@@ -1491,7 +1716,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong>基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
+                                <strong>🏛️ 基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">四川农业大学</span>
@@ -1510,7 +1735,7 @@
                     <div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong>基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
+                                <strong>💚 基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">四川农业大学</span>
@@ -1573,6 +1798,8 @@
     </footer>
 
     <script>
+        document.body.classList.add('page-loaded');
+
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 20) {
