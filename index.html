@@ -634,7 +634,7 @@
         }
 
         .project-lock::after {
-            content: "项目已私有化，核心源码请联系作者获取";
+            content: attr(data-tip);
             position: absolute;
             bottom: calc(100% + 8px);
             left: 50%;
@@ -1240,7 +1240,11 @@
                             <span class="metric-tag">节省 74.8% Token</span>
                             <span class="metric-tag">P95 54.2s</span>
                         </div>
-                        <div class="project-tech">LangGraph · RAG · pgvector · FTS5 · Blueprint 编译 · 语义缓存</div>
+                        <div class="project-tech">LangGraph · RAG · FTS5 · Blueprint 编译 · 语义缓存 · Pydantic</div>
+                        <div class="project-links-row">
+                            <a href="projects/compilelight.html" class="project-link">📄 查看详情</a>
+                            <span class="project-lock" data-tip="企业项目，源码受保密协议约束暂不公开">🔒 企业项目私有</span>
+                        </div>
                     </div>
 
                     <div class="project-card">
@@ -1289,7 +1293,7 @@
                         <div class="project-tech">Transformer · 相位注意力 · RoPE · 时空预测 · 视频帧预测</div>
                         <div class="project-links-row">
                             <a href="projects/fgformer.html" class="project-link">📄 查看详情</a>
-                            <span class="project-lock">🔒 源码私有</span>
+                            <span class="project-lock" data-tip="项目已私有化，核心源码请联系作者获取">🔒 源码私有</span>
                         </div>
                     </div>
                 </div>
