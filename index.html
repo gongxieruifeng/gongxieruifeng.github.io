@@ -317,32 +317,57 @@
             width: 28px;
         }
 
-        /* ========== Education Grid ========== */
-        .education-grid {
+        /* ========== Education Cards ========== */
+        .edu-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .edu-card {
             background: var(--panel);
             border: 1px solid var(--hairline);
             border-radius: 10px;
-            display: grid;
-            font-size: 16px;
-            grid-template-columns: 1.25fr 1.1fr 1fr;
-            line-height: 1.45;
-            margin-bottom: 10px;
-            padding: 12px 16px;
-            row-gap: 6px;
+            padding: 14px 18px;
         }
 
-        .education-grid div:nth-child(3n) {
-            color: var(--muted);
-            font-weight: 700;
-            text-align: right;
+        .edu-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
         }
 
-        .edu-school-name {
+        .edu-card-school {
             font-weight: 800;
+            font-size: 17px;
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
+        }
+
+        .edu-card-time {
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .edu-card-degree {
+            font-size: 15px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .edu-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
         }
 
         .edu-tag {
@@ -352,6 +377,30 @@
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 700;
+        }
+
+        .edu-tag.orange {
+            background: #fef3ee;
+            color: var(--accent2);
+        }
+
+        .edu-tag.green {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .edu-card-detail {
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: var(--muted);
+        }
+
+        .edu-card-detail p {
+            margin: 3px 0;
+        }
+
+        .edu-card-detail strong {
+            color: var(--text);
         }
 
         .info-line {
@@ -651,6 +700,49 @@
             color: var(--ink);
         }
 
+        .resume-subheading {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--ink);
+            margin: 24px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+        }
+
+        .honor-tags, .cert-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .honor-tag {
+            font-size: 12.5px;
+            background: #fef3ee;
+            color: var(--accent2);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid #fde2d4;
+        }
+
+        .cert-tag {
+            font-size: 12.5px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid #dbeafe;
+        }
+
+        .undergrad-divider {
+            border: none;
+            border-top: 1px dashed var(--hairline);
+            margin: 20px 0;
+        }
+
         /* ========== Contact Section ========== */
         .contact-page {
             text-align: center;
@@ -784,13 +876,9 @@
                 padding: 5px 10px;
             }
 
-            .education-grid {
-                grid-template-columns: 1fr;
-                row-gap: 4px;
-            }
-
-            .education-grid div:nth-child(3n) {
-                text-align: left;
+            .edu-card-head {
+                flex-direction: column;
+                gap: 4px;
             }
 
             .entry-title-row,
@@ -927,21 +1015,42 @@
                     <svg class="section-icon"><use href="#icon-school"></use></svg>
                     教育背景
                 </h2>
-                <div class="education-grid">
-                    <div class="edu-school-name">
-                        四川大学
-                        <span class="edu-tag">985</span>
-                        <span class="edu-tag">211</span>
-                        <span class="edu-tag">双一流</span>
-                        <span class="edu-tag">保研</span>
+                <div class="edu-cards">
+                    <div class="edu-card">
+                        <div class="edu-card-head">
+                            <div class="edu-card-school">
+                                四川大学
+                                <span class="edu-tag">985</span>
+                                <span class="edu-tag">211</span>
+                                <span class="edu-tag">双一流</span>
+                                <span class="edu-tag orange">保研</span>
+                                <span class="edu-tag green">QS TOP300</span>
+                            </div>
+                            <div class="edu-card-time">2025.09 — 2028.06（预计）</div>
+                        </div>
+                        <div class="edu-card-degree">电子信息硕士 · 大模型智能体决策方向</div>
+                        <div class="edu-card-detail">
+                            <p><strong>专业排名：</strong>前 5%</p>
+                            <p><strong>主修课程：</strong>深度学习、时序模型、Agent 智能</p>
+                        </div>
                     </div>
-                    <div>电子信息硕士 · 大模型智能体决策</div>
-                    <div>2025.09 — 2028.06（预计）</div>
-                    <div class="edu-school-name">四川农业大学</div>
-                    <div>数据科学与大数据技术 本科</div>
-                    <div>2021.09 — 2025.06</div>
+                    <div class="edu-card">
+                        <div class="edu-card-head">
+                            <div class="edu-card-school">
+                                四川农业大学
+                                <span class="edu-tag">211</span>
+                                <span class="edu-tag">双一流</span>
+                            </div>
+                            <div class="edu-card-time">2021.09 — 2025.06</div>
+                        </div>
+                        <div class="edu-card-degree">数据科学与大数据技术 本科</div>
+                        <div class="edu-card-detail">
+                            <p><strong>专业排名：</strong>前 1%（综合排名 2/164，GPA 4.33/5.0），保研至四川大学</p>
+                            <p><strong>主修课程：</strong>数据结构、深度学习、数据库原理、分布式模型与编程、算法</p>
+                            <p><strong>毕设/论文：</strong>《基于深度学习的智能垃圾分类系统》——提出基于通道独立时序分解（CITDT）的多尺度融合架构，结合多尺度卷积与层次化 Transformer，行为预测误差标准差 0.021；集成 YOLOv8 视觉引擎，复杂场景分类精度达 89.3%。</p>
+                        </div>
+                    </div>
                 </div>
-                <p class="info-line"><strong>本科排名：</strong>综合排名 2/164（前 1.2%），GPA 4.33/5.0，保研至四川大学</p>
                 <p class="info-line"><strong>研究方向：</strong>大模型智能体、多模态推理、图推理、时空预测</p>
             </section>
 
@@ -1107,9 +1216,67 @@
                             <li><strong>量化结果：</strong>在 GDP、温度、降水等预测任务中，Spearman ρ 最高提升 <strong>67.9%</strong>，区域 Bias 最高降低 <strong>87.5%</strong>，显著缓解长尾地区的预测偏差。</li>
                         </ul>
                     </div>
-                </div>
 
-                <!-- TSF Resume -->
+                    <hr class="undergrad-divider">
+                    <div class="resume-subheading">本科项目经历</div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">四川农业大学</span>
+                                <span class="entry-time">2023.07 — 2024.10</span>
+                            </div>
+                        </div>
+                        <p class="summary">项目描述：与学院党支部及雅安市高岗村合作，开发基于 CV 和 NLP 的双模态党建知识普及与服务平台，帮助村民更智能地学习党史知识。</p>
+                        <ul>
+                            <li><strong>数据采集：</strong>使用 Nutch 分布式网络爬虫获取党史信息并进行预处理，构建领域知识库。</li>
+                            <li><strong>模型实现：</strong>基于 YOLOv5 实现图像识别功能，基于 TextCNN 实现智能问答功能，完成双模态模型复现与调优。</li>
+                            <li><strong>工程落地：</strong>搭建 Web 端页面，与团队一同实地调研并进行用户测试，完成系统部署与落地。</li>
+                            <li><strong>项目成果：</strong>获软著《党史知识问答系统》（登记号：2024SR0510038），获第 17 届中国大学生计算机设计大赛<strong>国家级二等奖</strong>。</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">四川农业大学</span>
+                                <span class="entry-time">2022.04 — 2023.05</span>
+                            </div>
+                        </div>
+                        <p class="summary">项目描述：创新提出基于多特征图拼接的 Transformer 语音心理特征提取模块和基于 Att-BiLSTM 集成模型的文本心理特征提取模块的双模态融合心理估计模型，实现对学生心理的在线实时估计。</p>
+                        <ul>
+                            <li><strong>语音处理：</strong>负责语音处理模型部分，复现 Spectral Contrast、LM 模型，完成语音特征提取与数据整理工作。</li>
+                            <li><strong>文本处理：</strong>基于 Bert 和 Ngram2vec 训练多种预训练词向量，在自制数据集上表现优异，训练精度高达 <strong>99.06%</strong>。</li>
+                            <li><strong>项目成果：</strong>发表 SCI 论文 4 篇、省级刊物 5 篇，拥有专利 1 项、软著 2 份；获"互联网+"大学生创新创业大赛<strong>省级银奖</strong>等多项竞赛奖项。</li>
+                        </ul>
+                    </div>
+
+                    <div class="resume-subheading">所获荣誉</div>
+                    <div class="honor-tags">
+                        <span class="honor-tag">陈育新奖学金</span>
+                        <span class="honor-tag">"互联网+"省级银奖</span>
+                        <span class="honor-tag">计算机设计大赛国家级二等奖</span>
+                        <span class="honor-tag">校级优秀学生</span>
+                        <span class="honor-tag">省级三等奖</span>
+                        <span class="honor-tag">院级优秀青年志愿者</span>
+                        <span class="honor-tag">校级优秀共青团员</span>
+                        <span class="honor-tag">第16届中国大学生计算机设计大赛</span>
+                    </div>
+
+                    <div class="resume-subheading">资格证书</div>
+                    <div class="cert-tags">
+                        <span class="cert-tag">CET-4</span>
+                        <span class="cert-tag">二级 Python 语言程序设计</span>
+                        <span class="cert-tag">高中数学教师资格证</span>
+                        <span class="cert-tag">计算机网络技术三级证书</span>
+                    </div>
+                </div>
                 <div class="resume-panel" id="panel-tsf">
                     <div class="experience">
                         <div class="entry-head">
@@ -1164,6 +1331,66 @@
                             <li><strong>检索与编译：</strong>设计 FTS5+pgvector 混合召回与 RRF 融合，构建编译门禁流水线（Schema/权限/风险/预算）进行确定性校验；引入语义缓存 Hot Cache 命中率达 68%。</li>
                             <li><strong>量化结果：</strong>10,284 次真实流量回放成功率 89.4%，端到端 P95 54.2s，较 ReAct 基线节省 74.8% Token，无越权调用与重复副作用。</li>
                         </ul>
+                    </div>
+
+                    <hr class="undergrad-divider">
+                    <div class="resume-subheading">本科项目经历</div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>基于双模态智慧问答的党建智能平台系统 · 负责人</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">四川农业大学</span>
+                                <span class="entry-time">2023.07 — 2024.10</span>
+                            </div>
+                        </div>
+                        <p class="summary">项目描述：与学院党支部及雅安市高岗村合作，开发基于 CV 和 NLP 的双模态党建知识普及与服务平台，帮助村民更智能地学习党史知识。</p>
+                        <ul>
+                            <li><strong>数据采集：</strong>使用 Nutch 分布式网络爬虫获取党史信息并进行预处理，构建领域知识库。</li>
+                            <li><strong>模型实现：</strong>基于 YOLOv5 实现图像识别功能，基于 TextCNN 实现智能问答功能，完成双模态模型复现与调优。</li>
+                            <li><strong>工程落地：</strong>搭建 Web 端页面，与团队一同实地调研并进行用户测试，完成系统部署与落地。</li>
+                            <li><strong>项目成果：</strong>获软著《党史知识问答系统》（登记号：2024SR0510038），获第 17 届中国大学生计算机设计大赛<strong>国家级二等奖</strong>。</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>基于多模态心理估计的西部学生心理健康预警系统 · 核心成员</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">四川农业大学</span>
+                                <span class="entry-time">2022.04 — 2023.05</span>
+                            </div>
+                        </div>
+                        <p class="summary">项目描述：创新提出基于多特征图拼接的 Transformer 语音心理特征提取模块和基于 Att-BiLSTM 集成模型的文本心理特征提取模块的双模态融合心理估计模型，实现对学生心理的在线实时估计。</p>
+                        <ul>
+                            <li><strong>语音处理：</strong>负责语音处理模型部分，复现 Spectral Contrast、LM 模型，完成语音特征提取与数据整理工作。</li>
+                            <li><strong>文本处理：</strong>基于 Bert 和 Ngram2vec 训练多种预训练词向量，在自制数据集上表现优异，训练精度高达 <strong>99.06%</strong>。</li>
+                            <li><strong>项目成果：</strong>发表 SCI 论文 4 篇、省级刊物 5 篇，拥有专利 1 项、软著 2 份；获"互联网+"大学生创新创业大赛<strong>省级银奖</strong>等多项竞赛奖项。</li>
+                        </ul>
+                    </div>
+
+                    <div class="resume-subheading">所获荣誉</div>
+                    <div class="honor-tags">
+                        <span class="honor-tag">陈育新奖学金</span>
+                        <span class="honor-tag">"互联网+"省级银奖</span>
+                        <span class="honor-tag">计算机设计大赛国家级二等奖</span>
+                        <span class="honor-tag">校级优秀学生</span>
+                        <span class="honor-tag">省级三等奖</span>
+                        <span class="honor-tag">院级优秀青年志愿者</span>
+                        <span class="honor-tag">校级优秀共青团员</span>
+                        <span class="honor-tag">第16届中国大学生计算机设计大赛</span>
+                    </div>
+
+                    <div class="resume-subheading">资格证书</div>
+                    <div class="cert-tags">
+                        <span class="cert-tag">CET-4</span>
+                        <span class="cert-tag">二级 Python 语言程序设计</span>
+                        <span class="cert-tag">高中数学教师资格证</span>
+                        <span class="cert-tag">计算机网络技术三级证书</span>
                     </div>
                 </div>
             </section>
