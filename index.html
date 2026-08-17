@@ -3,185 +3,1265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>龚谢蕊烽 - 个人主页</title>
+    <title>龚谢蕊烽 - Agent 算法 · AI 应用开发</title>
+    <meta name="description" content="龚谢蕊烽的个人主页 - 四川大学电子信息硕士，研究方向为大模型智能体与空间推理，聚焦多模态、图推理、时空建模与 Agent 系统。">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --text-primary: #141414;
+            --text-secondary: #555;
+            --text-muted: #9ca3af;
+            --bg-page: #f5f5f5;
+            --bg-white: #ffffff;
+            --border: #e5e7eb;
+            --border-light: #f3f4f6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --content-width: 1040px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            background-color: #f5f5f5;
-            color: #141414;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        html {
+            scroll-behavior: smooth;
         }
 
-        .container {
-            background: white;
-            max-width: 800px;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* ========== Navigation ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            border-bottom-color: var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-inner {
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .nav-logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover::after {
             width: 100%;
-            padding: 60px 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .nav-mobile-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-primary);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+
+        /* ========== Hero ========== */
+        .hero {
+            padding-top: 140px;
+            padding-bottom: 100px;
             text-align: center;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #141414;
-            margin-bottom: 12px;
+        .hero-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
 
-        .subtitle {
-            font-size: 1.1rem;
-            color: #2563eb;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-
-        .divider {
-            width: 60px;
-            height: 3px;
-            background: #2563eb;
-            margin: 0 auto 32px;
-        }
-
-        .bio {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 32px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .tag {
-            background: #eff6ff;
-            color: #2563eb;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-light);
+            color: var(--primary);
             padding: 6px 16px;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
+            margin-bottom: 28px;
         }
 
-        .links {
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .hero-desc {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
-        .link-btn {
+        .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 12px 28px;
-            border-radius: 6px;
-            text-decoration: none;
+            border-radius: var(--radius);
             font-weight: 500;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            cursor: pointer;
             transition: all 0.2s ease;
+            border: none;
+            text-decoration: none;
         }
 
-        .link-btn.primary {
-            background: #2563eb;
+        .btn-primary {
+            background: var(--primary);
             color: white;
         }
 
-        .link-btn.primary:hover {
-            background: #1d4ed8;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
         }
 
-        .link-btn.secondary {
-            border: 1px solid #d1d5db;
-            color: #374151;
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
 
-        .link-btn.secondary:hover {
-            border-color: #2563eb;
-            color: #2563eb;
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
-        .footer {
-            margin-top: 48px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e7eb;
+        /* ========== Section Common ========== */
+        .section {
+            padding: 80px 24px;
+        }
+
+        .section-alt {
+            background: var(--bg-white);
+        }
+
+        .section-inner {
+            max-width: var(--content-width);
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .section-divider {
+            width: 48px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* ========== About ========== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+
+        .edu-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .edu-card + .edu-card {
+            margin-top: 16px;
+        }
+
+        .edu-school {
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .edu-tag {
+            font-size: 0.75rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .edu-time {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .edu-major {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .edu-detail {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .edu-highlight {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .skills-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .skill-group {
+            margin-bottom: 20px;
+        }
+
+        .skill-group-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: var(--border-light);
+            color: var(--text-primary);
+            padding: 5px 14px;
+            border-radius: 6px;
             font-size: 0.85rem;
-            color: #9ca3af;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
         }
 
-        @media (max-width: 640px) {
-            .container {
-                padding: 40px 24px;
+        .skill-tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        /* ========== Projects ========== */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .project-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .project-role {
+            font-size: 0.82rem;
+            color: var(--primary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .project-desc {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .project-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .metric-tag {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 4px;
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .project-tech {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .project-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        .project-status::before {
+            content: '🔜';
+        }
+
+        /* ========== Resume ========== */
+        .resume-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--border-light);
+            padding: 4px;
+            border-radius: var(--radius);
+            width: fit-content;
+            margin-bottom: 32px;
+        }
+
+        .resume-tab {
+            padding: 10px 28px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .resume-tab.active {
+            background: var(--bg-white);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            font-weight: 600;
+        }
+
+        .resume-panel {
+            display: none;
+        }
+
+        .resume-panel.active {
+            display: block;
+        }
+
+        .resume-preview {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 48px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .resume-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .resume-info {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .resume-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .resume-direction {
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .resume-contact {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .resume-section {
+            margin-bottom: 28px;
+        }
+
+        .resume-section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--primary);
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .resume-item {
+            margin-bottom: 20px;
+        }
+
+        .resume-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .resume-item-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .resume-item-time {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .resume-item-sub {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .resume-item ul {
+            padding-left: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .resume-item ul li {
+            margin-bottom: 4px;
+        }
+
+        .resume-item ul li strong {
+            color: var(--text-primary);
+        }
+
+        .resume-coming-soon {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* ========== Contact ========== */
+        .contact-inner {
+            text-align: center;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .contact-desc {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            line-height: 1.8;
+        }
+
+        .contact-links {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contact-card {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .contact-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            padding: 32px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            background: var(--bg-white);
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: var(--bg-white);
+                flex-direction: column;
+                padding: 16px 24px;
+                gap: 16px;
+                border-bottom: 1px solid var(--border);
+                box-shadow: var(--shadow-md);
             }
 
-            h1 {
-                font-size: 2rem;
+            .nav-links.open {
+                display: flex;
             }
 
-            .links {
+            .nav-mobile-toggle {
+                display: block;
+            }
+
+            .hero {
+                padding-top: 110px;
+                padding-bottom: 70px;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.05rem;
+            }
+
+            .section {
+                padding: 56px 20px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .project-card {
+                padding: 24px;
+            }
+
+            .resume-preview {
+                padding: 24px;
+            }
+
+            .resume-tabs {
+                width: 100%;
+            }
+
+            .resume-tab {
+                flex: 1;
+                padding: 10px 16px;
+                font-size: 0.88rem;
+            }
+
+            .hero-actions {
                 flex-direction: column;
             }
 
-            .link-btn {
+            .btn {
                 width: 100%;
                 justify-content: center;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>龚谢蕊烽</h1>
-        <div class="subtitle">Agent 算法 · AI 应用开发 · 大模型系统</div>
-        <div class="divider"></div>
-        <p class="bio">
-            四川大学电子信息硕士在读，研究方向为大模型智能体与空间推理。
-            聚焦多模态、图推理、时空建模与 Agent 系统，热爱构建可落地、可审计的 AI 应用。
-        </p>
-        <div class="tags">
-            <span class="tag">Agent</span>
-            <span class="tag">LangGraph</span>
-            <span class="tag">RAG</span>
-            <span class="tag">大模型微调</span>
-            <span class="tag">时空预测</span>
-            <span class="tag">PyTorch</span>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="#home" class="nav-logo">龚谢蕊烽</a>
+            <button class="nav-mobile-toggle" id="navToggle" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于</a></li>
+                <li><a href="#projects">项目</a></li>
+                <li><a href="#resume">简历</a></li>
+                <li><a href="#contact">联系</a></li>
+            </ul>
         </div>
-        <div class="links">
-            <a href="https://github.com/gongxieruifeng" class="link-btn primary" target="_blank" rel="noopener noreferrer">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                GitHub
-            </a>
-            <a href="mailto:gongxieruifeng@stu.scu.edu.cn" class="link-btn secondary">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                联系我
-            </a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <div class="hero-inner">
+            <div class="hero-badge">求职中 · 2027届</div>
+            <h1>龚谢蕊烽</h1>
+            <div class="hero-subtitle">Agent 算法 · AI 应用开发 · 大模型系统</div>
+            <p class="hero-desc">
+                四川大学电子信息硕士在读，研究方向为大模型智能体与空间推理。<br>
+                聚焦多模态推理、图结构推理、时空建模与可控 Agent 系统，热爱构建可落地、可审计的 AI 应用。
+            </p>
+            <div class="hero-actions">
+                <a href="#projects" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    查看作品集
+                </a>
+                <a href="#resume" class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    在线简历
+                </a>
+            </div>
         </div>
-        <div class="footer">
-            <p>🚧 网站建设中 · 作品集与简历页面即将上线</p>
-            <p style="margin-top: 8px;">© 2026 龚谢蕊烽</p>
+    </section>
+
+    <!-- About -->
+    <section class="section section-alt" id="about">
+        <div class="section-inner">
+            <div class="section-header">
+                <div class="section-label">About</div>
+                <h2 class="section-title">关于我</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="about-grid">
+                <div class="about-edu">
+                    <div class="edu-card">
+                        <div class="edu-school">
+                            四川大学
+                            <span class="edu-tag">985</span>
+                            <span class="edu-tag">211</span>
+                            <span class="edu-tag">双一流</span>
+                            <span class="edu-tag">保研</span>
+                        </div>
+                        <div class="edu-time">2025.09 — 至今（在读）</div>
+                        <div class="edu-major">电子信息硕士 · 大模型驱动的智能体决策方向</div>
+                        <div class="edu-detail">
+                            研究方向：<span class="edu-highlight">大模型智能体与空间推理</span>，聚焦多模态推理、图推理与时空建模。
+                        </div>
+                    </div>
+                    <div class="edu-card">
+                        <div class="edu-school">
+                            四川农业大学
+                            <span class="edu-tag">211</span>
+                            <span class="edu-tag">双一流</span>
+                        </div>
+                        <div class="edu-time">2021.09 — 2025.06</div>
+                        <div class="edu-major">数据科学与大数据技术 本科</div>
+                        <div class="edu-detail">
+                            综合排名 <span class="edu-highlight">2/164（前 1.2%）</span>，GPA 4.33/5，保研至四川大学。
+                        </div>
+                    </div>
+                </div>
+                <div class="about-skills">
+                    <div class="skills-title">技术栈</div>
+                    <div class="skill-group">
+                        <div class="skill-group-title">Agent 系统与检索增强</div>
+                        <div class="skill-tags">
+                            <span class="skill-tag">LangChain</span>
+                            <span class="skill-tag">LangGraph</span>
+                            <span class="skill-tag">AutoGen</span>
+                            <span class="skill-tag">ReAct</span>
+                            <span class="skill-tag">MCP</span>
+                            <span class="skill-tag">Function Calling</span>
+                            <span class="skill-tag">RAG</span>
+                            <span class="skill-tag">多路召回</span>
+                            <span class="skill-tag">Rerank</span>
+                            <span class="skill-tag">FastAPI</span>
+                            <span class="skill-tag">Docker</span>
+                        </div>
+                    </div>
+                    <div class="skill-group">
+                        <div class="skill-group-title">模型微调与对齐</div>
+                        <div class="skill-tags">
+                            <span class="skill-tag">LLaMA-Factory</span>
+                            <span class="skill-tag">SFT</span>
+                            <span class="skill-tag">LoRA</span>
+                            <span class="skill-tag">QLoRA</span>
+                            <span class="skill-tag">PEFT</span>
+                            <span class="skill-tag">DPO</span>
+                            <span class="skill-tag">GRPO</span>
+                            <span class="skill-tag">Prompt Engineering</span>
+                        </div>
+                    </div>
+                    <div class="skill-group">
+                        <div class="skill-group-title">深度学习与基础</div>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Transformer</span>
+                            <span class="skill-tag">Flash Attention</span>
+                            <span class="skill-tag">KV Cache</span>
+                            <span class="skill-tag">PyTorch</span>
+                            <span class="skill-tag">时空建模</span>
+                            <span class="skill-tag">多模态</span>
+                            <span class="skill-tag">图推理</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="section" id="projects">
+        <div class="section-inner">
+            <div class="section-header">
+                <div class="section-label">Portfolio</div>
+                <h2 class="section-title">作品集</h2>
+                <div class="section-divider"></div>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">CompileLight</div>
+                        <div class="project-role">KN Group · 算法实习</div>
+                    </div>
+                    <div class="project-desc">
+                        针对企业客服 Agent 在高频任务中重复检索、推理与执行不可审计的痛点，设计「Trace-Registry-Retrieval-Control-Execution」闭环，对已知子目标优先复用资产，对未知缺口触发有界推理。
+                    </div>
+                    <div class="project-metrics">
+                        <span class="metric-tag">成功率 89.4%</span>
+                        <span class="metric-tag">节省 74.8% Token</span>
+                        <span class="metric-tag">P95 54.2s</span>
+                        <span class="metric-tag">10,284 次回放</span>
+                    </div>
+                    <div class="project-tech">LangGraph · RAG · pgvector · FTS5 · Blueprint 编译</div>
+                    <div class="project-status">项目详情与代码整理中</div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">GeoME</div>
+                        <div class="project-role">项目负责人</div>
+                    </div>
+                    <div class="project-desc">
+                        针对大规模视觉语言模型在地理定位中的「先验主导」幻觉问题，设计零训练多轮溯因推理框架，以候选假设的对抗验证与动态特征规避抑制误导性视觉先验。
+                    </div>
+                    <div class="project-metrics">
+                        <span class="metric-tag">准确率 94.19%</span>
+                        <span class="metric-tag">提升 10%-15%</span>
+                        <span class="metric-tag">误差降低 68.1%</span>
+                    </div>
+                    <div class="project-tech">多模态推理 · 溯因推理 · 信念熵 · 特征规避 · LLM Agent</div>
+                    <div class="project-status">项目详情与论文整理中</div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">GeoGR²</div>
+                        <div class="project-role">项目负责人</div>
+                    </div>
+                    <div class="project-desc">
+                        针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调、基于图结构协同推理的自主推理框架，通过真实观测数据 Grounding 与邻域协同推理提升预测一致性。
+                    </div>
+                    <div class="project-metrics">
+                        <span class="metric-tag">Spearman ρ ↑67.9%</span>
+                        <span class="metric-tag">区域 Bias ↓87.5%</span>
+                    </div>
+                    <div class="project-tech">图推理 · 零样本预测 · 空间一致性 · Refine Reasoning</div>
+                    <div class="project-status">项目详情与论文整理中</div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-name">FGFormer</div>
+                        <div class="project-role">项目负责人</div>
+                    </div>
+                    <div class="project-desc">
+                        针对时空 Transformer 主要依赖内容相似度、难以区分外观相似但运动趋势相反序列的问题，基于傅里叶移位定理将相位信息显式注入时间注意力，结合帧间差分表征增强动态模式建模。
+                    </div>
+                    <div class="project-metrics">
+                        <span class="metric-tag">MSE 23.00</span>
+                        <span class="metric-tag">参数量 ↓61%</span>
+                        <span class="metric-tag">FLOPs ↓63%</span>
+                    </div>
+                    <div class="project-tech">Transformer · 相位注意力 · RoPE · 时空预测 · 视频帧预测</div>
+                    <div class="project-status">项目详情与代码整理中</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resume -->
+    <section class="section section-alt" id="resume">
+        <div class="section-inner">
+            <div class="section-header">
+                <div class="section-label">Resume</div>
+                <h2 class="section-title">在线简历</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="resume-tabs">
+                <button class="resume-tab active" data-tab="agent">Agent 方向</button>
+                <button class="resume-tab" data-tab="tsf">时序预测方向</button>
+            </div>
+
+            <!-- Agent Resume -->
+            <div class="resume-panel active" id="panel-agent">
+                <div class="resume-preview">
+                    <div class="resume-info">
+                        <div class="resume-name">龚谢蕊烽</div>
+                        <div class="resume-direction">Agent 算法 · AI 应用开发 · 大模型系统</div>
+                        <div class="resume-contact">
+                            gongxieruifeng@stu.scu.edu.cn · github.com/gongxieruifeng · 四川成都
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">教育背景</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">四川大学 · 电子信息硕士（保研）</span>
+                                <span class="resume-item-time">2025.09 — 至今</span>
+                            </div>
+                            <div class="resume-item-sub">大模型驱动的智能体决策方向 · 大模型智能体与空间推理</div>
+                        </div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">四川农业大学 · 数据科学与大数据技术</span>
+                                <span class="resume-item-time">2021.09 — 2025.06</span>
+                            </div>
+                            <div class="resume-item-sub">综合排名 2/164（前 1.2%）· GPA 4.33/5</div>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">实习经历</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">CompileLight —— 轻量级智能编译守卫 Agent</span>
+                                <span class="resume-item-time">KN Group · 2026.06—2026.08</span>
+                            </div>
+                            <div class="resume-item-sub">算法实习生</div>
+                            <ul>
+                                <li><strong>控制与编译：</strong>提出「LLM 提议、代码批准」原则，构建 Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译流水线，引入语义缓存 Hot Cache 命中率达 68%，命中 P95 由 8.7s 降至 580ms。</li>
+                                <li><strong>执行与路由：</strong>基于 LangGraph 实现 Meta-Executor，支持 REUSE/HYBRID/NEW 三模式路由，NEW 模式低置信度时切换受控探索策略，配合预算门禁防止无限循环与越权调用。</li>
+                                <li><strong>资产工程：</strong>设计 Header 召回 + Contract 匹配两级索引与 DRAFT-ACTIVE 生命周期，沉淀 5 类可复用资产，支持检索一跳扩展与执行视图冻结。</li>
+                                <li><strong>量化结果：</strong>10,284 次真实回放成功率 89.4%，端到端 P95 54.2s，较 ReAct 节省 74.8% Token，无越权调用与重复副作用。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">项目经历</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">GeoME —— 多阶段辩论与特征规避的视觉地理溯因推理框架</span>
+                                <span class="resume-item-time">2025.07—2026.02</span>
+                            </div>
+                            <ul>
+                                <li>提出 Candidate-Debate-Judge-Reflect 四阶段闭环架构，通过「恶魔代言人」机制引导模型挖掘双向证据（E⁺/E⁻）。</li>
+                                <li>引入信念熵作为不确定性度量驱动 Reflection，设计动态特征规避机制抑制误导性高频特征，聚焦地域唯一性长尾证据。</li>
+                                <li>IM2GPS3K 测试准确率 94.19%（提升 10%-15%），Haversine 误差降低 68.1%。</li>
+                            </ul>
+                        </div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">GeoGR² —— 图推理驱动的零样本地理空间预测框架</span>
+                                <span class="resume-item-time">2025.09—2026.01</span>
+                            </div>
+                            <ul>
+                                <li>构建 Topology-Feature-Update 三阶段工作流，通过物理近邻 + 语义类比双重拓扑引入真实数据作为物理锚点。</li>
+                                <li>设计 Refine Reasoning 闭环进行多轮迭代修正，约束预测满足地理空间一致性，缓解长尾数据预测偏见。</li>
+                                <li>Spearman ρ 最高提升 67.9%，区域 Bias 最高降低 87.5%。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">专业技能</div>
+                        <ul>
+                            <li><strong>Agent 系统与检索增强：</strong>熟悉 LangChain、LangGraph、AutoGen 等框架及 ReAct 范式，掌握 MCP、Function Calling 等工具调用机制；掌握全链路 RAG 优化及 FastAPI、Docker 部署。</li>
+                            <li><strong>模型微调与对齐：</strong>熟练使用 LLaMA-Factory 进行 SFT 与 LoRA/QLoRA 等 PEFT 微调，熟悉 DPO、GRPO 等对齐方法。</li>
+                            <li><strong>深度学习基础：</strong>深入理解 Transformer 架构及 MHA/MQA/GQA、Flash Attention、KV Cache 等关键机制；熟悉 PyTorch 训练流程。</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align:center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">📄 PDF 导出功能开发中，当前为网页预览版本</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TSF Resume -->
+            <div class="resume-panel" id="panel-tsf">
+                <div class="resume-preview">
+                    <div class="resume-info">
+                        <div class="resume-name">龚谢蕊烽</div>
+                        <div class="resume-direction">时空序列预测 · 视频帧预测 · AI 应用开发</div>
+                        <div class="resume-contact">
+                            gongxieruifeng@stu.scu.edu.cn · github.com/gongxieruifeng · 四川成都
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">教育背景</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">四川大学 · 电子信息硕士（保研）</span>
+                                <span class="resume-item-time">2025.09 — 至今</span>
+                            </div>
+                            <div class="resume-item-sub">大模型驱动的智能体决策方向 · 大模型智能体与空间推理</div>
+                        </div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">四川农业大学 · 数据科学与大数据技术</span>
+                                <span class="resume-item-time">2021.09 — 2025.06</span>
+                            </div>
+                            <div class="resume-item-sub">综合排名 2/164（前 1.2%）· GPA 4.33/5</div>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">项目经历</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">FGFormer —— 相位感知时空预测 Transformer</span>
+                                <span class="resume-item-time">2026.07—2026.12</span>
+                            </div>
+                            <ul>
+                                <li><strong>相位感知时间注意力（Phase-RoPE）：</strong>基于傅里叶移位定理对 Q/K 施加随时间步递进的相位旋转，使注意力同时建模内容相关性与相对相位差，支持自由频率与速度耦合双模式。</li>
+                                <li><strong>时间差分表征：</strong>构建独立差分分支，将 Δx_t = x_t - x_{t-1} 与原始帧分别映射后融合，实现静态内容与动态信息解耦。</li>
+                                <li><strong>量化结果：</strong>MMNIST 上 MSE 23.00（SSIM 0.9483），较 Transformer 基线降低 34.5%；TaxiBJ 上以 2.5M 参数/0.62G FLOPs 达到 PredFormer-d256 同等精度，参数量与计算量降低 61% 与 63%。</li>
+                            </ul>
+                        </div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">GeoGR² —— 图推理驱动的零样本地理空间预测框架</span>
+                                <span class="resume-item-time">2025.09—2026.01</span>
+                            </div>
+                            <ul>
+                                <li>构建 Topology-Feature-Update 三阶段工作流，通过物理近邻 + 语义类比双重拓扑引入真实观测数据作为物理锚点。</li>
+                                <li>设计 Refine Reasoning 闭环进行多轮迭代修正，约束预测满足地理空间一致性。</li>
+                                <li>GDP、温度、降水预测中 Spearman ρ 最高提升 67.9%，区域 Bias 最高降低 87.5%。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">实习经历</div>
+                        <div class="resume-item">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">CompileLight —— 轻量级智能编译守卫 Agent</span>
+                                <span class="resume-item-time">KN Group · 2026.06—2026.08</span>
+                            </div>
+                            <div class="resume-item-sub">算法实习生</div>
+                            <ul>
+                                <li>基于 LangGraph 构建企业级 Agent 执行框架，实现三模式路由、自动重试/补偿与 Checkpoint 恢复机制。</li>
+                                <li>设计混合召回与编译门禁流水线，在 10,284 次真实回放中成功率 89.4%，节省 74.8% Token。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="resume-section">
+                        <div class="resume-section-title">专业技能</div>
+                        <ul>
+                            <li><strong>深度学习与时空建模：</strong>熟练使用 PyTorch 进行模型训练，深入理解 Transformer 架构及 Flash Attention、RoPE、KV Cache 等机制；熟悉时空依赖建模、差分表征及模型复杂度评估。</li>
+                            <li><strong>模型训练与算法基础：</strong>熟悉模型训练、调参与消融分析流程，掌握经典机器学习算法；具备 LLaMA-Factory SFT、LoRA/QLoRA 微调经验。</li>
+                            <li><strong>大模型与工程能力：</strong>熟悉 LangGraph、AutoGen 等 Agent 框架及 ReAct 范式，掌握全链路 RAG 优化，具备 FastAPI、Docker 部署能力。</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align:center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">📄 PDF 导出功能开发中，当前为网页预览版本</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section" id="contact">
+        <div class="section-inner contact-inner">
+            <div class="section-header" style="text-align:center;">
+                <div class="section-label">Contact</div>
+                <h2 class="section-title">联系我</h2>
+                <div class="section-divider" style="margin: 0 auto;"></div>
+            </div>
+            <p class="contact-desc">
+                目前正在寻找 Agent 算法 / AI 应用开发 / 大模型系统相关的工作机会。<br>
+                如果你对我的项目感兴趣，欢迎通过邮件或 GitHub 联系我。
+            </p>
+            <div class="contact-links">
+                <a href="mailto:gongxieruifeng@stu.scu.edu.cn" class="contact-card">
+                    <span class="contact-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </span>
+                    gongxieruifeng@stu.scu.edu.cn
+                </a>
+                <a href="https://github.com/gongxieruifeng" target="_blank" rel="noopener noreferrer" class="contact-card">
+                    <span class="contact-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </span>
+                    github.com/gongxieruifeng
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">© 2026 龚谢蕊烽 · Built with HTML & CSS · Hosted on GitHub Pages</p>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile nav toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+
+        // Close mobile nav when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+            });
+        });
+
+        // Resume tabs
+        const tabs = document.querySelectorAll('.resume-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.resume-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + target).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
