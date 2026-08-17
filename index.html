@@ -417,43 +417,67 @@
         }
 
         /* ========== Skills ========== */
-        .skills-list {
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .skill-card {
             background: var(--panel);
             border: 1px solid var(--hairline);
             border-radius: 10px;
-            columns: 2;
-            column-gap: 28px;
-            font-size: 15px;
-            line-height: 1.45;
-            list-style: none;
-            margin: 0;
-            padding: 14px 16px;
+            padding: 16px 18px;
+            transition: all 0.2s ease;
         }
 
-        .skills-list li {
-            break-inside: avoid;
-            margin-top: 6px;
-            padding-left: 14px;
-            position: relative;
+        .skill-card:hover {
+            border-color: rgba(37, 99, 235, 0.3);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+            transform: translateY(-2px);
         }
 
-        .skills-list li:first-child {
-            margin-top: 0;
-        }
-
-        .skills-list li::before {
-            background: var(--rust);
-            border-radius: 999px;
-            content: "";
-            height: 5px;
-            left: 0;
-            position: absolute;
-            top: 9px;
-            width: 5px;
-        }
-
-        .skills-list li strong {
+        .skill-card-title {
+            font-size: 14.5px;
             font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .skill-card-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .skill-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .skill-kw {
+            font-size: 11px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .skill-card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--muted);
+            margin: 0;
         }
 
         /* ========== Projects Grid ========== */
@@ -811,6 +835,12 @@
         }
 
         /* ========== Responsive ========== */
+        @media (max-width: 1100px) {
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 900px) {
             .nav-links {
                 display: none;
@@ -892,8 +922,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .skills-list {
-                columns: 1;
+            .skills-grid {
+                grid-template-columns: 1fr;
             }
 
             .tabs-container {
@@ -1060,11 +1090,49 @@
                     <svg class="section-icon"><use href="#icon-tool"></use></svg>
                     专业技能
                 </h2>
-                <ul class="skills-list">
-                    <li><strong>Agent 系统与检索增强：</strong>熟悉 LangChain、<strong>LangGraph</strong>、AutoGen 等 Agent 框架及 ReAct 范式，掌握 <strong>MCP、Function Calling</strong> 等工具调用机制，具备多 Agent 编排与状态管理能力；掌握全链路 <strong>RAG</strong> 优化，包括混合召回、Rerank 与 Self/CRAG，并具备 FastAPI、Docker 等工程化部署经验。</li>
-                    <li><strong>模型微调与对齐：</strong>熟练使用 <strong>LLaMA-Factory</strong> 进行 SFT 与 LoRA/QLoRA 等 PEFT 高效微调，熟悉 RLHF 及 <strong>DPO、GRPO</strong> 等对齐方法，了解模型蒸馏，并能结合 Prompt Engineering 优化复杂任务表现。</li>
-                    <li><strong>深度学习与算法基础：</strong>深入理解 <strong>Transformer</strong> 架构及 MHA/MQA/GQA、Flash Attention 与 <strong>KV Cache</strong> 等关键机制；熟悉 PyTorch 训练与模型优化流程，掌握回归、聚类、决策树、随机森林等经典机器学习算法。</li>
-                </ul>
+                <div class="skills-grid">
+                    <div class="skill-card">
+                        <div class="skill-card-title">Agent 系统与检索增强</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">LangGraph</span>
+                            <span class="skill-kw">LangChain</span>
+                            <span class="skill-kw">AutoGen</span>
+                            <span class="skill-kw">MCP</span>
+                            <span class="skill-kw">Function Calling</span>
+                            <span class="skill-kw">RAG</span>
+                            <span class="skill-kw">Rerank</span>
+                            <span class="skill-kw">FastAPI</span>
+                            <span class="skill-kw">Docker</span>
+                        </div>
+                        <p>熟悉主流 Agent 框架及 ReAct 范式，掌握多 Agent 编排与状态管理；掌握全链路 RAG 优化（混合召回/Rerank/Self-CRAG），具备工程化部署经验。</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-card-title">模型微调与对齐</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">LLaMA-Factory</span>
+                            <span class="skill-kw">SFT</span>
+                            <span class="skill-kw">LoRA</span>
+                            <span class="skill-kw">QLoRA</span>
+                            <span class="skill-kw">RLHF</span>
+                            <span class="skill-kw">DPO</span>
+                            <span class="skill-kw">GRPO</span>
+                            <span class="skill-kw">Prompt Engineering</span>
+                        </div>
+                        <p>熟练使用 LLaMA-Factory 进行 PEFT 高效微调，熟悉 RLHF 及 DPO/GRPO 等对齐方法，了解模型蒸馏，能结合 Prompt Engineering 优化复杂任务。</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-card-title">深度学习与算法基础</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">Transformer</span>
+                            <span class="skill-kw">MHA/MQA/GQA</span>
+                            <span class="skill-kw">Flash Attention</span>
+                            <span class="skill-kw">KV Cache</span>
+                            <span class="skill-kw">PyTorch</span>
+                            <span class="skill-kw">机器学习</span>
+                        </div>
+                        <p>深入理解 Transformer 架构及 Flash Attention、KV Cache 等关键机制；熟悉 PyTorch 训练与优化流程，掌握经典机器学习算法。</p>
+                    </div>
+                </div>
             </section>
         </div>
     </section>
@@ -1268,14 +1336,6 @@
                         <span class="honor-tag">校级优秀共青团员</span>
                         <span class="honor-tag">第16届中国大学生计算机设计大赛</span>
                     </div>
-
-                    <div class="resume-subheading">资格证书</div>
-                    <div class="cert-tags">
-                        <span class="cert-tag">CET-4</span>
-                        <span class="cert-tag">二级 Python 语言程序设计</span>
-                        <span class="cert-tag">高中数学教师资格证</span>
-                        <span class="cert-tag">计算机网络技术三级证书</span>
-                    </div>
                 </div>
                 <div class="resume-panel" id="panel-tsf">
                     <div class="experience">
@@ -1383,14 +1443,6 @@
                         <span class="honor-tag">院级优秀青年志愿者</span>
                         <span class="honor-tag">校级优秀共青团员</span>
                         <span class="honor-tag">第16届中国大学生计算机设计大赛</span>
-                    </div>
-
-                    <div class="resume-subheading">资格证书</div>
-                    <div class="cert-tags">
-                        <span class="cert-tag">CET-4</span>
-                        <span class="cert-tag">二级 Python 语言程序设计</span>
-                        <span class="cert-tag">高中数学教师资格证</span>
-                        <span class="cert-tag">计算机网络技术三级证书</span>
                     </div>
                 </div>
             </section>
