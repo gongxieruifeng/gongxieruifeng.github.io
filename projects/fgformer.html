@@ -104,6 +104,53 @@
             background: var(--accent); border-color: var(--accent); color: #fff;
         }
 
+        .btn-lock {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px;
+            border: 1px dashed var(--hairline);
+            background: #f1f3f5; color: var(--muted);
+            cursor: default; position: relative;
+        }
+
+        .btn-lock::after {
+            content: "核心源码已私有化，如需获取请联系作者";
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #fff;
+            font-size: 12px; font-weight: 600;
+            padding: 7px 12px; border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-lock::before {
+            content: ""; position: absolute;
+            bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
+            border: 6px solid transparent; border-top-color: #1e293b;
+            opacity: 0; transition: opacity 0.2s;
+        }
+
+        .btn-lock:hover::after, .btn-lock:hover::before {
+            opacity: 1;
+        }
+
+        .private-notice {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            padding: 14px 18px; border-radius: 0 8px 8px 0;
+            margin: 20px 0; font-size: 14px;
+            color: #92400e;
+        }
+
+        .private-notice strong {
+            color: #78350f;
+        }
+
         /* Metrics bar */
         .metrics-bar {
             display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0;
@@ -253,12 +300,15 @@
             <h1 class="project-title"><i>FGFormer</i>: Phase-aware Spatio-Temporal Prediction Transformer</h1>
             <p class="project-subtitle">相位感知时空预测 Transformer —— 让时间注意力具备运动方向感知能力</p>
             <div class="project-links">
-                <a href="https://github.com/gongxieruifeng/FGFormer" target="_blank" rel="noopener noreferrer" class="btn-link primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    GitHub 仓库
-                </a>
-                <a href="#quickstart" class="btn-link">快速开始</a>
+                <span class="btn-lock">
+                    🔒 源码私有
+                </span>
                 <a href="#results" class="btn-link">实验结果</a>
+                <a href="#innovation" class="btn-link">核心创新</a>
+            </div>
+
+            <div class="private-notice">
+                ⚠️ <strong>项目源码已私有化</strong> —— 核心代码暂未公开。如需获取源码用于学术交流或合作，请通过主页联系方式与作者联系。
             </div>
 
             <div class="metrics-bar">
@@ -296,7 +346,7 @@
         </div>
 
         <!-- Innovation 1 -->
-        <div class="section">
+        <div class="section" id="innovation">
             <h2>创新点一：Phase-RoPE 时间注意力</h2>
             <h3>问题背景</h3>
             <p>标准时间注意力 <code>Score = Q·K^T</code> 只编码像素内容相似度。一个白球在第 1 帧向右运动、第 5 帧回到同一位置（向左运动），两帧像素内容几乎一致，标准注意力会给它们高分，导致模型被"方向冲突"的历史帧干扰，预测出模糊残影。</p>
@@ -436,8 +486,13 @@ Score(i, j) ≈ content_similarity × cos((j-i)·θ)</code></pre>
         </div>
 
         <!-- Quick Start -->
-        <div class="section" id="quickstart">
-            <h2>快速开始</h2>
+        <div class="section">
+            <h2>复现说明</h2>
+            <div class="private-notice" style="margin-top:0;">
+                <strong>🔒 源码暂未公开</strong><br>
+                项目核心代码目前处于私有化阶段，尚未在 GitHub 公开发布。如需获取源码用于 <strong>学术交流、合作研究</strong>，欢迎通过主页邮箱联系作者。<br><br>
+                源码公开后将包含完整的训练脚本、配置文件、数据集下载工具，可通过以下命令一键复现：
+            </div>
 <pre><code># 环境搭建
 conda env create -f environment.yml
 conda activate fgformer
