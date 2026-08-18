@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习笔记 | 龚谢蕊烽</title>
+    <meta name="description" content="龚谢蕊烽的个人博客与学习笔记 - AI Agent、LLM Systems、深度学习、时空预测等技术笔记">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --accent-soft: #eaf1ff;
+            --accent2: #7c3aed;
+            --rust: #d97757;
+            --ink: #141414;
+            --muted: #667085;
+            --hairline: #dbe2ea;
+            --panel: #f7f9fc;
+            --screen-bg: #eef2f7;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --warning: #d97706;
+            --warning-soft: #fef3c7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Nav */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 900px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        /* Page */
+        .page {
+            max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+
+        /* Hero */
+        .blog-hero {
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .blog-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-soft) 0%, #f3e8ff 100%);
+            color: var(--accent2);
+            padding: 5px 12px; border-radius: 999px;
+            margin-bottom: 14px;
+        }
+        .blog-title {
+            font-size: 36px; font-weight: 900; line-height: 1.25;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .blog-subtitle {
+            font-size: 16px; color: var(--muted); margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .blog-stats {
+            display: flex; flex-wrap: wrap; gap: 16px;
+            padding: 16px 20px; background: var(--panel);
+            border: 1px solid var(--hairline); border-radius: 12px;
+        }
+        .stat-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: var(--muted); font-weight: 600;
+        }
+        .stat-value {
+            font-size: 18px; font-weight: 900; color: var(--accent);
+        }
+
+        /* Categories */
+        .categories {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+        .category-tag {
+            font-size: 13px; font-weight: 700;
+            padding: 7px 16px; border-radius: 999px;
+            border: 1px solid var(--hairline); background: #fff;
+            color: var(--muted); cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+        }
+        .category-tag:hover, .category-tag.active {
+            border-color: var(--accent); color: var(--accent);
+            background: var(--accent-soft);
+            transform: translateY(-1px);
+        }
+
+        /* Posts List */
+        .posts-list {
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .post-card {
+            background: #fff;
+            border: 1px solid var(--hairline);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+        .post-card:nth-child(1) { animation-delay: 0.15s; }
+        .post-card:nth-child(2) { animation-delay: 0.2s; }
+        .post-card:nth-child(3) { animation-delay: 0.25s; }
+        .post-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.1);
+            transform: translateY(-2px);
+        }
+        .post-meta {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 10px; flex-wrap: wrap;
+        }
+        .post-category {
+            font-size: 11px; font-weight: 700;
+            padding: 3px 10px; border-radius: 999px;
+        }
+        .post-category.agent {
+            color: var(--accent); background: var(--accent-soft);
+        }
+        .post-category.llm {
+            color: var(--accent2); background: #f3e8ff;
+        }
+        .post-category.dl {
+            color: var(--success); background: var(--success-soft);
+        }
+        .post-category.engineering {
+            color: var(--warning); background: var(--warning-soft);
+        }
+        .post-date {
+            font-size: 13px; color: var(--muted); font-weight: 500;
+        }
+        .post-title {
+            font-size: 18px; font-weight: 800; color: var(--ink);
+            margin-bottom: 8px; line-height: 1.4;
+        }
+        .post-excerpt {
+            font-size: 14px; color: var(--muted); line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .post-tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+        }
+        .post-tag {
+            font-size: 11px; font-weight: 600;
+            color: var(--muted); background: var(--panel);
+            padding: 3px 10px; border-radius: 6px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 80px 24px;
+            background: #fff; border: 2px dashed var(--hairline);
+            border-radius: 12px;
+            animation: fadeInUp 0.6s ease-out 0.15s both;
+        }
+        .empty-icon {
+            font-size: 48px; margin-bottom: 16px;
+        }
+        .empty-title {
+            font-size: 20px; font-weight: 800; color: var(--ink);
+            margin-bottom: 8px;
+        }
+        .empty-desc {
+            font-size: 14px; color: var(--muted); max-width: 400px;
+            margin: 0 auto; line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center; padding: 40px 24px;
+            font-size: 13px; color: var(--muted);
+            border-top: 1px solid var(--hairline);
+            margin-top: 60px;
+        }
+        .footer a {
+            color: var(--accent); text-decoration: none; font-weight: 600;
+        }
+        .footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .blog-title { font-size: 28px; }
+            .post-card { padding: 20px; }
+            .blog-stats { flex-direction: column; gap: 12px; }
+            .stat-item { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">
+                <span class="nav-logo-mark">龚</span>
+                龚谢蕊烽
+            </a>
+            <a href="index.html" class="nav-back">← 返回首页</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="page">
+        <!-- Hero -->
+        <div class="blog-hero">
+            <div class="blog-badge">📚 学习笔记</div>
+            <h1 class="blog-title">技术博客与学习笔记</h1>
+            <p class="blog-subtitle">
+                记录 AI Agent、大语言模型、深度学习、工程实践等方向的学习心得、论文笔记与技术思考。
+            </p>
+            <div class="blog-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="postCount">0</span>
+                    <span>篇笔记</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">4</span>
+                    <span>个分类</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">持续更新</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-tag active" data-category="all">全部</button>
+            <button class="category-tag" data-category="agent">🤖 AI Agent</button>
+            <button class="category-tag" data-category="llm">🧠 大语言模型</button>
+            <button class="category-tag" data-category="dl">⚡ 深度学习</button>
+            <button class="category-tag" data-category="engineering">🔧 工程实践</button>
+        </div>
+
+        <!-- Posts List -->
+        <div class="posts-list" id="postsList">
+            <!-- 笔记文章将在这里添加 -->
+            <!-- 
+            示例文章格式：
+            <a href="posts/your-post.html" class="post-card" style="text-decoration: none; color: inherit; display: block;">
+                <div class="post-meta">
+                    <span class="post-category agent">🤖 AI Agent</span>
+                    <span class="post-date">2026-08-18</span>
+                </div>
+                <h3 class="post-title">文章标题</h3>
+                <p class="post-excerpt">文章摘要描述...</p>
+                <div class="post-tags">
+                    <span class="post-tag">标签1</span>
+                    <span class="post-tag">标签2</span>
+                </div>
+            </a>
+            -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📝</div>
+            <h3 class="empty-title">笔记建设中</h3>
+            <p class="empty-desc">
+                这里将陆续分享我的技术学习笔记，包括论文解读、工程实践、算法思考等内容，敬请期待。
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 龚谢蕊烽 · <a href="index.html">返回个人主页</a></p>
+    </footer>
+
+    <script>
+        // 笔记数据 - 后续由另一个agent维护
+        const posts = [
+            // 在这里添加笔记条目，格式如下：
+            // {
+            //     title: "文章标题",
+            //     excerpt: "文章摘要...",
+            //     date: "2026-08-18",
+            //     category: "agent", // agent | llm | dl | engineering
+            //     categoryLabel: "🤖 AI Agent",
+            //     tags: ["标签1", "标签2"],
+            //     url: "posts/post-name.html"
+            // }
+        ];
+
+        // 渲染笔记列表
+        function renderPosts(category = 'all') {
+            const postsList = document.getElementById('postsList');
+            const emptyState = document.getElementById('emptyState');
+            const postCount = document.getElementById('postCount');
+            
+            const filteredPosts = category === 'all' 
+                ? posts 
+                : posts.filter(p => p.category === category);
+            
+            postCount.textContent = posts.length;
+            
+            if (filteredPosts.length === 0) {
+                postsList.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            postsList.innerHTML = filteredPosts.map(post => `
+                <a href="${post.url}" class="post-card" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="post-meta">
+                        <span class="post-category ${post.category}">${post.categoryLabel}</span>
+                        <span class="post-date">${post.date}</span>
+                    </div>
+                    <h3 class="post-title">${post.title}</h3>
+                    <p class="post-excerpt">${post.excerpt}</p>
+                    <div class="post-tags">
+                        ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // 分类切换
+        document.querySelectorAll('.category-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+                renderPosts(tag.dataset.category);
+            });
+        });
+
+        // 初始化渲染
+        renderPosts();
+    </script>
+</body>
+</html>
