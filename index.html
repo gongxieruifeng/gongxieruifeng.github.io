@@ -154,6 +154,37 @@
             color: var(--accent);
         }
 
+        .lang-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--hairline);
+            background: #fff;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            margin-left: 8px;
+        }
+
+        .lang-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .lang-toggle .lang-sep {
+            color: var(--hairline);
+            font-weight: 400;
+        }
+
+        .lang-toggle .active-lang {
+            color: var(--accent);
+        }
+
         .nav-mobile-toggle {
             display: none;
             background: none;
@@ -1327,12 +1358,19 @@
                 <span></span>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#home">首页</a></li>
-                <li><a href="#about">关于</a></li>
-                <li><a href="#projects">项目</a></li>
-                <li><a href="#resume">简历</a></li>
-                <li><a href="blog.html">博客</a></li>
-                <li><a href="#contact">联系</a></li>
+                <li><a href="#home" data-i18n="nav_home">首页</a></li>
+                <li><a href="#about" data-i18n="nav_about">关于</a></li>
+                <li><a href="#projects" data-i18n="nav_projects">项目</a></li>
+                <li><a href="#resume" data-i18n="nav_resume">简历</a></li>
+                <li><a href="blog.html" data-i18n="nav_blog">博客</a></li>
+                <li><a href="#contact" data-i18n="nav_contact">联系</a></li>
+                <li>
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="active-lang" id="langZh">中</span>
+                        <span class="lang-sep">/</span>
+                        <span id="langEn">EN</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
@@ -1345,9 +1383,9 @@
                     <p class="eyebrow">AI Agent Engineering / LLM Systems / Spatio-Temporal Modeling</p>
                     <div class="name-row">
                         <h1>龚谢蕊烽</h1>
-                        <span class="availability-badge">求职中 · 2028届</span>
+                        <span class="availability-badge" id="availability-badge">求职中 · 2028届</span>
                     </div>
-                    <p class="identity-line">Agent 算法 · AI 应用开发 · 大模型系统</p>
+                    <p class="identity-line" id="identity-line">Agent 算法 · AI 应用开发 · 大模型系统</p>
                     <div class="contact-line">
                         <a href="mailto:gongxieruifeng@stu.scu.edu.cn">
                             <svg class="icon"><use href="#icon-mail"></use></svg>
@@ -1359,10 +1397,10 @@
                         </a>
                         <a href="#contact">
                             <svg class="icon"><use href="#icon-map"></use></svg>
-                            四川成都
+                            <span id="location-text">四川成都</span>
                         </a>
                     </div>
-                    <p class="hero-bio">
+                    <p class="hero-bio" id="hero-bio">
                         四川大学电子信息硕士在读（2025.09 入学，预计 2028 年毕业），研究方向为大模型智能体与空间推理。
                         聚焦多模态推理、图结构推理、时空建模与可控 Agent 系统，热爱构建可落地、可审计的 AI 应用。
                     </p>
@@ -1371,56 +1409,58 @@
 
             <!-- Education -->
             <section class="section" id="about">
-                <h2>
+                <h2 id="edu-title">
                     <svg class="section-icon"><use href="#icon-school"></use></svg>
                     教育背景
                 </h2>
+                <div id="edu-content">
                 <div class="edu-cards">
                     <div class="edu-card master">
                         <div class="edu-card-head">
                             <div class="edu-card-school">
-                                🎓 四川大学
+                                🎓 <span id="edu-master-school">四川大学</span>
                                 <span class="edu-tag">985</span>
                                 <span class="edu-tag">211</span>
-                                <span class="edu-tag">双一流</span>
-                                <span class="edu-tag orange">保研</span>
+                                <span class="edu-tag" id="edu-tag-doublefirst">双一流</span>
+                                <span class="edu-tag orange" id="edu-tag-baoyan">保研</span>
                                 <span class="edu-tag green">QS TOP300</span>
                             </div>
-                            <div class="edu-card-time">2025.09 — 2028.06（预计）</div>
+                            <div class="edu-card-time" id="edu-master-time">2025.09 — 2028.06（预计）</div>
                         </div>
-                        <div class="edu-card-degree">电子信息硕士 · 大模型智能体决策方向</div>
+                        <div class="edu-card-degree" id="edu-master-degree">电子信息硕士 · 大模型智能体决策方向</div>
                         <div class="edu-card-detail">
-                            <p><strong>专业排名：</strong>前 5%</p>
-                            <p><strong>主修课程：</strong>深度学习、时序模型、Agent 智能</p>
+                            <p id="edu-master-rank"><strong>专业排名：</strong>前 5%</p>
+                            <p id="edu-master-courses"><strong>主修课程：</strong>深度学习、时序模型、Agent 智能</p>
                         </div>
                     </div>
                     <div class="edu-card bachelor">
                         <div class="edu-card-head">
                             <div class="edu-card-school">
-                                🎓 四川农业大学
+                                🎓 <span id="edu-bach-school">四川农业大学</span>
                                 <span class="edu-tag">211</span>
-                                <span class="edu-tag">双一流</span>
+                                <span class="edu-tag" id="edu-tag-doublefirst2">双一流</span>
                             </div>
                             <div class="edu-card-time">2021.09 — 2025.06</div>
                         </div>
-                        <div class="edu-card-degree">数据科学与大数据技术 本科</div>
+                        <div class="edu-card-degree" id="edu-bach-degree">数据科学与大数据技术 本科</div>
                         <div class="edu-card-detail">
-                            <p><strong>专业排名：</strong>前 1%（综合排名 2/164，GPA 4.33/5.0），保研至四川大学</p>
-                            <p><strong>主修课程：</strong>数据结构、深度学习、数据库原理、分布式模型与编程、算法</p>
-                            <p><strong>毕设/论文：</strong>《基于深度学习的智能垃圾分类系统》——提出基于通道独立时序分解（CITDT）的多尺度融合架构，结合多尺度卷积与层次化 Transformer，行为预测误差标准差 0.021；集成 YOLOv8 视觉引擎，复杂场景分类精度达 89.3%。</p>
+                            <p id="edu-bach-rank"><strong>专业排名：</strong>前 1%（综合排名 2/164，GPA 4.33/5.0），保研至四川大学</p>
+                            <p id="edu-bach-courses"><strong>主修课程：</strong>数据结构、深度学习、数据库原理、分布式模型与编程、算法</p>
+                            <p id="edu-bach-thesis"><strong>毕设/论文：</strong>《基于深度学习的智能垃圾分类系统》——提出基于通道独立时序分解（CITDT）的多尺度融合架构，结合多尺度卷积与层次化 Transformer，行为预测误差标准差 0.021；集成 YOLOv8 视觉引擎，复杂场景分类精度达 89.3%。</p>
                         </div>
                     </div>
                 </div>
-                <p class="info-line"><strong>研究方向：</strong>大模型智能体、多模态推理、图推理、时空预测</p>
+                <p class="info-line" id="research-directions"><strong>研究方向：</strong>大模型智能体、多模态推理、图推理、时空预测</p>
+                </div>
             </section>
 
             <!-- Skills -->
             <section class="section">
-                <h2>
+                <h2 id="skills-title">
                     <svg class="section-icon"><use href="#icon-tool"></use></svg>
                     专业技能
                 </h2>
-                <div class="skills-grid">
+                <div class="skills-grid" id="skills-grid">
                     <div class="skill-card">
                         <div class="skill-card-title"><span class="skill-emoji">🤖</span>Agent 系统与检索增强</div>
                         <div class="skill-keywords">
@@ -1471,11 +1511,11 @@
     <section class="content-section" id="projects">
         <div class="page">
             <section class="section">
-                <h2>
+                <h2 id="projects-title">
                     <svg class="section-icon"><use href="#icon-folder"></use></svg>
                     精选项目
                 </h2>
-                <div class="projects-grid">
+                <div class="projects-grid" id="projects-grid">
                     <div class="project-card">
                         <span class="project-badge internship">实习</span>
                         <div class="project-head">
@@ -1580,14 +1620,14 @@
     <section class="content-section" id="resume">
         <div class="page">
             <section class="section">
-                <h2>
+                <h2 id="resume-title">
                     <svg class="section-icon"><use href="#icon-file"></use></svg>
                     在线简历
                 </h2>
-                <div class="resume-toolbar">
+                <div class="resume-toolbar" id="resume-toolbar">
                     <div class="tabs-container">
-                        <button class="resume-tab active" data-tab="agent">Agent 方向</button>
-                        <button class="resume-tab" data-tab="tsf">时空预测方向</button>
+                        <button class="resume-tab active" data-tab="agent" id="tab-agent">Agent 方向</button>
+                        <button class="resume-tab" data-tab="tsf" id="tab-tsf">时空预测方向</button>
                     </div>
                 </div>
 
@@ -1817,22 +1857,22 @@
     <section class="content-section" id="contact">
         <div class="page contact-page">
             <section class="section" style="margin-top: 0;">
-                <h2 style="justify-content: center;">
+                <h2 style="justify-content: center;" id="contact-title">
                     <svg class="section-icon"><use href="#icon-user"></use></svg>
                     联系我
                 </h2>
-                <p class="contact-desc">
+                <p class="contact-desc" id="contact-desc">
                     目前正在寻找 Agent 算法 / AI 应用开发 / 大模型系统相关的工作机会。<br>
                     如果你对我的项目感兴趣，欢迎通过邮件或 GitHub 联系我。
                 </p>
-                <div class="contact-links">
+                <div class="contact-links" id="contact-links">
                     <a href="mailto:gongxieruifeng@stu.scu.edu.cn" class="contact-btn primary">
                         <svg class="icon"><use href="#icon-mail"></use></svg>
-                        发送邮件
+                        <span id="contact-email-btn">发送邮件</span>
                     </a>
                     <a href="https://github.com/gongxieruifeng" target="_blank" rel="noopener noreferrer" class="contact-btn">
                         <svg class="icon"><use href="#icon-github"></use></svg>
-                        GitHub 主页
+                        <span id="contact-github-btn">GitHub 主页</span>
                     </a>
                 </div>
             </section>
@@ -1841,12 +1881,539 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p class="footer-text">© 2026 龚谢蕊烽 · Built with HTML & CSS · Hosted on GitHub Pages</p>
+        <p class="footer-text" id="footer-text">© 2026 龚谢蕊烽 · Built with HTML & CSS · Hosted on GitHub Pages</p>
     </footer>
 
     <script>
         document.body.classList.add('page-loaded');
 
+        // ========== i18n 中英文切换 ==========
+        let currentLang = 'zh';
+
+        // 保存原始中文内容
+        const originalContent = {
+            availabilityBadge: document.getElementById('availability-badge').textContent,
+            identityLine: document.getElementById('identity-line').textContent,
+            locationText: document.getElementById('location-text').textContent,
+            heroBio: document.getElementById('hero-bio').innerHTML,
+            eduTitle: document.getElementById('edu-title').innerHTML,
+            eduContent: document.getElementById('edu-content').innerHTML,
+            skillsTitle: document.getElementById('skills-title').innerHTML,
+            skillsGrid: document.getElementById('skills-grid').innerHTML,
+            projectsTitle: document.getElementById('projects-title').innerHTML,
+            projectsGrid: document.getElementById('projects-grid').innerHTML,
+            resumeTitle: document.getElementById('resume-title').innerHTML,
+            tabAgent: document.getElementById('tab-agent').textContent,
+            tabTsf: document.getElementById('tab-tsf').textContent,
+            panelAgent: document.getElementById('panel-agent').innerHTML,
+            panelTsf: document.getElementById('panel-tsf').innerHTML,
+            contactTitle: document.getElementById('contact-title').innerHTML,
+            contactDesc: document.getElementById('contact-desc').innerHTML,
+            contactEmailBtn: document.getElementById('contact-email-btn').textContent,
+            contactGithubBtn: document.getElementById('contact-github-btn').textContent,
+            footerText: document.getElementById('footer-text').textContent,
+            navHome: document.querySelector('[data-i18n="nav_home"]').textContent,
+            navAbout: document.querySelector('[data-i18n="nav_about"]').textContent,
+            navProjects: document.querySelector('[data-i18n="nav_projects"]').textContent,
+            navResume: document.querySelector('[data-i18n="nav_resume"]').textContent,
+            navBlog: document.querySelector('[data-i18n="nav_blog"]').textContent,
+            navContact: document.querySelector('[data-i18n="nav_contact"]').textContent,
+        };
+
+        // 英文翻译
+        const enContent = {
+            availabilityBadge: 'Seeking 2028 Opportunities',
+            identityLine: 'Agent Algorithms · AI Application Development · LLM Systems',
+            locationText: 'Chengdu, Sichuan',
+            heroBio: 'Master\'s student in Electronic Information at Sichuan University (enrolled Sep 2025, expected graduation 2028), researching LLM Agents and spatial reasoning. Focused on multimodal reasoning, graph-structured reasoning, spatio-temporal modeling, and controllable Agent systems. Passionate about building deployable and auditable AI applications.',
+            eduTitle: '<svg class="section-icon"><use href="#icon-school"></use></svg>Education',
+            skillsTitle: '<svg class="section-icon"><use href="#icon-tool"></use></svg>Technical Skills',
+            projectsTitle: '<svg class="section-icon"><use href="#icon-folder"></use></svg>Featured Projects',
+            resumeTitle: '<svg class="section-icon"><use href="#icon-file"></use></svg>Resume',
+            tabAgent: 'Agent Track',
+            tabTsf: 'Spatio-Temporal Track',
+            contactTitle: '<svg class="section-icon"><use href="#icon-user"></use></svg>Contact Me',
+            contactDesc: 'Currently seeking opportunities in Agent Algorithms / AI Application Development / LLM Systems.<br>If you are interested in my projects, feel free to reach out via email or GitHub.',
+            contactEmailBtn: 'Send Email',
+            contactGithubBtn: 'GitHub Profile',
+            footerText: '© 2026 Ruifeng Gong · Built with HTML & CSS · Hosted on GitHub Pages',
+            navHome: 'Home',
+            navAbout: 'About',
+            navProjects: 'Projects',
+            navResume: 'Resume',
+            navBlog: 'Blog',
+            navContact: 'Contact',
+            eduContent: `
+                <div class="edu-cards">
+                    <div class="edu-card master">
+                        <div class="edu-card-head">
+                            <div class="edu-card-school">
+                                🎓 Sichuan University
+                                <span class="edu-tag">985</span>
+                                <span class="edu-tag">211</span>
+                                <span class="edu-tag">Double First-Class</span>
+                                <span class="edu-tag orange">Postgraduate Recommendation</span>
+                                <span class="edu-tag green">QS TOP300</span>
+                            </div>
+                            <div class="edu-card-time">2025.09 — 2028.06 (Expected)</div>
+                        </div>
+                        <div class="edu-card-degree">M.Eng. in Electronic Information · LLM Agent Decision Making</div>
+                        <div class="edu-card-detail">
+                            <p><strong>Class Rank:</strong> Top 5%</p>
+                            <p><strong>Key Courses:</strong> Deep Learning, Time Series Models, Agent Intelligence</p>
+                        </div>
+                    </div>
+                    <div class="edu-card bachelor">
+                        <div class="edu-card-head">
+                            <div class="edu-card-school">
+                                🎓 Sichuan Agricultural University
+                                <span class="edu-tag">211</span>
+                                <span class="edu-tag">Double First-Class</span>
+                            </div>
+                            <div class="edu-card-time">2021.09 — 2025.06</div>
+                        </div>
+                        <div class="edu-card-degree">B.Sc. in Data Science and Big Data Technology</div>
+                        <div class="edu-card-detail">
+                            <p><strong>Class Rank:</strong> Top 1% (2/164, GPA 4.33/5.0), recommended for postgraduate study at Sichuan University</p>
+                            <p><strong>Key Courses:</strong> Data Structures, Deep Learning, Database Principles, Distributed Models and Programming, Algorithms</p>
+                            <p><strong>Thesis:</strong> "Intelligent Garbage Classification System Based on Deep Learning" — Proposed a multi-scale fusion architecture based on Channel Independent Time Series Decomposition (CITDT), combining multi-scale convolution and hierarchical Transformer, with behavior prediction error std of 0.021; integrated YOLOv8 vision engine, achieving 89.3% classification accuracy in complex scenes.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="info-line"><strong>Research Interests:</strong> LLM Agents, Multimodal Reasoning, Graph Reasoning, Spatio-Temporal Prediction</p>
+            `,
+            skillsGrid: `
+                    <div class="skill-card">
+                        <div class="skill-card-title"><span class="skill-emoji">🤖</span>Agent Systems & Retrieval-Augmented Generation</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">LangGraph</span>
+                            <span class="skill-kw">LangChain</span>
+                            <span class="skill-kw">AutoGen</span>
+                            <span class="skill-kw">MCP</span>
+                            <span class="skill-kw">Function Calling</span>
+                            <span class="skill-kw">RAG</span>
+                            <span class="skill-kw">Rerank</span>
+                            <span class="skill-kw">FastAPI</span>
+                            <span class="skill-kw">Docker</span>
+                        </div>
+                        <p>Familiar with mainstream Agent frameworks and ReAct paradigm, proficient in multi-Agent orchestration and state management; mastered full-stack RAG optimization (hybrid retrieval/Rerank/Self-CRAG) with engineering deployment experience.</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-card-title"><span class="skill-emoji">🧠</span>Model Fine-tuning & Alignment</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">LLaMA-Factory</span>
+                            <span class="skill-kw">SFT</span>
+                            <span class="skill-kw">LoRA</span>
+                            <span class="skill-kw">QLoRA</span>
+                            <span class="skill-kw">RLHF</span>
+                            <span class="skill-kw">DPO</span>
+                            <span class="skill-kw">GRPO</span>
+                            <span class="skill-kw">Prompt Engineering</span>
+                        </div>
+                        <p>Proficient in using LLaMA-Factory for PEFT fine-tuning, familiar with RLHF and alignment methods such as DPO/GRPO, understanding model distillation, and able to optimize complex tasks with Prompt Engineering.</p>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-card-title"><span class="skill-emoji">⚡</span>Deep Learning & Algorithm Fundamentals</div>
+                        <div class="skill-keywords">
+                            <span class="skill-kw">Transformer</span>
+                            <span class="skill-kw">MHA/MQA/GQA</span>
+                            <span class="skill-kw">Flash Attention</span>
+                            <span class="skill-kw">KV Cache</span>
+                            <span class="skill-kw">PyTorch</span>
+                            <span class="skill-kw">Machine Learning</span>
+                        </div>
+                        <p>Deep understanding of Transformer architecture and key mechanisms such as Flash Attention and KV Cache; familiar with PyTorch training and optimization workflows, mastered classic machine learning algorithms.</p>
+                    </div>
+            `,
+            projectsGrid: `
+                    <div class="project-card">
+                        <span class="project-badge internship">Internship</span>
+                        <div class="project-head">
+                            <div class="project-name"><span class="project-emoji">⚡</span>CompileLight</div>
+                            <div class="project-role">KN Group · Intern</div>
+                        </div>
+                        <p class="project-desc">
+                            Lightweight intelligent compilation guard Agent. Designed a closed-loop "Trace-Registry-Retrieval-Control-Execution" system that prioritizes asset reuse for known subgoals and triggers bounded reasoning for unknown gaps, solving redundant retrieval and unauditable execution issues in high-frequency tasks.
+                        </p>
+                        <div class="project-metrics">
+                            <span class="metric-tag">📈 Success Rate 89.4%</span>
+                            <span class="metric-tag">📈 74.8% Token Savings</span>
+                            <span class="metric-tag">📈 P95 54.2s</span>
+                        </div>
+                        <div class="project-tech">LangGraph · PostgreSQL · pgvector · Multi-Model Switching · Blueprint Compilation · Semantic Cache</div>
+                        <div class="project-links-row">
+                            <a href="projects/compilelight.html" class="project-link">📄 View Details</a>
+                            <a href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer" class="project-link secondary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                GitHub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <span class="project-badge research">Research</span>
+                        <div class="project-head">
+                            <div class="project-name"><span class="project-emoji">🌍</span>GeoME</div>
+                            <div class="project-status-tags">
+                                <span class="status-tag submitting">Under Review</span>
+                                <span class="project-role">Project Lead · First Author</span>
+                            </div>
+                        </div>
+                        <p class="project-desc">
+                            Multi-stage debate and feature evasion framework for visual geo-abductive reasoning. Guides bidirectional evidence (E+/E-) mining through a "Devil's Advocate" mechanism, introduces belief entropy for reflection and dynamic feature evasion, enabling general LVLMs to surpass domain SOTA without training.
+                        </p>
+                        <div class="project-metrics">
+                            <span class="metric-tag">📈 Accuracy 94.19%</span>
+                            <span class="metric-tag">📈 Error ↓68.1%</span>
+                            <span class="metric-tag">📈 Surpasses SOTA +21.8pp</span>
+                        </div>
+                        <div class="project-tech">Multimodal Reasoning · Abductive Reasoning · Belief Entropy · Feature Evasion · Multi-Agent Debate · Python</div>
+                        <div class="project-links-row">
+                            <a href="projects/geome.html" class="project-link">📄 View Details</a>
+                            <span class="project-lock" data-tip="Project source code is private, please contact the author for access">🔒 Source Private</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <span class="project-badge research">Research</span>
+                        <div class="project-head">
+                            <div class="project-name"><span class="project-emoji">🗺️</span>GeoGR²</div>
+                            <div class="project-status-tags">
+                                <span class="status-tag submitting">Under Review</span>
+                                <span class="project-role">Project Lead</span>
+                            </div>
+                        </div>
+                        <p class="project-desc">
+                            Graph reasoning-driven zero-shot geospatial prediction framework. Constructs dual topologies of physical neighbors + semantic analogies, introduces real observation data as anchors, implements dynamic graph message passing through Topology-Feature-Update three-stage cycle + Refine Reasoning multi-round iterative correction, surpassing fine-tuned GNNs without training.
+                        </p>
+                        <div class="project-metrics">
+                            <span class="metric-tag">📈 Spearman ↑67.9%</span>
+                            <span class="metric-tag">📈 Regional Bias ↓87.5%</span>
+                            <span class="metric-tag">📈 Zero-Shot No Training</span>
+                        </div>
+                        <div class="project-tech">Graph Reasoning · Multi-Agent Collaboration · Dynamic Graph Structure · Refine Reasoning · Geographic Bias Mitigation · Python</div>
+                        <div class="project-links-row">
+                            <a href="projects/geogr2.html" class="project-link">📄 View Details</a>
+                            <span class="project-lock" data-tip="Project source code is private, please contact the author for access">🔒 Source Private</span>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <span class="project-badge research-purple">Research</span>
+                        <div class="project-head">
+                            <div class="project-name"><span class="project-emoji">⏱️</span>FGFormer</div>
+                            <div class="project-status-tags">
+                                <span class="status-tag researching">In Progress</span>
+                                <span class="project-role">Project Lead</span>
+                            </div>
+                        </div>
+                        <p class="project-desc">
+                            Phase-aware spatio-temporal prediction Transformer. Explicitly injects phase information into temporal attention based on the Fourier Shift Theorem, combines inter-frame difference representations to enhance dynamic pattern modeling, solving the confusion problem for sequences with similar appearances but opposite motion trends.
+                        </p>
+                        <div class="project-metrics">
+                            <span class="metric-tag">📈 MSE 23.00</span>
+                            <span class="metric-tag">📈 Params ↓61%</span>
+                            <span class="metric-tag">📈 FLOPs ↓63%</span>
+                        </div>
+                        <div class="project-tech">Transformer · Phase Attention · RoPE · Spatio-Temporal Prediction · Video Frame Prediction</div>
+                        <div class="project-links-row">
+                            <a href="projects/fgformer.html" class="project-link">📄 View Details</a>
+                            <span class="project-lock" data-tip="Project source code is private, please contact the author for access">🔒 Source Private</span>
+                        </div>
+                    </div>
+            `,
+            panelAgent: `
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>⚡ <i>CompileLight</i> — Lightweight Intelligent Compilation Guard Agent</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">KN Group · Algorithm Intern</span>
+                                <span class="entry-time">2026.06 — 2026.08</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing the pain points of redundant retrieval, unauditable reasoning and execution in high-frequency tasks for <strong>enterprise customer service Agents</strong>, designed a closed-loop <strong>"Trace-Registry-Retrieval-Control-Execution"</strong> system that prioritizes asset reuse for known subgoals and triggers bounded reasoning for unknown gaps, reducing reasoning overhead and improving execution controllability.</p>
+                        <ul>
+                            <li><strong>Control & Compilation:</strong> Proposed the <strong>"LLM proposes, Code approves"</strong> principle, constructed a <strong>Normalize-Hard Filter-Hybrid Retrieval-SAD-Blueprint-Deterministic Compilation</strong> pipeline using PostgreSQL FTS + pgvector multi-path retrieval with RRF fusion; introduced <strong>semantic cache (Hot Cache)</strong> to reuse historical Blueprints for similar intents, achieving <strong>68%</strong> hit rate, reducing P95 for hit requests from 8.7s to <strong>580ms</strong>; constrained model proposals through <strong>compilation gates</strong> (Schema / Permission / Risk / Budget) with deterministic validation.</li>
+                            <li><strong>Execution & Routing:</strong> Implemented deterministic <strong>Meta-Executor</strong> based on LangGraph, supporting <strong>REUSE / HYBRID / NEW</strong> three-mode routing, automatic retry / compensation and manual Checkpoint recovery; <strong>NEW mode switches to controlled exploration strategy at low confidence</strong> — deep exploration within controlled whitelist, controlled reasoning engine executing "freeze context-gap classification-finite reasoning-output verification" workflow, with <strong>budget gates</strong> preventing infinite loops and unauthorized calls.</li>
+                            <li><strong>Asset Engineering:</strong> Asynchronously precipitated successful Traces into reusable assets, designed <strong>Header Retrieval + Contract Matching</strong> two-level indexing with DRAFT-ACTIVE lifecycle, precipitated <strong>5 Kinds</strong> (Tool/FSM/DAEF/Adapter/Validator), supporting one-hop retrieval expansion and execution view freezing to avoid version drift during execution.</li>
+                            <li><strong>Quantitative Results:</strong> In <strong>10,284</strong> real traffic replays, achieved <strong>89.4%</strong> overall success rate, end-to-end P95 of <strong>54.2s</strong> for all tasks, saving <strong>74.8% Tokens</strong> compared to ReAct baseline; audited with zero unauthorized calls and duplicate side effects, compilation gates fully passed, forming a <strong>replayable, auditable, and sustainable</strong> asset extraction closed loop.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>🌍 <i>GeoME</i> — Multi-Stage Debate and Feature Evasion Framework for Visual Geo-Abductive Reasoning</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Project Lead · First Author (Under Review)</span>
+                                <span class="entry-time">2025.07 — 2026.02</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing the <strong>"prior-dominated"</strong> hallucination problem of Large Vision-Language Models (LVLMs) in geolocalization, designed a zero-training multi-round abductive reasoning framework that suppresses misleading visual priors through adversarial validation of candidate hypotheses and dynamic feature evasion.</p>
+                        <ul>
+                            <li><strong>Architecture Design:</strong> Proposed a four-stage closed-loop architecture of <strong>"Candidate-Debate-Judge-Reflect"</strong>, reconstructing visual matching as evidence-chain-driven abductive reasoning. Through a "Devil's Advocate" mechanism, guides the model to actively search for supporting and refuting <strong>bidirectional evidence (E⁺/E⁻)</strong>, mitigating visual ambiguity and early prior anchoring.</li>
+                            <li><strong>Reflection & Candidate Update:</strong> Introduced <strong>Belief Entropy</strong> as an uncertainty measure during the debate stage, driving the model to perform meta-reasoning (Reflection). By dynamically eliminating weak evidence hypotheses and resampling, reduces the risk of Agents falling into local optima in ambiguous scenarios.</li>
+                            <li><strong>Feature Evasion Mechanism:</strong> Designed a dynamic feature evasion mechanism that automatically identifies and suppresses misleading high-frequency features, driving the model to mine <strong>"long-tail evidence" with high geographic discriminability</strong>, achieving iterative correction of candidate space.</li>
+                            <li><strong>Quantitative Results:</strong> In IM2GPS3K testing, the framework combined with base LVLMs achieved <strong>94.19%</strong> accuracy, improving <strong>10%–15%</strong>, Haversine error reduced by <strong>68.1%</strong>. Meanwhile, the self-constructed <strong>GeoReplica-200</strong> test set verified the framework's robustness in complex visual ambiguity environments.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>🗺️ <i>GeoGR²</i> — Graph Reasoning-Driven Zero-Shot Geospatial Prediction Framework</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Project Lead</span>
+                                <span class="entry-time">2025.09 — 2026.01</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing spatial isolation and regional distribution bias of LLMs in geospatial predictions such as GDP, temperature, and precipitation, designed a fine-tuning-free autonomous reasoning framework based on graph-structured collaborative reasoning, improving prediction consistency through real observation data grounding and neighborhood collaborative reasoning.</p>
+                        <ul>
+                            <li><strong>Architecture Design:</strong> Constructed a <strong>"Topology-Feature-Update"</strong> three-stage cyclic workflow, introducing real data as "physical anchors" through <strong>physical neighbor + semantic analogy</strong> dual topology operators, and utilizing the <strong>Feature operator</strong> to drive LLMs to autonomously filter task-relevant covariates, transforming isolated point prediction into collaborative reasoning on graphs.</li>
+                            <li><strong>Iterative Reasoning:</strong> Designed a <strong>Refine Reasoning</strong> closed loop, with LLM serving as spatial coordinator, performing multi-round (K&lt;N) iterative correction by comparing feature/value deviations between target points and neighborhood nodes, enforcing geospatial consistency constraints, significantly <strong>mitigating prediction bias on long-tail data</strong>.</li>
+                            <li><strong>Quantitative Results:</strong> In prediction tasks including GDP, temperature, and precipitation, Spearman ρ improved by up to <strong>67.9%</strong>, regional Bias reduced by up to <strong>87.5%</strong>, significantly alleviating prediction bias in long-tail regions.</li>
+                        </ul>
+                    </div>
+
+                    <hr class="undergrad-divider">
+                    <div class="resume-subheading">Undergraduate Projects</div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>🏛️ Bimodal Smart Q&A Party Building Intelligent Platform System · Lead</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Sichuan Agricultural University</span>
+                                <span class="entry-time">2023.07 — 2024.10</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Collaborated with the college Party branch and Gaogang Village, Ya'an City, to develop a bimodal Party building knowledge popularization and service platform based on CV and NLP, helping villagers learn Party history knowledge more intelligently.</p>
+                        <ul>
+                            <li><strong>Data Collection:</strong> Used Nutch distributed web crawler to obtain Party history information and preprocess it, constructing a domain knowledge base.</li>
+                            <li><strong>Model Implementation:</strong> Implemented image recognition based on YOLOv5, intelligent Q&A based on TextCNN, completing bimodal model reproduction and tuning.</li>
+                            <li><strong>Engineering Deployment:</strong> Built web pages, conducted field research and user testing with the team, completing system deployment and implementation.</li>
+                            <li><strong>Project Outcomes:</strong> Obtained software copyright "Party History Q&A System" (Registration No.: 2024SR0510038), won <strong>National Second Prize</strong> in the 17th China College Student Computer Design Competition.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>💚 Multimodal Psychological Estimation-Based Mental Health Early Warning System for Western Students · Core Member</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Sichuan Agricultural University</span>
+                                <span class="entry-time">2022.04 — 2023.05</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Innovatively proposed a bimodal fusion psychological estimation model combining Transformer speech psychological feature extraction module based on multi-feature map concatenation and Att-BiLSTM ensemble model-based text psychological feature extraction module, achieving online real-time estimation of student psychology.</p>
+                        <ul>
+                            <li><strong>Speech Processing:</strong> Responsible for the speech processing model part, reproduced Spectral Contrast and LM models, completing speech feature extraction and data organization.</li>
+                            <li><strong>Text Processing:</strong> Trained multiple pre-trained word vectors based on Bert and Ngram2vec, achieving excellent performance on self-built datasets with training accuracy up to <strong>99.06%</strong>.</li>
+                            <li><strong>Project Outcomes:</strong> Published 4 SCI papers, 5 provincial publications, holding 1 patent and 2 software copyrights; won multiple competition awards including <strong>Provincial Silver Award</strong> in "Internet+" College Student Innovation and Entrepreneurship Competition.</li>
+                        </ul>
+                    </div>
+
+                    <div class="resume-subheading">Honors & Awards</div>
+                    <div class="honor-tags">
+                        <span class="honor-tag">Chen Yuxin Scholarship</span>
+                        <span class="honor-tag">"Internet+" Provincial Silver Award</span>
+                        <span class="honor-tag">Computer Design Competition National Second Prize</span>
+                        <span class="honor-tag">University Outstanding Student</span>
+                        <span class="honor-tag">Provincial Third Prize</span>
+                        <span class="honor-tag">College Outstanding Youth Volunteer</span>
+                        <span class="honor-tag">University Outstanding Communist Youth League Member</span>
+                        <span class="honor-tag">16th China College Student Computer Design Competition</span>
+                    </div>
+            `,
+            panelTsf: `
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>⏱️ <i>FGFormer</i> — Phase-Aware Spatio-Temporal Prediction Transformer</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Project Lead</span>
+                                <span class="entry-time">2026.07 — 2026.12</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing the issue that spatio-temporal Transformers mainly rely on content similarity and have difficulty distinguishing sequences with <strong>similar appearances but opposite motion trends</strong>, proposed FGFormer; explicitly injected <strong>phase information</strong> into temporal attention based on the Fourier Shift Theorem, combined with inter-frame difference representations to enhance dynamic pattern modeling.</p>
+                        <ul>
+                            <li><strong>Phase-Aware Temporal Attention (Phase-RoPE):</strong> Based on the Fourier Shift Theorem, applied phase rotations progressive with timesteps to Q/K, enabling attention to simultaneously model content relevance and relative phase difference, suppressing erroneous correlations between frames with inconsistent motion directions; supports free frequency and velocity-coupled modes, the latter explicitly encoding motion velocity through θ=ωv, introducing only <strong>8 learnable parameters</strong> per layer.</li>
+                            <li><strong>Temporal Difference Representation (Diff Embedding):</strong> Constructed an independent difference branch that maps and fuses Δx<sub>t</sub>=x<sub>t</sub>-x<sub>t-1</sub> with original frames separately, explicitly encoding local change trends at the input end, achieving <strong>static content and dynamic information decoupling</strong>, enhancing the model's perception of short-term motion changes.</li>
+                            <li><strong>Spatio-Temporal Backbone:</strong> Constructed a Space→Time→Space three-stage Gated Transformer, modeling intra-frame spatial relationships and cross-frame temporal dependencies respectively, combined with SwiGLU and residual connections to complete multi-layer spatio-temporal interactions, strengthening long-term dynamic modeling while maintaining lightweight design.</li>
+                            <li><strong>Quantitative Results:</strong> On MMNIST, MSE <strong>23.00</strong>, SSIM <strong>0.9483</strong>, a <strong>34.5%</strong> reduction compared to pure Transformer baseline (MSE 35.13); on TaxiBJ, achieved equivalent accuracy to PredFormer-d256 (6.4M / 1.66G) with <strong>2.5M</strong> parameters / <strong>0.62G FLOPs</strong>, reducing parameters and computations by <strong>61%</strong> and <strong>63%</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>🗺️ <i>GeoGR²</i> — Graph Reasoning-Driven Zero-Shot Geospatial Prediction Framework</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Project Lead</span>
+                                <span class="entry-time">2025.09 — 2026.01</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing spatial isolation and regional distribution bias of LLMs in geospatial predictions such as GDP, temperature, and precipitation, designed a fine-tuning-free autonomous reasoning framework based on graph-structured collaborative reasoning, improving prediction consistency through real observation data grounding and neighborhood collaborative reasoning.</p>
+                        <ul>
+                            <li><strong>Architecture Design:</strong> Constructed a <strong>"Topology-Feature-Update"</strong> three-stage cyclic workflow, introducing real data as "physical anchors" through <strong>physical neighbor + semantic analogy</strong> dual topology operators, and utilizing the <strong>Feature operator</strong> to drive LLMs to autonomously filter task-relevant covariates, transforming isolated point prediction into collaborative reasoning on graphs.</li>
+                            <li><strong>Iterative Reasoning:</strong> Designed a <strong>Refine Reasoning</strong> closed loop, with LLM serving as spatial coordinator, performing multi-round (K&lt;N) iterative correction by comparing feature/value deviations between target points and neighborhood nodes, enforcing geospatial consistency constraints, significantly <strong>mitigating prediction bias on long-tail data</strong>.</li>
+                            <li><strong>Quantitative Results:</strong> In prediction tasks including GDP, temperature, and precipitation, Spearman ρ improved by up to <strong>67.9%</strong>, regional Bias reduced by up to <strong>87.5%</strong>, significantly alleviating prediction bias in long-tail regions.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>⚡ <i>CompileLight</i> — Lightweight Intelligent Compilation Guard Agent</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">KN Group · Algorithm Intern</span>
+                                <span class="entry-time">2026.06 — 2026.08</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Addressing pain points of redundant retrieval, unauditable reasoning and execution in high-frequency tasks for enterprise customer service Agents, designed a reusable asset-prioritized closed-loop execution framework.</p>
+                        <ul>
+                            <li><strong>Execution Framework:</strong> Implemented deterministic Meta-Executor based on LangGraph, supporting REUSE/HYBRID/NEW three-mode routing, automatic retry/compensation and Checkpoint recovery mechanisms, with budget gates preventing infinite loops and unauthorized calls.</li>
+                            <li><strong>Retrieval & Compilation:</strong> Designed FTS5+pgvector hybrid retrieval with RRF fusion, built compilation gate pipeline (Schema/Permission/Risk/Budget) for deterministic validation; introduced semantic cache Hot Cache with 68% hit rate.</li>
+                            <li><strong>Quantitative Results:</strong> 10,284 real traffic replays achieved 89.4% success rate, end-to-end P95 54.2s, saving 74.8% Tokens compared to ReAct baseline, with zero unauthorized calls and duplicate side effects.</li>
+                        </ul>
+                    </div>
+
+                    <hr class="undergrad-divider">
+                    <div class="resume-subheading">Undergraduate Projects</div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>🏛️ Bimodal Smart Q&A Party Building Intelligent Platform System · Lead</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Sichuan Agricultural University</span>
+                                <span class="entry-time">2023.07 — 2024.10</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Collaborated with the college Party branch and Gaogang Village, Ya'an City, to develop a bimodal Party building knowledge popularization and service platform based on CV and NLP, helping villagers learn Party history knowledge more intelligently.</p>
+                        <ul>
+                            <li><strong>Data Collection:</strong> Used Nutch distributed web crawler to obtain Party history information and preprocess it, constructing a domain knowledge base.</li>
+                            <li><strong>Model Implementation:</strong> Implemented image recognition based on YOLOv5, intelligent Q&A based on TextCNN, completing bimodal model reproduction and tuning.</li>
+                            <li><strong>Engineering Deployment:</strong> Built web pages, conducted field research and user testing with the team, completing system deployment and implementation.</li>
+                            <li><strong>Project Outcomes:</strong> Obtained software copyright "Party History Q&A System" (Registration No.: 2024SR0510038), won <strong>National Second Prize</strong> in the 17th China College Student Computer Design Competition.</li>
+                        </ul>
+                    </div>
+
+                    <div class="experience">
+                        <div class="entry-head">
+                            <div class="entry-title-row">
+                                <strong>💚 Multimodal Psychological Estimation-Based Mental Health Early Warning System for Western Students · Core Member</strong>
+                            </div>
+                            <div class="entry-meta-row">
+                                <span class="entry-role">Sichuan Agricultural University</span>
+                                <span class="entry-time">2022.04 — 2023.05</span>
+                            </div>
+                        </div>
+                        <p class="summary"><strong>Project Description:</strong> Innovatively proposed a bimodal fusion psychological estimation model combining Transformer speech psychological feature extraction module based on multi-feature map concatenation and Att-BiLSTM ensemble model-based text psychological feature extraction module, achieving online real-time estimation of student psychology.</p>
+                        <ul>
+                            <li><strong>Speech Processing:</strong> Responsible for the speech processing model part, reproduced Spectral Contrast and LM models, completing speech feature extraction and data organization.</li>
+                            <li><strong>Text Processing:</strong> Trained multiple pre-trained word vectors based on Bert and Ngram2vec, achieving excellent performance on self-built datasets with training accuracy up to <strong>99.06%</strong>.</li>
+                            <li><strong>Project Outcomes:</strong> Published 4 SCI papers, 5 provincial publications, holding 1 patent and 2 software copyrights; won multiple competition awards including <strong>Provincial Silver Award</strong> in "Internet+" College Student Innovation and Entrepreneurship Competition.</li>
+                        </ul>
+                    </div>
+
+                    <div class="resume-subheading">Honors & Awards</div>
+                    <div class="honor-tags">
+                        <span class="honor-tag">Chen Yuxin Scholarship</span>
+                        <span class="honor-tag">"Internet+" Provincial Silver Award</span>
+                        <span class="honor-tag">Computer Design Competition National Second Prize</span>
+                        <span class="honor-tag">University Outstanding Student</span>
+                        <span class="honor-tag">Provincial Third Prize</span>
+                        <span class="honor-tag">College Outstanding Youth Volunteer</span>
+                        <span class="honor-tag">University Outstanding Communist Youth League Member</span>
+                        <span class="honor-tag">16th China College Student Computer Design Competition</span>
+                    </div>
+            `
+        };
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            const zh = lang === 'zh';
+
+            // 更新按钮状态
+            document.getElementById('langZh').classList.toggle('active-lang', zh);
+            document.getElementById('langEn').classList.toggle('active-lang', !zh);
+
+            // 导航栏
+            document.querySelector('[data-i18n="nav_home"]').textContent = zh ? originalContent.navHome : enContent.navHome;
+            document.querySelector('[data-i18n="nav_about"]').textContent = zh ? originalContent.navAbout : enContent.navAbout;
+            document.querySelector('[data-i18n="nav_projects"]').textContent = zh ? originalContent.navProjects : enContent.navProjects;
+            document.querySelector('[data-i18n="nav_resume"]').textContent = zh ? originalContent.navResume : enContent.navResume;
+            document.querySelector('[data-i18n="nav_blog"]').textContent = zh ? originalContent.navBlog : enContent.navBlog;
+            document.querySelector('[data-i18n="nav_contact"]').textContent = zh ? originalContent.navContact : enContent.navContact;
+
+            // Hero区域
+            document.getElementById('availability-badge').textContent = zh ? originalContent.availabilityBadge : enContent.availabilityBadge;
+            document.getElementById('identity-line').textContent = zh ? originalContent.identityLine : enContent.identityLine;
+            document.getElementById('location-text').textContent = zh ? originalContent.locationText : enContent.locationText;
+            document.getElementById('hero-bio').innerHTML = zh ? originalContent.heroBio : enContent.heroBio;
+
+            // 教育背景
+            document.getElementById('edu-title').innerHTML = zh ? originalContent.eduTitle : enContent.eduTitle;
+            document.getElementById('edu-content').innerHTML = zh ? originalContent.eduContent : enContent.eduContent;
+
+            // 技能
+            document.getElementById('skills-title').innerHTML = zh ? originalContent.skillsTitle : enContent.skillsTitle;
+            document.getElementById('skills-grid').innerHTML = zh ? originalContent.skillsGrid : enContent.skillsGrid;
+
+            // 项目
+            document.getElementById('projects-title').innerHTML = zh ? originalContent.projectsTitle : enContent.projectsTitle;
+            document.getElementById('projects-grid').innerHTML = zh ? originalContent.projectsGrid : enContent.projectsGrid;
+
+            // 简历
+            document.getElementById('resume-title').innerHTML = zh ? originalContent.resumeTitle : enContent.resumeTitle;
+            document.getElementById('tab-agent').textContent = zh ? originalContent.tabAgent : enContent.tabAgent;
+            document.getElementById('tab-tsf').textContent = zh ? originalContent.tabTsf : enContent.tabTsf;
+            document.getElementById('panel-agent').innerHTML = zh ? originalContent.panelAgent : enContent.panelAgent;
+            document.getElementById('panel-tsf').innerHTML = zh ? originalContent.panelTsf : enContent.panelTsf;
+
+            // 联系
+            document.getElementById('contact-title').innerHTML = zh ? originalContent.contactTitle : enContent.contactTitle;
+            document.getElementById('contact-desc').innerHTML = zh ? originalContent.contactDesc : enContent.contactDesc;
+            document.getElementById('contact-email-btn').textContent = zh ? originalContent.contactEmailBtn : enContent.contactEmailBtn;
+            document.getElementById('contact-github-btn').textContent = zh ? originalContent.contactGithubBtn : enContent.contactGithubBtn;
+
+            // 页脚
+            document.getElementById('footer-text').textContent = zh ? originalContent.footerText : enContent.footerText;
+
+            // 重新绑定简历tab切换事件（因为innerHTML替换后事件丢失）
+            bindResumeTabs();
+        }
+
+        function bindResumeTabs() {
+            const tabs = document.querySelectorAll('.resume-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.resume-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('panel-' + target).classList.add('active');
+                });
+            });
+        }
+
+        // 语言切换按钮
+        document.getElementById('langToggle').addEventListener('click', () => {
+            switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
+        });
+
+        // ========== 原有功能 ==========
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 20) {
@@ -1868,16 +2435,7 @@
             });
         });
 
-        const tabs = document.querySelectorAll('.resume-tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.tab;
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('.resume-panel').forEach(p => p.classList.remove('active'));
-                document.getElementById('panel-' + target).classList.add('active');
-            });
-        });
+        bindResumeTabs();
     </script>
 </body>
 </html>
