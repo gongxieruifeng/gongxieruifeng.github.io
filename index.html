@@ -1200,6 +1200,10 @@
                 display: flex;
             }
 
+            .nav-links li {
+                width: 100%;
+            }
+
             .nav-links li a {
                 display: block;
                 padding: 12px 16px;
@@ -1215,22 +1219,31 @@
                 color: var(--accent);
             }
 
+            .nav-links li .lang-toggle {
+                width: 100%;
+                justify-content: center;
+                margin: 8px 0 0 0;
+                padding: 12px 16px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+
             .nav-mobile-toggle {
                 display: block;
             }
 
             .hero-section {
-                padding: 24px 16px 20px;
+                padding: 16px 12px 16px;
             }
 
             .content-section {
-                padding: 0 16px 20px;
+                padding: 0 12px 16px;
             }
 
             .hero-page, .page {
                 border: 0;
                 box-shadow: none;
-                padding: 28px 20px 34px;
+                padding: 24px 16px 28px;
                 width: 100vw;
                 border-radius: 0;
             }
@@ -1246,48 +1259,211 @@
 
             .resume-header {
                 border-top-width: 3px;
-                padding: 20px;
+                padding: 0;
             }
 
             .resume-header h1 {
-                font-size: 32px;
+                font-size: 28px;
+            }
+
+            .name-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .availability-badge {
+                font-size: 12px;
             }
 
             .identity-line {
-                font-size: 15px;
+                font-size: 14px;
+            }
+
+            .hero-bio {
+                font-size: 14px;
+                line-height: 1.7;
             }
 
             .contact-line {
-                gap: 7px;
+                gap: 6px;
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .contact-line a {
                 font-size: 13px;
-                padding: 5px 10px;
+                padding: 6px 12px;
+                width: 100%;
+                justify-content: center;
             }
 
             .stats-bar {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 14px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .section {
+                margin-bottom: 28px;
+            }
+
+            .section h2 {
+                font-size: 18px;
+                margin-bottom: 14px;
             }
 
             .edu-card-head {
                 flex-direction: column;
+                gap: 6px;
+                align-items: flex-start;
+            }
+
+            .edu-card-school {
+                flex-wrap: wrap;
                 gap: 4px;
+                font-size: 15px;
+            }
+
+            .edu-tag {
+                font-size: 10px;
+                padding: 2px 7px;
+            }
+
+            .edu-card-degree {
+                font-size: 14px;
+            }
+
+            .edu-card-detail p {
+                font-size: 13px;
+            }
+
+            .info-line {
+                font-size: 13px;
+            }
+
+            .skill-card {
+                padding: 18px;
+            }
+
+            .skill-card-title {
+                font-size: 15px;
+            }
+
+            .skill-keywords {
+                gap: 5px;
+            }
+
+            .skill-kw {
+                font-size: 11px;
+                padding: 4px 9px;
+            }
+
+            .skill-card p {
+                font-size: 13px;
+            }
+
+            .project-card {
+                padding: 20px;
+            }
+
+            .project-head {
+                padding-right: 80px;
+            }
+
+            .project-badge {
+                font-size: 9px;
+                padding: 2px 7px;
+                top: 8px;
+                right: 8px;
+            }
+
+            .project-name {
+                font-size: 15px;
+            }
+
+            .project-desc {
+                font-size: 13px;
+                line-height: 1.7;
+            }
+
+            .project-metrics {
+                gap: 6px;
+            }
+
+            .metric-tag {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+
+            .project-tech {
+                font-size: 12px;
+                line-height: 1.6;
+            }
+
+            .project-links-row {
+                flex-direction: column;
+            }
+
+            .project-link, .project-lock {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .entry-title-row strong {
+                font-size: 15px;
+                line-height: 1.5;
             }
 
             .entry-title-row,
             .entry-meta-row {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 4px;
+                gap: 6px;
+            }
+
+            .entry-role, .entry-time {
+                font-size: 12px;
+            }
+
+            .summary {
+                font-size: 13px;
+            }
+
+            .experience li {
+                font-size: 13px;
+                line-height: 1.7;
+            }
+
+            .resume-subheading {
+                font-size: 15px;
+            }
+
+            .undergrad-divider {
+                margin: 24px 0;
+            }
+
+            .honor-tags {
+                gap: 6px;
+            }
+
+            .honor-tag {
+                font-size: 11px;
+                padding: 5px 10px;
             }
 
             .projects-grid {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
 
             .skills-grid {
                 grid-template-columns: 1fr;
+                gap: 14px;
             }
 
             .tabs-container {
@@ -1299,6 +1475,24 @@
                 text-align: center;
                 padding: 10px 12px;
                 font-size: 13px;
+            }
+
+            .contact-desc {
+                font-size: 14px;
+            }
+
+            .contact-links {
+                flex-direction: column;
+            }
+
+            .contact-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .footer {
+                font-size: 12px;
+                padding: 24px 16px;
             }
         }
 
