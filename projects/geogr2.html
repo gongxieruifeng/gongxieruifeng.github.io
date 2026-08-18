@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoGR² - 图推理驱动的零样本地理空间预测 Agent | 龚谢蕊烽</title>
+    <meta name="description" content="GeoGR² (Geospatial Graph Refine Reasoning): 基于图消息传递机制的零样本地理空间推理Agent框架，通过Topology-Feature-Update三阶段循环实现动态图推理，显著缓解地理偏见。">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --accent-soft: #eaf1ff;
+            --rust: #d97757;
+            --purple: #7c3aed;
+            --purple-soft: #f3e8ff;
+            --green: #059669;
+            --green-soft: #ecfdf5;
+            --teal: #0d9488;
+            --teal-soft: #f0fdfa;
+            --amber: #d97706;
+            --amber-soft: #fffbeb;
+            --ink: #141414;
+            --muted: #667085;
+            --hairline: #dbe2ea;
+            --panel: #f7f9fc;
+            --screen-bg: #eef2f7;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Nav */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 900px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; font-size: 14px; font-weight: 800;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--accent); }
+
+        /* Page */
+        .page {
+            max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+
+        /* Hero */
+        .project-hero { margin-bottom: 40px; }
+        .project-badge {
+            display: inline-block;
+            font-size: 12px; font-weight: 700;
+            background: var(--teal-soft); color: var(--teal);
+            padding: 3px 10px; border-radius: 4px;
+            margin-bottom: 14px;
+        }
+        .project-title {
+            font-size: 32px; font-weight: 900; line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        .project-title i {
+            font-style: italic; color: var(--accent); margin-right: 4px;
+        }
+        .project-subtitle {
+            font-size: 17px; color: var(--muted); margin-bottom: 20px;
+        }
+        .project-links {
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .btn-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s;
+            border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+        }
+        .btn-link:hover {
+            border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+            transform: translateY(-1px);
+        }
+        .btn-link.primary {
+            background: linear-gradient(135deg, #101828 0%, #1e293b 100%);
+            border-color: #101828; color: #fff;
+        }
+        .btn-link.primary:hover {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            border-color: var(--accent); color: #fff;
+        }
+
+        /* Metrics bar */
+        .metrics-bar {
+            display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0;
+            padding: 16px 20px; background: var(--panel);
+            border: 1px solid var(--hairline); border-radius: 12px;
+        }
+        .metric { text-align: center; flex: 1; min-width: 110px; }
+        .metric-value {
+            font-size: 22px; font-weight: 900;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-value.teal {
+            background: linear-gradient(135deg, var(--teal) 0%, #14b8a6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-value.green {
+            background: linear-gradient(135deg, var(--green) 0%, #10b981 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+        /* Section */
+        .section { margin-bottom: 36px; }
+        .section h2 {
+            font-size: 20px; font-weight: 800; color: var(--ink);
+            margin-bottom: 16px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before {
+            content: ""; display: inline-block;
+            width: 5px; height: 20px;
+            background: linear-gradient(180deg, var(--accent) 0%, var(--purple) 100%);
+            border-radius: 2px;
+        }
+        .section h3 {
+            font-size: 16px; font-weight: 800; color: var(--ink);
+            margin: 20px 0 10px;
+        }
+        .section p { font-size: 15px; color: var(--ink); margin-bottom: 12px; }
+        .section strong { font-weight: 800; }
+        .section ul { padding-left: 20px; margin-bottom: 12px; }
+        .section li { font-size: 15px; margin-bottom: 8px; }
+
+        /* Highlight box */
+        .highlight-box {
+            background: var(--accent-soft);
+            border-left: 4px solid var(--accent);
+            padding: 14px 18px; border-radius: 0 10px 10px 0;
+            margin: 16px 0; font-size: 14.5px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.purple { background: var(--purple-soft); border-left-color: var(--purple); }
+        .highlight-box.green { background: var(--green-soft); border-left-color: var(--green); }
+        .highlight-box.teal { background: var(--teal-soft); border-left-color: var(--teal); }
+        .highlight-box.amber { background: var(--amber-soft); border-left-color: var(--amber); }
+
+        /* Code block */
+        pre {
+            background: var(--code-bg); color: var(--code-text);
+            padding: 18px 20px; border-radius: 10px;
+            overflow-x: auto; font-size: 13px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.6; margin: 12px 0 16px;
+        }
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        /* Table */
+        table {
+            width: 100%; border-collapse: collapse; margin: 14px 0 18px;
+            font-size: 14px;
+        }
+        th {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            color: #fff; padding: 10px 12px; text-align: left; font-weight: 700;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+        tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+        .best { color: var(--accent); font-weight: 800; }
+
+        /* Tag cloud */
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag {
+            font-size: 12px; background: var(--accent-soft); color: var(--accent);
+            padding: 4px 12px; border-radius: 20px; font-weight: 600;
+        }
+        .tag.purple { background: var(--purple-soft); color: var(--purple); }
+        .tag.teal { background: var(--teal-soft); color: var(--teal); }
+        .tag.rust { background: #fef3ee; color: var(--rust); }
+        .tag.green { background: var(--green-soft); color: var(--green); }
+        .tag.amber { background: var(--amber-soft); color: var(--amber); }
+
+        /* Flow chart */
+        .flow-box {
+            background: var(--panel); border: 1px solid var(--hairline);
+            border-radius: 12px; padding: 20px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px; line-height: 1.8; overflow-x: auto;
+            white-space: pre; margin: 14px 0;
+        }
+
+        /* Architecture diagram - 3-stage loop */
+        .arch-diagram {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--hairline);
+            border-radius: 12px; padding: 28px 20px; margin: 16px 0;
+            overflow-x: auto;
+        }
+        .arch-loop-flow {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0; min-width: 320px; position: relative;
+        }
+        .arch-node {
+            padding: 14px 28px; border-radius: 12px;
+            font-weight: 700; font-size: 14px; text-align: center;
+            min-width: 280px; transition: transform 0.2s;
+            position: relative; z-index: 2;
+        }
+        .arch-node:hover { transform: translateY(-2px); }
+        .arch-node.input {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white; box-shadow: 0 4px 12px rgba(30,41,59,0.2);
+        }
+        .arch-node.topology {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af; border: 2px solid #93c5fd;
+        }
+        .arch-node.feature {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534; border: 2px solid #86efac;
+        }
+        .arch-node.update {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e; border: 2px solid #fcd34d;
+        }
+        .arch-node.evaluate {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            color: #6b21a8; border: 2px dashed #c4b5fd;
+        }
+        .arch-node.output {
+            background: linear-gradient(135deg, var(--teal) 0%, var(--accent) 100%);
+            color: white; box-shadow: 0 4px 16px rgba(13,148,136,0.35);
+        }
+        .arch-arrow {
+            font-size: 22px; color: #94a3b8; line-height: 1;
+            padding: 4px 0;
+        }
+        .arch-side-note {
+            font-size: 12px; color: var(--muted); font-weight: 500;
+            margin-top: 4px; opacity: 0.85;
+        }
+
+        /* Loop indicator */
+        .arch-loop-indicator {
+            display: flex; align-items: center; gap: 10px;
+            margin: 8px 0;
+            padding: 8px 18px;
+            background: var(--amber-soft);
+            border: 1.5px dashed #fcd34d;
+            border-radius: 20px;
+            font-size: 12px; font-weight: 700; color: var(--amber);
+        }
+
+        /* Branch structure */
+        .arch-branch-container {
+            display: flex; width: 100%; max-width: 560px;
+            position: relative; margin: 2px 0;
+            justify-content: center; gap: 20px;
+        }
+        .arch-branch {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; position: relative;
+            max-width: 240px;
+        }
+        .arch-branch-label {
+            font-size: 13px; font-weight: 700;
+            padding: 5px 14px; border-radius: 20px;
+            margin-bottom: 4px;
+        }
+        .arch-branch-label.yes { background: #dcfce7; color: #166534; }
+        .arch-branch-label.no { background: #fee2e2; color: #991b1b; }
+
+        /* Operator cards */
+        .op-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            margin: 16px 0;
+        }
+        .op-card {
+            background: #fff; border: 1px solid var(--hairline);
+            border-radius: 10px; padding: 16px;
+            transition: all 0.2s;
+        }
+        .op-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .op-card.topology { border-top: 3px solid var(--accent); }
+        .op-card.feature { border-top: 3px solid var(--green); }
+        .op-card.update { border-top: 3px solid var(--amber); }
+        .op-card-title {
+            font-weight: 800; font-size: 14px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .op-card-icon {
+            width: 24px; height: 24px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; color: white; font-weight: 800;
+        }
+        .op-card.topology .op-card-icon { background: var(--accent); }
+        .op-card.feature .op-card-icon { background: var(--green); }
+        .op-card.update .op-card-icon { background: var(--amber); }
+        .op-card-desc {
+            font-size: 13px; color: var(--muted); line-height: 1.6;
+        }
+        .op-card-sub {
+            font-size: 12px; color: var(--muted); margin-top: 8px;
+            padding-top: 8px; border-top: 1px dashed var(--hairline);
+        }
+
+        /* Agent cards */
+        .agent-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            margin: 14px 0;
+        }
+        .agent-card {
+            background: #fff; border: 1px solid var(--hairline);
+            border-radius: 8px; padding: 12px 14px;
+            font-size: 13px; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s;
+        }
+        .agent-card:hover {
+            border-color: var(--purple);
+            box-shadow: 0 2px 8px rgba(124,58,237,0.1);
+        }
+        .agent-name {
+            font-family: "SF Mono", monospace; font-weight: 700;
+            color: var(--purple); font-size: 12px;
+            background: var(--purple-soft); padding: 2px 8px; border-radius: 4px;
+        }
+        .agent-desc { color: var(--muted); }
+
+        /* Back link */
+        .back-home {
+            text-align: center; margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--hairline);
+        }
+        .back-home a {
+            color: var(--accent); font-weight: 700; text-decoration: none;
+            font-size: 14px;
+        }
+        .back-home a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .project-title { font-size: 24px; }
+            .project-subtitle { font-size: 15px; }
+            .metric-value { font-size: 18px; }
+            .metrics-bar { padding: 12px; }
+            .page { padding: 28px 16px 60px; }
+            .op-grid { grid-template-columns: 1fr; }
+            .agent-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../index.html" class="nav-back">← 返回主页</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Hero -->
+        <div class="project-hero">
+            <span class="project-badge">🗺️ 图推理 · 地理空间 AI · 零样本 Agent</span>
+            <h1 class="project-title"><i>GeoGR²</i>: Geospatial Graph Refine Reasoning Agent</h1>
+            <p class="project-subtitle">图推理驱动的零样本地理空间预测框架 —— 动态图消息传递 + Refine Reasoning 多轮迭代修正</p>
+            <div class="project-links">
+                <a href="https://github.com/gongxieruifeng/GeoGR-2" target="_blank" rel="noopener noreferrer" class="btn-link primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub 仓库
+                </a>
+                <a href="#architecture" class="btn-link">三阶段架构</a>
+                <a href="#operators" class="btn-link">核心算子</a>
+                <a href="#results" class="btn-link">量化结果</a>
+            </div>
+
+            <div class="metrics-bar">
+                <div class="metric">
+                    <div class="metric-value teal">+67.9%</div>
+                    <div class="metric-label">Spearman 相关系数</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value green">−87.5%</div>
+                    <div class="metric-label">地理偏见（Bias）</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">K &lt; N</div>
+                    <div class="metric-label">迭代轮数（远少于总点数）</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value teal">0</div>
+                    <div class="metric-label">训练样本需求</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="section">
+            <h2>项目概述</h2>
+            <p>GeoGR²（Geospatial Graph Refine Reasoning）是一个<strong>基于图消息传递机制的零样本地理空间推理 Agent 框架</strong>，针对大语言模型（LLM）在地理空间预测任务中的两大核心缺陷——<strong>空间孤立性</strong>（每个地点被当作独立个体预测，违背"地理学第一定律"）与<strong>区域分布偏见</strong>（训练语料偏向发达/人口稠密地区，导致欠发达地区预测失真），设计了一套无需任何模型微调的推理阶段解决方案。</p>
+            <p>框架将传统的"孤立点预测"转变为"图上的协同推理"过程：在推理阶段动态构建邻居图，引入真实地理数据作为"物理锚点"，通过多轮迭代修正机制（Refine Reasoning）强制模型满足地理空间一致性约束。</p>
+            <div class="highlight-box teal">
+                <strong>💡 核心洞察：</strong>地理学第一定律——"空间上相近的事物关联度更高"。GeoGR² 让 LLM 像 GNN 一样在动态图上进行消息传递，但无需任何训练数据或微调，纯推理阶段实现。
+            </div>
+
+            <h3>现有方法局限性对比</h3>
+            <table>
+                <thead>
+                    <tr><th>方法</th><th>空间一致性</th><th>训练成本</th><th>地理偏见</th><th>动态拓扑</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>LLM 直接预测</td><td>❌ 孤立预测</td><td>无</td><td>❌ 严重</td><td>—</td></tr>
+                    <tr><td>GNN 微调</td><td>✅ 消息传递</td><td>❌ 需大量标注数据</td><td>依赖训练分布</td><td>❌ 固定图结构</td></tr>
+                    <tr><td class="best">GeoGR²（本方法）</td><td class="best">✅ 图消息传递</td><td class="best">✅ 零样本，无需训练</td><td class="best">✅ 显著缓解</td><td class="best">✅ 动态构建</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Architecture -->
+        <div class="section" id="architecture">
+            <h2>两阶段运行架构</h2>
+            <p>GeoGR² 采用两阶段流水线设计：阶段一独立生成初始预测，阶段二通过图推理进行多轮修正。</p>
+
+            <div class="arch-diagram">
+                <div class="arch-loop-flow">
+                    <div class="arch-node input">📂 输入：坐标点集 (prompts/*.jsonl) + GeoTIFF 栅格数据</div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node topology">
+                        阶段一：GeoLLM —— 初始独立预测
+                        <div class="arch-side-note">对每个点独立调用 LLM，输出初始预测 CSV + 地图可视化</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node feature">
+                        阶段二：GeoGRR —— 多轮图推理修正（核心）
+                        <div class="arch-side-note">Topology-Feature-Update 三阶段循环迭代</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+
+                    <!-- 三算子循环 -->
+                    <div class="arch-node topology" style="min-width: 300px;">
+                        🔗 Topology Operator（拓扑算子）
+                        <div class="arch-side-note">10个物理近邻 + 5个LLM语义选点 → 构建邻居图</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node feature" style="min-width: 300px;">
+                        🌿 Feature Operator（特征算子）
+                        <div class="arch-side-note">LLM自主筛选 WorldClim BIO1-BIO19 生物气候协变量</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node update" style="min-width: 300px;">
+                        🔄 Update Operator（更新算子）
+                        <div class="arch-side-note">LLM担任空间协调员，对比邻域偏差，修正预测值</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+
+                    <!-- 判断分支 -->
+                    <div class="arch-branch-container">
+                        <div class="arch-branch">
+                            <div class="arch-branch-label no">📉 Spearman 下降</div>
+                            <div class="arch-arrow">↓</div>
+                        </div>
+                        <div class="arch-branch">
+                            <div class="arch-branch-label yes">📈 Spearman 提升/持平</div>
+                            <div class="arch-arrow">↓</div>
+                        </div>
+                    </div>
+
+                    <div class="arch-branch-container">
+                        <div class="arch-branch">
+                            <div class="arch-node output" style="min-width: 180px; padding: 12px 16px; font-size: 13px;">
+                                🎯 输出最优预测
+                                <div class="arch-side-note" style="color: rgba(255,255,255,0.85);">+ 指标追踪文件</div>
+                            </div>
+                        </div>
+                        <div class="arch-branch">
+                            <div class="arch-loop-indicator">
+                                <span>↺</span>
+                                <span>使用修正后数据进入下一轮</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Operators -->
+        <div class="section" id="operators">
+            <h2>三大核心算子</h2>
+
+            <div class="op-grid">
+                <div class="op-card topology">
+                    <div class="op-card-title">
+                        <span class="op-card-icon">T</span>
+                        Topology 拓扑算子
+                    </div>
+                    <div class="op-card-desc">
+                        解决"谁是参考对象"——为每个目标点动态构建邻居集合。
+                    </div>
+                    <div class="op-card-sub">
+                        <strong>物理近邻</strong>：全局10个欧氏最近邻（确定性）<br>
+                        <strong>语义类比</strong>：5°×5°区域内LLM选5个语义相似点（自适应）
+                    </div>
+                </div>
+                <div class="op-card feature">
+                    <div class="op-card-title">
+                        <span class="op-card-icon">F</span>
+                        Feature 特征算子
+                    </div>
+                    <div class="op-card-desc">
+                        解决"用哪些背景信息"——LLM根据任务自主筛选协变量。
+                    </div>
+                    <div class="op-card-sub">
+                        支持 WorldClim BIO1-BIO19 共19个生物气候变量，如年均温(BIO1)、年降水量(BIO12)等。
+                    </div>
+                </div>
+                <div class="op-card update">
+                    <div class="op-card-title">
+                        <span class="op-card-icon">U</span>
+                        Update 更新算子
+                    </div>
+                    <div class="op-card-desc">
+                        解决"如何综合修正"——LLM担任空间协调员执行消息传递。
+                    </div>
+                    <div class="op-card-sub">
+                        综合目标点与参考点的特征/数值偏差，区域生物气候模式，输出科学修正值。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refine Reasoning -->
+        <div class="section">
+            <h2>Refine Reasoning 多轮迭代机制</h2>
+            <p>系统设计了 K 轮（K &lt; N，N 为总点数）迭代修正闭环，每轮都使用上一轮修正后的预测值重新选点，实现"迭代反思"。</p>
+
+            <div class="flow-box">初始CSV (stage0)
+   │
+   ▼
+┌────────────────────────────────────────────────┐
+│  第 1 轮 (生成 stage1)                           │
+│  对每个点：                                      │
+│    1. 辅助变量选择 → 变量列表                     │
+│    2. 参考点选择 → 相似点索引                     │
+│    3. 修正 Agent → 新预测值                      │
+│    4. 更新缓存 & 新 DataFrame                    │
+│  计算 Spearman/Bias → 记录到指标文件             │
+└────────────────────────────────────────────────┘
+   │ (若 Spearman 提升/持平)
+   ▼
+┌────────────────────────────────────────────────┐
+│  第 2 轮 (生成 stage2)                           │
+│  相同流程，但参考点数据来自 stage1 的修正后预测值  │
+│  → 实现"迭代反思"，图上的消息逐级传播             │
+└────────────────────────────────────────────────┘
+   │ (直到 Spearman 严格下降或达到 max_rounds)
+   ▼
+停止迭代，输出最佳阶段 CSV</div>
+
+            <div class="highlight-box amber">
+                <strong>⚠️ 动态停止策略：</strong>仅当 Spearman 相关系数<strong>严格下降</strong>时停止迭代。若持平或上升则继续（直到 max_rounds），避免过度修正导致的性能退化。
+            </div>
+        </div>
+
+        <!-- Multi-Agent -->
+        <div class="section">
+            <h2>模块化多 Agent 架构</h2>
+            <p>系统由四个解耦的 Agent 协作完成，每个 Agent 独立可测试、可替换：</p>
+
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <span class="agent-name">AuxVariableSelector</span>
+                    <span class="agent-desc">辅助变量选择（Feature 算子）</span>
+                </div>
+                <div class="agent-card">
+                    <span class="agent-name">PointSelector</span>
+                    <span class="agent-desc">参考点选择（Topology 算子）</span>
+                </div>
+                <div class="agent-card">
+                    <span class="agent-name">PredictionRefiner</span>
+                    <span class="agent-desc">预测修正（Update 算子）</span>
+                </div>
+                <div class="agent-card">
+                    <span class="agent-name">RefinementEvaluator</span>
+                    <span class="agent-desc">效果评估（预留接口）</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Highlights -->
+        <div class="section">
+            <h2>项目亮点</h2>
+
+            <h3>🔬 零样本 & 免训练的图推理能力</h3>
+            <p>不修改 LLM 内部任何参数，纯靠推理阶段的机制设计实现类似 GNN 的空间消息传递能力：</p>
+            <ul>
+                <li><strong>无需标注数据</strong>：不需要任何训练集，零样本即插即用</li>
+                <li><strong>模型无关</strong>：支持 GPT-4、Gemini、Together 等任意 LLM 后端</li>
+                <li><strong>即插即用</strong>：更换任务/模型只需修改参数，无需重新训练</li>
+            </ul>
+
+            <h3>🔗 动态图结构（突破 GNN 静态拓扑限制）</h3>
+            <p>传统 GNN 需要预定义固定的图拓扑结构，而 GeoGR² 在推理时动态寻找"上下文邻居"：</p>
+            <ul>
+                <li>每个目标点的邻居图独立构建</li>
+                <li>每轮迭代使用上一轮修正后的预测值重新选点（迭代反思）</li>
+                <li>打破静态网格限制，适应不同地理尺度</li>
+            </ul>
+
+            <h3>⚖️ 显著缓解地理偏见</h3>
+            <p>通过强制模型参考周边真实数据（空间一致性检查），大幅降低 LLM 对欠发达地区的系统性预测偏见，提升预测公平性。</p>
+
+            <h3>🔄 工程化设计</h3>
+            <ul>
+                <li><strong>RefinementCache 缓存机制</strong>：记录每轮每个点的修正状态（pending/completed/failed），支持中断后无缝续传</li>
+                <li><strong>并发处理</strong>：ThreadPoolExecutor 支持多线程加速</li>
+                <li><strong>API 速率控制</strong>：内置请求间隔，避免限流</li>
+                <li><strong>完整指标追踪</strong>：每轮自动计算并记录 Spearman 和 Bias 变化</li>
+            </ul>
+        </div>
+
+        <!-- Results -->
+        <div class="section" id="results">
+            <h2>量化结果</h2>
+
+            <h3>核心性能指标（GPT-4）</h3>
+            <table>
+                <thead>
+                    <tr><th>指标</th><th>提升幅度</th><th>说明</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>📈 <strong>Spearman 相关系数</strong></td>
+                        <td class="best">最高 +67.9%</td>
+                        <td>预测值与真实值的排序一致性显著提升</td>
+                    </tr>
+                    <tr>
+                        <td>📉 <strong>地理偏见（Bias）</strong></td>
+                        <td class="best">最高 −87.5%</td>
+                        <td>区域分布偏见大幅降低</td>
+                    </tr>
+                    <tr>
+                        <td>🌍 <strong>欠发达地区公平性</strong></td>
+                        <td>显著改善</td>
+                        <td>长尾数据预测偏差得到缓解</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>方法对比</h3>
+            <table>
+                <thead>
+                    <tr><th>方法</th><th>Spearman ↑</th><th>Bias ↓</th><th>训练需求</th><th>动态图结构</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>LLM 直接预测（基线）</td><td>基准</td><td>基准</td><td>无</td><td>—</td></tr>
+                    <tr><td>传统 GNN 微调</td><td>中等提升</td><td>中等降低</td><td>❌ 需大量标注数据</td><td>❌</td></tr>
+                    <tr><td class="best">GeoGR²（本方法）</td><td class="best">+67.9%</td><td class="best">−87.5%</td><td class="best">零样本</td><td class="best">✅</td></tr>
+                </tbody>
+            </table>
+
+            <h3>已验证任务</h3>
+            <div class="tag-cloud">
+                <span class="tag teal">💰 GDP 预测（经济地理）</span>
+                <span class="tag green">🌡️ 温度预测（气候空间）</span>
+                <span class="tag">🌧️ 降水预测（水文空间）</span>
+            </div>
+        </div>
+
+        <!-- Mix Selection -->
+        <div class="section">
+            <h2>混合选点机制</h2>
+            <table>
+                <thead>
+                    <tr><th>类型</th><th>数量</th><th>选择范围</th><th>依据</th><th>特点</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>最近邻点</strong></td>
+                        <td>10</td>
+                        <td>全局</td>
+                        <td>空间欧氏距离（经纬度）</td>
+                        <td>确定性，保证局部连续性</td>
+                    </tr>
+                    <tr>
+                        <td><strong>模型选点</strong></td>
+                        <td>5</td>
+                        <td>5°×5° 局部区域</td>
+                        <td>LLM 综合判断（任务相关性、变量模式）</td>
+                        <td>自适应，注入先验知识</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="highlight-box">
+                <strong>设计理念：</strong>选点逻辑 = <strong>空间最近邻（确定性）+ LLM 语义选点（自适应）</strong>，兼顾地理定律的可靠性与LLM的知识灵活性，为修正器提供高质量参考点集合。
+            </div>
+        </div>
+
+        <!-- Engineering -->
+        <div class="section">
+            <h2>工程化设计</h2>
+            <ul>
+                <li><strong>两阶段解耦</strong>：GeoLLM 初始预测与 GeoGRR 图推理修正完全分离，可独立运行</li>
+                <li><strong>断点续传</strong>：RefinementCache 记录每轮每个点状态，中断后无缝恢复</li>
+                <li><strong>多线程并发</strong>：ThreadPoolExecutor 加速批量处理，内置API速率控制</li>
+                <li><strong>栅格数据支持</strong>：rasterio 读取 GeoTIFF，支持 WorldClim 生物气候变量</li>
+                <li><strong>地图可视化</strong>：folium 生成交互式 HTML 地图，直观展示预测结果</li>
+                <li><strong>完整评估体系</strong>：Spearman 等级相关 + Bias 分数双指标自动追踪</li>
+                <li><strong>模块化架构</strong>：4个Agent完全解耦，符合软件工程最佳实践，易于扩展</li>
+                <li><strong>跨平台兼容</strong>：支持 Linux / macOS，提供 DEPLOYMENT.md 部署指南</li>
+            </ul>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="section">
+            <h2>技术栈</h2>
+            <div class="tag-cloud">
+                <span class="tag">Python 3.8+</span>
+                <span class="tag teal">图消息传递</span>
+                <span class="tag purple">多 Agent 协作</span>
+                <span class="tag teal">Refine Reasoning</span>
+                <span class="tag green">GPT-4</span>
+                <span class="tag green">Gemini</span>
+                <span class="tag">rasterio</span>
+                <span class="tag">GeoTIFF</span>
+                <span class="tag">pandas</span>
+                <span class="tag">numpy</span>
+                <span class="tag">scipy</span>
+                <span class="tag">folium</span>
+                <span class="tag amber">ThreadPoolExecutor</span>
+                <span class="tag amber">断点续传缓存</span>
+                <span class="tag rust">WorldClim BIO1-19</span>
+            </div>
+        </div>
+
+        <!-- Project Structure -->
+        <div class="section">
+            <h2>项目结构</h2>
+            <div class="flow-box">GeoGR-2/
+├── GeoLLM.py                          # 阶段一：LLM 初始独立点预测
+├── GeoGRR.py                          # 阶段二：多轮图推理修正（核心入口）
+├── bioclim_selector.py                # Agent: 辅助变量选择器（Feature算子）
+├── point_selector.py                  # Agent: 参考点选择器（Topology算子）
+├── predict_refiner.py                 # Agent: 预测修正器（Update算子）
+├── cache_manager.py                   # 推理缓存管理（断点续传）
+├── calculate_spearman_correlation.py  # Spearman相关系数计算
+├── calculate_bias_score.py            # 地理偏见（Bias）分数计算
+├── tif_utils.py                       # GeoTIFF栅格数据读取工具
+├── utils.py                           # 通用工具函数（Haversine距离等）
+├── prompts/                           # 示例坐标点集
+│   ├── bay_area_prompts.jsonl
+│   ├── china_coordinates.jsonl
+│   └── world_prompts.jsonl
+├── docs/                              # 架构示意图
+├── README.md                          # 项目说明文档
+└── DEPLOYMENT.md                      # Linux服务器部署指南</div>
+        </div>
+
+        <!-- Applicable Scenarios -->
+        <div class="section">
+            <h2>适用场景</h2>
+            <div class="tag-cloud">
+                <span class="tag teal">🗺️ 地理空间预测（GDP/温度/降水/人口）</span>
+                <span class="tag purple">⚖️ LLM偏见缓解（欠发达地区公平性）</span>
+                <span class="tag green">🎯 零样本推理（无标注数据场景）</span>
+                <span class="tag amber">🔗 动态图推理（上下文感知邻居）</span>
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../index.html">← 返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>
