@@ -710,6 +710,30 @@
             border-radius: 999px;
         }
 
+        .project-status-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-tag {
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            padding: 3px 9px;
+            border-radius: 999px;
+        }
+
+        .status-tag.submitting {
+            color: #d97706;
+            background: #fef3c7;
+        }
+
+        .status-tag.researching {
+            color: #059669;
+            background: #d1fae5;
+        }
+
         .project-desc {
             font-size: 14px;
             color: var(--muted);
@@ -1500,7 +1524,10 @@
                         <span class="project-badge research">科研</span>
                         <div class="project-head">
                             <div class="project-name"><span class="project-emoji">🗺️</span>GeoGR²</div>
-                            <div class="project-role">项目负责人</div>
+                            <div class="project-status-tags">
+                                <span class="status-tag submitting">在投</span>
+                                <span class="project-role">项目负责人</span>
+                            </div>
                         </div>
                         <p class="project-desc">
                             图推理驱动的零样本地理空间预测框架。构建物理近邻+语义类比双重拓扑，引入真实观测数据作为锚点，通过 Topology-Feature-Update 三阶段循环 + Refine Reasoning 多轮迭代修正，实现动态图消息传递，零训练超越GNN微调。
@@ -1521,7 +1548,10 @@
                         <span class="project-badge research-purple">科研</span>
                         <div class="project-head">
                             <div class="project-name"><span class="project-emoji">⏱️</span>FGFormer</div>
-                            <div class="project-role">项目负责人</div>
+                            <div class="project-status-tags">
+                                <span class="status-tag researching">在研</span>
+                                <span class="project-role">项目负责人</span>
+                            </div>
                         </div>
                         <p class="project-desc">
                             相位感知时空预测 Transformer。基于傅里叶移位定理将相位信息显式注入时间注意力，结合帧间差分表征增强动态模式建模，解决外观相似但运动趋势相反序列的混淆问题。
