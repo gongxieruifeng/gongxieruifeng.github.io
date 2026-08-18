@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoME - 多阶段辩论与特征规避的视觉地理溯因推理 Agent | 龚谢蕊烽</title>
+    <meta name="description" content="GeoME: Visual Geographic Abductive Reasoning Agent via Multi-Stage Debate and Feature Evasion - 零训练多轮对抗性溯因推理智能体，将LVLM地理定位重构为证据链驱动的System 2推理。">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --accent-soft: #eaf1ff;
+            --rust: #d97757;
+            --purple: #7c3aed;
+            --purple-soft: #f3e8ff;
+            --green: #059669;
+            --green-soft: #ecfdf5;
+            --ink: #141414;
+            --muted: #667085;
+            --hairline: #dbe2ea;
+            --panel: #f7f9fc;
+            --screen-bg: #eef2f7;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Nav */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 900px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; font-size: 14px; font-weight: 800;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--accent); }
+
+        /* Page */
+        .page {
+            max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+        }
+
+        /* Hero */
+        .project-hero {
+            margin-bottom: 40px;
+        }
+        .project-badge {
+            display: inline-block;
+            font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent);
+            padding: 3px 10px; border-radius: 4px;
+            margin-bottom: 14px;
+        }
+        .project-badge.purple {
+            background: var(--purple-soft); color: var(--purple);
+        }
+        .project-title {
+            font-size: 32px; font-weight: 900; line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        .project-title i {
+            font-style: italic; color: var(--accent);
+        }
+        .project-subtitle {
+            font-size: 17px; color: var(--muted); margin-bottom: 20px;
+        }
+        .project-links {
+            display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .btn-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 14px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s;
+            border: 1px solid var(--hairline); background: #fff; color: var(--ink);
+        }
+        .btn-link:hover {
+            border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+            transform: translateY(-1px);
+        }
+        .btn-link.primary {
+            background: linear-gradient(135deg, #101828 0%, #1e293b 100%);
+            border-color: #101828; color: #fff;
+        }
+        .btn-link.primary:hover {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            border-color: var(--accent); color: #fff;
+        }
+
+        /* Metrics bar */
+        .metrics-bar {
+            display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0;
+            padding: 16px 20px; background: var(--panel);
+            border: 1px solid var(--hairline); border-radius: 12px;
+        }
+        .metric {
+            text-align: center; flex: 1; min-width: 110px;
+        }
+        .metric-value {
+            font-size: 22px; font-weight: 900;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-value.green {
+            background: linear-gradient(135deg, var(--green) 0%, #10b981 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-label {
+            font-size: 12px; color: var(--muted); font-weight: 600;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 36px;
+        }
+        .section h2 {
+            font-size: 20px; font-weight: 800; color: var(--ink);
+            margin-bottom: 16px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before {
+            content: ""; display: inline-block;
+            width: 5px; height: 20px;
+            background: linear-gradient(180deg, var(--accent) 0%, var(--purple) 100%);
+            border-radius: 2px;
+        }
+        .section h3 {
+            font-size: 16px; font-weight: 800; color: var(--ink);
+            margin: 20px 0 10px;
+        }
+        .section p {
+            font-size: 15px; color: var(--ink); margin-bottom: 12px;
+        }
+        .section strong {
+            font-weight: 800;
+        }
+        .section ul {
+            padding-left: 20px; margin-bottom: 12px;
+        }
+        .section li {
+            font-size: 15px; margin-bottom: 8px;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: var(--accent-soft);
+            border-left: 4px solid var(--accent);
+            padding: 14px 18px; border-radius: 0 10px 10px 0;
+            margin: 16px 0; font-size: 14.5px;
+        }
+        .highlight-box.orange {
+            background: #fff7ed; border-left-color: var(--rust);
+        }
+        .highlight-box.purple {
+            background: var(--purple-soft); border-left-color: var(--purple);
+        }
+        .highlight-box.green {
+            background: var(--green-soft); border-left-color: var(--green);
+        }
+
+        /* Code block */
+        pre {
+            background: var(--code-bg); color: var(--code-text);
+            padding: 18px 20px; border-radius: 10px;
+            overflow-x: auto; font-size: 13px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.6; margin: 12px 0 16px;
+        }
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+        pre code {
+            background: none; padding: 0; color: var(--code-text);
+        }
+
+        /* Table */
+        table {
+            width: 100%; border-collapse: collapse; margin: 14px 0 18px;
+            font-size: 14px;
+        }
+        th {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            color: #fff;
+            padding: 10px 12px; text-align: left; font-weight: 700;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        td {
+            padding: 10px 12px; border-bottom: 1px solid var(--hairline);
+        }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+        tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+        .best { color: var(--accent); font-weight: 800; }
+
+        /* Tag cloud */
+        .tag-cloud {
+            display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;
+        }
+        .tag {
+            font-size: 12px; background: var(--accent-soft); color: var(--accent);
+            padding: 4px 12px; border-radius: 20px; font-weight: 600;
+        }
+        .tag.purple { background: var(--purple-soft); color: var(--purple); }
+        .tag.rust { background: #fef3ee; color: var(--rust); }
+        .tag.green { background: var(--green-soft); color: var(--green); }
+
+        /* Flow chart */
+        .flow-box {
+            background: var(--panel); border: 1px solid var(--hairline);
+            border-radius: 12px; padding: 20px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px; line-height: 1.8; overflow-x: auto;
+            white-space: pre; margin: 14px 0;
+        }
+
+        /* Architecture diagram */
+        .arch-diagram {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--hairline);
+            border-radius: 12px; padding: 28px 20px; margin: 16px 0;
+            overflow-x: auto;
+        }
+        .arch-flow {
+            display: flex; flex-direction: column; align-items: center; gap: 0;
+            min-width: 320px;
+        }
+        .arch-node {
+            padding: 14px 28px; border-radius: 12px;
+            font-weight: 700; font-size: 14px; text-align: center;
+            min-width: 280px; transition: transform 0.2s;
+            position: relative; z-index: 2;
+        }
+        .arch-node:hover { transform: translateY(-2px); }
+        .arch-node.input {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white; box-shadow: 0 4px 12px rgba(30,41,59,0.2);
+        }
+        .arch-node.stage1 {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af; border: 2px solid #93c5fd;
+        }
+        .arch-node.stage2 {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534; border: 2px solid #86efac;
+        }
+        .arch-node.stage3 {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e; border: 2px solid #fcd34d;
+        }
+        .arch-node.stage4 {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            color: #6b21a8; border: 2px dashed #c4b5fd;
+        }
+        .arch-node.output {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            color: white; box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+        }
+        .arch-arrow {
+            font-size: 22px; color: #94a3b8; line-height: 1;
+            padding: 4px 0;
+        }
+        .arch-side-note {
+            font-size: 12px; color: var(--muted); font-weight: 500;
+            margin-top: 4px; opacity: 0.85;
+        }
+
+        /* Branch structure */
+        .arch-branch-container {
+            display: flex; width: 100%; max-width: 560px;
+            position: relative; margin: 2px 0;
+            justify-content: center; gap: 20px;
+        }
+        .arch-branch {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; position: relative;
+            max-width: 240px;
+        }
+        .arch-branch-label {
+            font-size: 13px; font-weight: 700;
+            padding: 5px 14px; border-radius: 20px;
+            margin-bottom: 4px;
+        }
+        .arch-branch-label.yes {
+            background: #dcfce7; color: #166534;
+        }
+        .arch-branch-label.no {
+            background: #fee2e2; color: #991b1b;
+        }
+        .arch-loop-back {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; margin-top: 8px;
+            padding: 8px 16px;
+            background: #fff7ed;
+            border: 1.5px dashed #fdba74;
+            border-radius: 20px;
+            font-size: 12px; font-weight: 700; color: var(--rust);
+            width: fit-content;
+            align-self: center;
+        }
+        .arch-loop-arrow-simple {
+            font-size: 16px;
+        }
+
+        /* Stage cards */
+        .stage-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+            margin: 16px 0;
+        }
+        .stage-card {
+            background: #fff; border: 1px solid var(--hairline);
+            border-radius: 10px; padding: 16px;
+            transition: all 0.2s;
+        }
+        .stage-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+            transform: translateY(-2px);
+        }
+        .stage-card-title {
+            font-weight: 800; font-size: 14px; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .stage-card-num {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+            color: white; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800;
+        }
+        .stage-card-desc {
+            font-size: 13px; color: var(--muted); line-height: 1.6;
+        }
+
+        /* Evidence E+/E- */
+        .evidence-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            margin: 12px 0;
+        }
+        .evidence-box {
+            padding: 14px; border-radius: 10px; font-size: 14px;
+        }
+        .evidence-box.e-plus {
+            background: var(--green-soft); border: 1px solid #a7f3d0;
+        }
+        .evidence-box.e-minus {
+            background: #fef2f2; border: 1px solid #fecaca;
+        }
+        .evidence-label {
+            font-weight: 800; font-size: 13px; margin-bottom: 6px;
+        }
+        .evidence-box.e-plus .evidence-label { color: var(--green); }
+        .evidence-box.e-minus .evidence-label { color: #dc2626; }
+
+        /* Back link */
+        .back-home {
+            text-align: center; margin-top: 48px; padding-top: 24px;
+            border-top: 1px solid var(--hairline);
+        }
+        .back-home a {
+            color: var(--accent); font-weight: 700; text-decoration: none;
+            font-size: 14px;
+        }
+        .back-home a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .project-title { font-size: 24px; }
+            .project-subtitle { font-size: 15px; }
+            .metric-value { font-size: 18px; }
+            .metrics-bar { padding: 12px; }
+            .page { padding: 28px 16px 60px; }
+            .stage-grid { grid-template-columns: 1fr; }
+            .evidence-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../index.html" class="nav-back">← 返回主页</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Hero -->
+        <div class="project-hero">
+            <span class="project-badge">🌍 多模态推理 · 视觉地理定位 · Agent</span>
+            <h1 class="project-title"><i style="margin-right: 4px;">GeoME</i>: Visual Geographic Abductive Reasoning Agent via Multi-Stage Debate and Feature Evasion</h1>
+            <p class="project-subtitle">多阶段辩论与特征规避的视觉地理溯因推理 Agent —— 零训练证据链驱动的 System 2 推理</p>
+            <div class="project-links">
+                <a href="https://github.com/gongxieruifeng/GeoME" target="_blank" rel="noopener noreferrer" class="btn-link primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub 仓库
+                </a>
+                <a href="#architecture" class="btn-link">四阶段架构</a>
+                <a href="#results" class="btn-link">量化结果</a>
+                <a href="#innovation" class="btn-link">核心创新</a>
+            </div>
+
+            <div class="metrics-bar">
+                <div class="metric">
+                    <div class="metric-value">94.19%</div>
+                    <div class="metric-label">IM2GPS3K 准确率</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value green">−68.1%</div>
+                    <div class="metric-label">Haversine 误差</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">−45.5%</div>
+                    <div class="metric-label">信念熵降幅</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value green">+21.8pp</div>
+                    <div class="metric-label">超越 SOTA PIGEON</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="section">
+            <h2>项目概述</h2>
+            <p>GeoME 是一个<strong>零训练、多轮对抗性溯因推理智能体框架</strong>，针对大规模视觉语言模型（LVLMs）在地理定位任务中的"先验主导"幻觉问题，通过模拟人类"System 2"慢思考的多阶段辩论机制，将视觉地理定位从"模式匹配"重构为"证据链驱动的深度推理"。</p>
+            <p>现有 LVLMs（如 GPT-4o、Gemini、Qwen-VL）看到红色电话亭就判定为"英国"，即使图像实际拍摄于仿英式主题街区——这种<strong>视觉歧义</strong>导致模型在反直觉场景中频繁误判。GeoME 通过纯 Prompt 编排，无需任何微调即可让通用 LVLM 突破这一瓶颈。</p>
+            <div class="highlight-box">
+                <strong>💡 核心洞察：</strong>地理定位的瓶颈不在于模型"能看到什么"，而在于"能推理多深"。GeoME 证明：通过 Prompt 级别的辩论编排，通用 LVLM 无需微调即可展现出强大的空间推理能力，甚至超越领域专用微调模型。
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="section" id="architecture">
+            <h2>四阶段闭环架构：Candidate-Debate-Judge-Reflect</h2>
+            <p>GeoME 的核心创新是模拟人类 System 2 慢思考的四阶段闭环推理流程，完全自包含、不依赖外部地图 API、不修改模型权重。</p>
+
+            <div class="arch-diagram">
+                <div class="arch-flow">
+                    <div class="arch-node input">📷 输入图像</div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node stage1">
+                        1️⃣ Candidate Generation（候选生成）
+                        <div class="arch-side-note">生成 Top-K 多样化地理假设，打破锚定偏差</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node stage2" id="debate-stage">
+                        2️⃣ Iterative Debate（迭代辩论）
+                        <div class="arch-side-note">魔鬼代言人：提取 E+ 支持证据 & E- 反驳证据，标记误导特征</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-node stage3">
+                        3️⃣ Consensus Judgment（共识裁决）
+                        <div class="arch-side-note">贝叶斯式信念更新，判断是否达到信心阈值</div>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+
+                    <!-- 分支判断 -->
+                    <div class="arch-branch-container">
+                        <div class="arch-branch">
+                            <div class="arch-branch-label yes">✅ 信心足够</div>
+                            <div class="arch-arrow">↓</div>
+                        </div>
+                        <div class="arch-branch">
+                            <div class="arch-branch-label no">❌ 信心不足</div>
+                            <div class="arch-arrow">↓</div>
+                        </div>
+                    </div>
+
+                    <!-- 分支结果 -->
+                    <div class="arch-branch-container">
+                        <div class="arch-branch">
+                            <div class="arch-node output" style="min-width: 200px; padding: 12px 20px; font-size: 13px;">
+                                🎯 输出结果
+                                <div class="arch-side-note" style="color: rgba(255,255,255,0.85);">+ E+/E- 证据链</div>
+                            </div>
+                        </div>
+                        <div class="arch-branch">
+                            <div class="arch-node stage4" style="min-width: 200px; padding: 12px 20px; font-size: 13px;">
+                                4️⃣ Critical Reflection
+                                <div class="arch-side-note">批判反思：剔除最弱候选，重新采样</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 回环提示 -->
+                    <div class="arch-loop-back">
+                        <span class="arch-loop-arrow-simple">↺</span>
+                        返回 Stage 2 重启辩论
+                    </div>
+                </div>
+            </div>
+
+            <div class="stage-grid">
+                <div class="stage-card">
+                    <div class="stage-card-title"><span class="stage-card-num">1</span>候选生成</div>
+                    <div class="stage-card-desc">生成 Top-K 多样化地理假设，防止模型收敛到单一局部最优，打破锚定偏差。</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-card-title"><span class="stage-card-num">2</span>迭代辩论</div>
+                    <div class="stage-card-desc">模型扮演"魔鬼代言人"，对每个候选主动提取<strong>双向证据</strong>，并标记高频误导特征。</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-card-title"><span class="stage-card-num">3</span>共识裁决</div>
+                    <div class="stage-card-desc">基于贝叶斯式信念更新，当 Top 候选信心超阈值或共识达成时终止循环。</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-card-title"><span class="stage-card-num">4</span>批判反思</div>
+                    <div class="stage-card-desc">元推理步骤：信心不足时剔除最弱候选，基于未充分探索的视觉线索重新采样假设。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Innovation -->
+        <div class="section" id="innovation">
+            <h2>核心创新机制</h2>
+
+            <h3>🎭 魔鬼代言人机制（Devil's Advocate）</h3>
+            <p>在辩论阶段，模型被强制扮演"魔鬼代言人"角色，主动寻找<strong>双向证据</strong>——这是证伪式推理的核心，也是 System 2 思维的关键特征：</p>
+            <div class="evidence-row">
+                <div class="evidence-box e-plus">
+                    <div class="evidence-label">✅ 支持证据 E+</div>
+                    哪些视觉线索支持这个候选国家？（如：路牌文字、建筑风格、植被类型）
+                </div>
+                <div class="evidence-box e-minus">
+                    <div class="evidence-label">❌ 反驳证据 E-</div>
+                    哪些视觉线索反驳这个候选国家？（如：车牌格式不符、气候植被矛盾）
+                </div>
+            </div>
+            <p>模型不再单方向寻找支持理由，而是被迫进行证伪，有效解决视觉歧义问题。</p>
+
+            <h3>📊 信念熵驱动的元推理（Belief Entropy）</h3>
+            <p><strong>信念熵 H(C_t)</strong> 是 GeoME 的关键不确定性度量指标，量化模型在辩论各轮次中信念分布的演化：</p>
+            <ul>
+                <li>初始高熵 → 模型对多个候选犹豫不决</li>
+                <li>熵持续下降 → 辩论逻辑在有效收敛信念、降低认知噪声</li>
+                <li>当熵稳定在阈值之上 → 反思 Agent 介入，重构候选空间</li>
+            </ul>
+            <div class="highlight-box purple">
+                <strong>实验验证：</strong>在 Gemini-3 + OSV-5M 上，初始熵 0.8360 → 最终熵 0.4555，<strong>降幅 45.5%</strong>。正确预测的最终熵始终低于错误预测，证明熵是推理质量的有效代理指标。
+            </div>
+
+            <h3>🚫 特征规避机制（Feature Evasion）</h3>
+            <p>这是 GeoME 的<strong>核心差异化创新</strong>，专门针对"先验主导"问题设计：</p>
+            <ul>
+                <li><strong>动态识别</strong>：自动识别在多个候选中反复出现的高频特征（如通用城市天际线、红色电话亭等统计相关但非地域唯一的特征）</li>
+                <li><strong>主动抑制</strong>：将这些误导特征标记入抑制集 F_t^-，在后续推理中排除</li>
+                <li><strong>长尾证据挖掘</strong>：强制模型回答"除了这些常见特征，还有什么细节支持/反驳这个结论？"，推动模型挖掘具有地域唯一性的长尾证据</li>
+            </ul>
+            <div class="highlight-box orange">
+                <strong>效果：</strong>模型从统计相关性（"红色电话亭 → 英国"）转向深度逻辑推理（"路牌字体样式 + 植被类型 + 气候特征 → 英国南部"）。
+            </div>
+
+            <h3>⚡ 信心驱动的自适应路由</h3>
+            <p>Candidate Agent 首先评估预测信心，平衡效率与精度：</p>
+            <ul>
+                <li><strong>高信心</strong> → 直接输出结果，跳过辩论（高效模式）</li>
+                <li><strong>中/低信心</strong> → 生成 Top-5 候选并进入辩论循环</li>
+            </ul>
+            <p>只有歧义场景才承担多轮推理的成本，简单场景快速通过。</p>
+        </div>
+
+        <!-- Results -->
+        <div class="section" id="results">
+            <h2>量化成果</h2>
+
+            <h3>核心性能对比</h3>
+            <table>
+                <thead>
+                    <tr><th>数据集</th><th>基础模型</th><th>方法</th><th>准确率</th><th>提升</th><th>Haversine 误差</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="2"><strong>IM2GPS3K</strong></td>
+                        <td rowspan="2">Gemini-3</td>
+                        <td>Baseline（单轮 Prompt）</td>
+                        <td>~79-84%</td>
+                        <td>—</td>
+                        <td>~410 km</td>
+                    </tr>
+                    <tr>
+                        <td class="best">GeoME</td>
+                        <td class="best">94.19%</td>
+                        <td class="best">+10% to +15%</td>
+                        <td class="best">130.7 km（−68.1%）</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2"><strong>GeoGuessr</strong></td>
+                        <td>GPT-5</td>
+                        <td>Baseline → GeoME</td>
+                        <td>56.74% → <strong>72.08%</strong></td>
+                        <td class="best">+15.34 pp</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Gemini-3</td>
+                        <td>Baseline → GeoME</td>
+                        <td>71.90% → <strong>82.80%</strong></td>
+                        <td class="best">+10.90 pp</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>与领域 SOTA 对比（IM2GPS3K）</h3>
+            <table>
+                <thead>
+                    <tr><th>方法</th><th>类型</th><th>是否微调</th><th>国家准确率</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>PIGEON（领域专用 SOTA）</td><td>监督微调</td><td>✅ 需要</td><td>72.40%</td></tr>
+                    <tr><td class="best">GeoME（Gemini-3）</td><td>零训练 Agent</td><td>❌ 不需要</td><td class="best">94.19%（+21.8 pp）</td></tr>
+                </tbody>
+            </table>
+            <div class="highlight-box green">
+                <strong>🏆 关键结论：</strong>纯 Prompt 编排的零训练方案，<strong>超越</strong>需要大规模标注数据训练的领域专用微调模型 PIGEON 达 21.8 个百分点。
+            </div>
+
+            <h3>信念熵演化验证</h3>
+            <table>
+                <thead>
+                    <tr><th>模型</th><th>数据集</th><th>初始熵</th><th>最终熵</th><th>降幅</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Gemini-3</td>
+                        <td>OSV-5M</td>
+                        <td>0.8360</td>
+                        <td class="best">0.4555</td>
+                        <td class="best">−45.5%</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>熵下降曲线直接量化了辩论逻辑对认知噪声的抑制效果，证明多轮辩论确实在帮助模型收敛信念。</p>
+
+            <h3>自建测试集：GeoReplica-200</h3>
+            <p>为验证框架在<strong>复杂视觉歧义环境</strong>中的鲁棒性，自建了 GeoReplica-200 测试集：</p>
+            <ul>
+                <li>200 个反直觉难定位样本（如亚洲街景模仿欧洲风格）</li>
+                <li>专门用于压测智能体穿透视觉误导的能力</li>
+                <li>验证了 Feature Evasion 机制在极端歧义场景下的有效性</li>
+            </ul>
+        </div>
+
+        <!-- Engineering -->
+        <div class="section">
+            <h2>工程化设计</h2>
+            <ul>
+                <li><strong>零训练、零样本</strong>：直接接入现成 LVLM（GPT-4o/5、Gemini-3、Qwen2.5-VL/Qwen3-VL），无需微调，即插即用</li>
+                <li><strong>异步高吞吐</strong>：基于 AsyncOpenAI 实现并行推理，支持批量处理</li>
+                <li><strong>断点续跑</strong>：每 N 张图片自动保存结果 CSV，支持从中断处恢复</li>
+                <li><strong>离线坐标查询</strong>：内置约 200 个国家的静态坐标字典，Haversine 误差计算完全离线</li>
+                <li><strong>跨平台兼容</strong>：支持 Linux / macOS / Windows（含 Windows 事件循环特殊处理）</li>
+                <li><strong>可复现性保障</strong>：固定随机种子（默认 seed=666）、结果 CSV 包含完整推理轨迹（初始/最终熵、证据链、辩论轮数）</li>
+                <li><strong>可解释性</strong>：每条预测都附带 E+/E- 双向证据链，推理过程完全透明可审计</li>
+            </ul>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="section">
+            <h2>技术栈</h2>
+            <div class="tag-cloud">
+                <span class="tag">Python 3.9+</span>
+                <span class="tag">AsyncOpenAI</span>
+                <span class="tag purple">Multi-Agent Debate</span>
+                <span class="tag purple">System 2 Reasoning</span>
+                <span class="tag">Pandas</span>
+                <span class="tag">NumPy</span>
+                <span class="tag rust">geopy</span>
+                <span class="tag rust">Haversine</span>
+                <span class="tag">Matplotlib</span>
+                <span class="tag green">GPT-4o/GPT-5</span>
+                <span class="tag green">Gemini-3</span>
+                <span class="tag green">Qwen2.5-VL</span>
+                <span class="tag green">Qwen3-VL</span>
+                <span class="tag">Belief Entropy</span>
+                <span class="tag">Feature Evasion</span>
+            </div>
+        </div>
+
+        <!-- Project Structure -->
+        <div class="section">
+            <h2>项目结构</h2>
+            <div class="flow-box">GeoME/
+├── Multi_Debate_Geo_System.py        # 核心多 Agent 系统（四阶段闭环）
+├── Run_Multi_Debate_Geo_System.py    # CLI 入口（参数解析、调度）
+├── Distance_Search.py                # 国家坐标查询与 Haversine 距离计算
+├── country_utils.py                  # 国家列表与地理距离工具
+├── visualization_utils.py            # 结果可视化（准确率、熵、误差分析）
+├── Calculate_Prediction_Distance.py  # 批量 Haversine 误差距离计算
+├── Get_Evidence.py                   # 证据链提取（E+/E-）
+├── revisualize.py                    # 重新可视化分析
+├── docs/images/geome_architecture.png # 系统架构图
+├── requirements.txt                  # Python 依赖
+├── README.md                         # 项目说明（英文）
+└── DEPLOYMENT.md                     # Linux 部署指南</div>
+        </div>
+
+        <div class="back-home">
+            <a href="../index.html">← 返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>
