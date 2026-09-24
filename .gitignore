@@ -17,6 +17,9 @@ GeoGRWork.md
 # 本地参考资料（架构图源文件等，不公开）
 System_Structure/
 
+# 学习笔记原始素材（已改写为 posts/ 下的网页文章，原始 md 不公开）
+Resource/
+
 # 项目进度与偏好原始文档（本地私有，不公开）
 PROJECT_PROGRESS.md
 HOMEPAGE_PREFERENCES.md

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型微调与对齐全流程：从 SFT 到 DPO / GRPO | 龚谢蕊烽</title>
+    <meta name="description" content="梳理 Base Model 到对齐模型的完整流水线：Pre-train 与 SFT 的 Loss 本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 30px; font-weight: 900; line-height: 1.3; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.purple { background: #f5f3ff; border-left-color: var(--accent2); }
+
+        .example-box {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 8px;
+            padding: 12px 16px; margin: 10px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .example-box strong { color: var(--ink); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+
+        .concept-card {
+            border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 18px; margin: 12px 0; background: #fff;
+        }
+        .concept-card h4 { font-size: 14.5px; font-weight: 800; color: var(--accent2); margin-bottom: 6px; }
+        .concept-card p { margin-bottom: 6px; }
+        .concept-card p:last-child { margin-bottom: 0; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 23px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🧠 大语言模型</span>
+            <h1 class="post-title">大模型微调与对齐全流程：从 SFT 到 DPO / GRPO</h1>
+            <p class="post-subtitle">Pre-train 得到的 Base Model 并不具备对话能力。从 Base Model 到一个真正"能对话、说人话"的对齐模型，中间要经过一条完整的流水线——本文梳理这条流水线上每一环的本质差异与工程取舍。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-24</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">SFT</span>
+                    <span class="post-meta-tag">DPO</span>
+                    <span class="post-meta-tag">GRPO</span>
+                    <span class="post-meta-tag">LoRA</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>总体脉络</h2>
+            <p>通过 Pre-train 训练出的 Base Model 只会"接龙"，不具备对话能力。我们使用 FFT（全量微调）或 PEFT（如 LoRA、QLoRA、Adapter、Prefix，甚至解码时干预的 Proxy-tuning）对 Base Model 做 SFT（监督微调），使其变成 Chat Model。之后通常再用 RLHF、DPO、GRPO 等对齐算法（期间依然可以结合 LoRA 等 PEFT 技术）对 Chat Model 做人类偏好对齐，最终得到高质量的对齐模型。</p>
+            <div class="highlight-box">
+                ORPO 等新算法可以跳过独立的 SFT 阶段，直接进行对齐，或者把两者合而为一。
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Pre-train 与 SFT 的 Loss 核心差异</h2>
+            <p>两者在数学本质上完全相同，都是交叉熵损失，真正的差异在于<strong>计算范围（Mask 掩码）</strong>。</p>
+            <div class="concept-card">
+                <h4>Pre-train（预训练）：全量计算，自监督接龙</h4>
+                <p>输入纯文本，模型对<strong>每一个词</strong>都执行"预测下一个词"的任务，所有位置的 Loss 均参与平均，目的是学习语言规律与世界知识。</p>
+                <div class="example-box">例：输入「天王盖地虎」，目标是「盖地虎宝塔」。模型对"盖""地虎""宝塔"等每一个预测都计算 Loss（如 avg(−log0.56, −log0.42, −log0.37)）。</div>
+            </div>
+            <div class="concept-card">
+                <h4>SFT（监督微调）：掩码计算，只学回答</h4>
+                <p>输入问答对，模型同样做下一个词预测，但通过 Mask <strong>强制屏蔽 Prompt（提问）部分的 Loss</strong>，只有 Assistant（回答）部分的 Loss 参与反向传播，目的是学会遵循指令对话。</p>
+                <div class="example-box">例：输入「[user]天王盖地虎[assistant]」，目标「宝塔镇河妖&lt;EOS&gt;」。"天王""盖""地虎"不计算 Loss（Mask 为 −100），仅计算"宝塔""镇""河妖"和 <code>&lt;EOS&gt;</code> 的 Loss。</div>
+            </div>
+            <h3>为什么 −log(P) 就表达了交叉熵</h3>
+            <p>交叉熵衡量的是"模型预测分布"与"真实分布"的差距。在语言模型中，真实分布是 One-hot 编码（正确词概率为 1，其他词概率为 0）。根据交叉熵公式 H = −Σ P<sub>真实</sub>·log(P<sub>预测</sub>)，由于其他词真实概率为 0，求和后只剩一项：<strong>−log(预测正确词的概率)</strong>。概率越低，−log 的值就越大，对模型的"惩罚"就越重。</p>
+            <div class="highlight-box purple">
+                一句话记忆：Pre-train 是"接龙游戏，错一个词都要挨打（全算）"；SFT 是"课堂考试，只改作答部分（Mask 提问）"；交叉熵则是"给正确词打分，概率越低，罚得越狠"。
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>前置概念：参数更新策略 vs 训练阶段，是正交关系</h2>
+            <p>必须明确：<strong>FFT/PEFT（参数更新策略）与 SFT/RLHF/DPO/GRPO（训练阶段/优化目标）是两个相互独立、可以自由组合的维度</strong>。LoRA 等 PEFT 技术并非 SFT 专属，它贯穿于 SFT 和偏好对齐（如 DPO、GRPO）的全流程。</p>
+            <div class="highlight-box">
+                打个比方：烹饪方式（炒、炖、烤）和食材（猪肉、牛肉、蔬菜）是正交的——你可以"炒猪肉"，也可以"炖猪肉"，还可以"炒蔬菜"。烹饪方式不限制食材，食材也不限制烹饪方式，它们互不干扰。
+            </div>
+            <p>注：Proxy-tuning 严格来说不是参数微调，而是解码时（Decoding-time）通过修改大模型 logits 分布来实现干预，目标大模型权重不动。</p>
+        </div>
+
+        <div class="section">
+            <h2>SFT 阶段：让模型"会说话"</h2>
+            <ul>
+                <li><strong>目标：</strong>让 Base Model 学会指令遵循，具备一问一答的对话能力</li>
+                <li><strong>数据：</strong>成对的 QA 数据（如 Alpaca、ShareGPT 格式）</li>
+                <li><strong>手段：</strong>可用 FFT（全量微调，成本极高），也可用 PEFT（高效微调）——冻结大部分参数，仅微调少量参数（如 LoRA、QLoRA、Adapter、Prefix-Tuning），大幅降低显存并缓解灾难性遗忘</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>偏好对齐阶段：让模型"说人话、说好话"</h2>
+            <p>SFT 后的 Chat Model 虽然能对话，但可能产生幻觉、有害内容或答非所问。对齐算法旨在用人类偏好数据（或奖励信号）进一步优化模型。</p>
+
+            <h3>DPO（Direct Preference Optimization，直接偏好优化）</h3>
+            <p><strong>数学本质：</strong>绕过显式的奖励模型，直接利用偏好数据（chosen/rejected）。其损失函数利用策略模型和参考模型对 chosen 和 rejected 回答的生成概率（logps）之差，通过 Sigmoid 函数映射并计算交叉熵损失，最大化 chosen 的相对概率。</p>
+            <p><strong>工程痛点：</strong>标准 DPO 需要同时加载策略模型和参考模型，显存翻倍。</p>
+            <div class="highlight-box orange">
+                <strong>LoRA DPO 工程绝技：</strong>加载一个共享的基座模型，在其上挂载两个 LoRA 适配器——一个可训练（train），一个冻结作为参考（reference）。训练时通过切换适配器计算概率，将"模型级对比"降维为"适配器级对比"，让消费级显卡也能跑大模型 DPO。<br><br>
+                踩坑提示：若 SFT 用了 QLoRA，需先合并权重得到未量化模型，再加载新 LoRA 做 DPO。
+            </div>
+
+            <h3>GRPO（Group Relative Policy Optimization，群组相对策略优化）</h3>
+            <p><strong>核心思想：</strong>取消 PPO 中庞大的价值网络（Critic），通过<strong>组内相对比较</strong>估计优势。</p>
+            <p><strong>流程：</strong>对每个 Prompt 生成一组（如 8 个）回答 → 奖励模型（或规则函数）打分 → 计算组内奖励的均值和标准差得到优势值 → 结合 KL 惩罚项更新策略模型。</p>
+            <h3>模型加载数量的显存优化路径</h3>
+            <ul>
+                <li>标准 GRPO 需加载 <strong>2 个模型</strong>（策略模型 + 奖励模型），相比 PPO（4 个模型）已大幅节省显存</li>
+                <li><strong>参考模型为何可选：</strong>参考模型原本用于计算 KL 惩罚，防止模型偏离 SFT 太远。但若奖励信号极度客观（如数学规则），或直接取消 KL 惩罚（如 DeepSeek-R1 的 β=0），就可以安全省去参考模型</li>
+                <li><strong>工程降维至 1 个模型：</strong>若用数学/代码等规则函数替代奖励模型，或用 LoRA 共享基座（挂载策略和参考适配器），则只需加载一个基础模型</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>特殊演进与例外</h2>
+            <ul>
+                <li><strong>ORPO / SimPO：</strong>打破"先 SFT 再对齐"的两段式范式，将 SFT 损失和偏好对齐损失合并为单一损失函数，一步到位完成训练</li>
+                <li><strong>RLHF (PPO)：</strong>传统的对齐方式，流程复杂（需策略、价值、奖励、参考四个模型），是 DPO 和 GRPO 试图改进的"前辈"</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>一句话终极总结</h2>
+            <div class="highlight-box">
+                从 Base Model 到最终对齐模型，是一条"<strong>Pre-train 打底 → SFT（结合 FFT/PEFT）赋予对话能力 → 偏好对齐（DPO/GRPO 结合 LoRA 等 PEFT）提升回答质量</strong>"的流水线。参数更新策略和训练阶段是两个正交的维度，理解这一点，才能在实际项目里灵活组合出符合显存预算的训练方案。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

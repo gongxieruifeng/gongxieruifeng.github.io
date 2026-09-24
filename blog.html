@@ -315,18 +315,44 @@
     </footer>
 
     <script>
-        // 笔记数据 - 后续由另一个agent维护
+        // 笔记数据
         const posts = [
-            // 在这里添加笔记条目，格式如下：
-            // {
-            //     title: "文章标题",
-            //     excerpt: "文章摘要...",
-            //     date: "2026-08-18",
-            //     category: "agent", // agent | llm | dl | engineering
-            //     categoryLabel: "🤖 AI Agent",
-            //     tags: ["标签1", "标签2"],
-            //     url: "posts/post-name.html"
-            // }
+            {
+                title: "生产级 Agent 系统怎么评估？CompileLight 实战复盘",
+                excerpt: "以 CompileLight 项目为例，拆解 Agent 评估体系的核心方法论：成功率分级定义、回放评估保真度、路由决策质量、越权审计机制、评估集分层构造方法论。",
+                date: "2026-09-24",
+                category: "agent",
+                categoryLabel: "🤖 AI Agent",
+                tags: ["Agent评估", "CompileLight", "LLM-as-Judge", "评估方法论"],
+                url: "posts/compilelight-agent-evaluation.html"
+            },
+            {
+                title: "RAG 系统工程深化：海量文档预处理、模型选型与评估体系",
+                excerpt: "从工程实践角度拆解 RAG 落地的三大难点：百万级文档的近似去重与分层清洗流水线、Embedding/Rerank 模型选型、基于 RAGAS 的检索-生成双层评估框架。",
+                date: "2026-09-24",
+                category: "engineering",
+                categoryLabel: "🔧 工程实践",
+                tags: ["RAG", "MinHash", "向量检索", "RAGAS", "评估"],
+                url: "posts/rag-engineering-deep-dive.html"
+            },
+            {
+                title: "大模型微调与对齐全流程：从 SFT 到 DPO / GRPO",
+                excerpt: "梳理 Base Model 到对齐模型的完整流水线：预训练与 SFT 的 Loss 本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。",
+                date: "2026-09-24",
+                category: "llm",
+                categoryLabel: "🧠 大语言模型",
+                tags: ["SFT", "DPO", "GRPO", "LoRA", "对齐"],
+                url: "posts/finetuning-alignment.html"
+            },
+            {
+                title: "LLM 推理性能指标详解：TTFT、TPOT 与 ITL",
+                excerpt: "拆解大模型推理服务中最核心的三个延迟指标——首 Token 延迟、单 Token 生成耗时、Token 间隔延迟，给出计算公式、影响因素与工程优化方向。",
+                date: "2026-09-24",
+                category: "llm",
+                categoryLabel: "🧠 大语言模型",
+                tags: ["LLM推理", "vLLM", "性能优化", "TTFT"],
+                url: "posts/llm-inference-metrics.html"
+            }
         ];
 
         // 渲染笔记列表

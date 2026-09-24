@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG 系统工程深化：海量文档预处理、模型选型与评估体系 | 龚谢蕊烽</title>
+    <meta name="description" content="从工程实践角度拆解 RAG 落地的三大难点：百万级文档的近似去重与分层清洗流水线、Embedding/Rerank 模型选型、基于 RAGAS 的检索-生成双层评估框架。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🔧 工程实践</span>
+            <h1 class="post-title">RAG 系统工程深化：海量文档预处理、模型选型与评估体系</h1>
+            <p class="post-subtitle">RAG 的效果上限从来不是模型调出来的，而是从"文档怎么洗""向量怎么选""结果怎么测"这些工程决策里一点点攒出来的。这篇整理了我在实际项目中反复验证过的几个关键环节。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-24</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">RAG</span>
+                    <span class="post-meta-tag">向量检索</span>
+                    <span class="post-meta-tag">RAGAS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#preprocess">海量文档预处理：先降量，再精洗</a></li>
+                <li><a href="#selection">Embedding / Rerank 模型选型</a></li>
+                <li><a href="#metadata">元数据与关键词匹配在向量数据库中的存在形式</a></li>
+                <li><a href="#debug">RAG 答不准，怎么排查</a></li>
+                <li><a href="#eval">RAG 系统怎么评估</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="preprocess">
+            <h2>海量文档预处理：先降量，再精洗</h2>
+            <p>文档量大时最容易踩的坑是"硬扛全量精洗"。核心思路应该是：<strong>先降量、再分流、然后工程化并行，把算力花在真正有价值的数据上。</strong>具体分五步：</p>
+
+            <h3>第一步：去重——最便宜的大杀器</h3>
+            <p>大文档量里重复内容占比往往高得惊人：同一文档的多个版本、模板化页眉页脚、镜像副本。精确去重用 Hash 就够；近似重复（同一篇文档只改了几个字、换了页眉、调了顺序）需要 <strong>MinHash + LSH</strong>：先用 MinHash 把每篇文档压成固定长度的相似度指纹，再用 LSH 分桶，把"可能相似"的文档提前圈到同一个桶里，只比桶内候选对，避免全量两两比较。这一步经常能直接砍掉三到七成的量，后面所有环节都跟着省。</p>
+
+            <div class="subcard">
+                <h4>MinHash + LSH 近似去重的实现原理</h4>
+                <p><strong>MinHash：</strong>把文档切成 shingles（按词/字符切的滑动窗口片段），用 N 个不同的 Hash 函数分别对所有片段取最小值，拼成一个长度为 N 的签名向量。两个文档的 Jaccard 相似度约等于它们签名向量对应位置相等的比例——比签名就是在比相似度，而且签名长度固定，比原始文档小得多。</p>
+                <p><strong>LSH：</strong>有了签名还不够，一万篇文档两两比就是五千万次比较。LSH 把 N 维签名切成 b 个 band（每个 band 有 r 行，b×r=N），只要有一个 band 的哈希值相同，两篇文档就进同一个桶成为候选对，只在候选对里做精确 Jaccard 计算。相似文档的签名在大多数位置都相同，至少一个 band 完全相同的概率很高；不相似的文档很难撞进同一个桶。这样就把 O(n²) 的两两比较降到了只比候选对。b 越大越容易召回（但误报多），r 越大越严格（但可能漏），需要根据业务对召回/精度的要求调参。</p>
+                <pre><code>文档 → 切 shingles → 多 Hash 取最小 → MinHash 签名
+     → 切成 b 个 band → 每个 band 哈希分桶（LSH）
+     → 同桶文档作为候选对 → 精确算 Jaccard → 超过阈值判为重复 → 合并/丢弃</code></pre>
+                <p>实践中通常在文档级和段落级分别做一次：文档级抓多版本、镜像副本；段落级抓模板化页眉页脚、重复段落。去重放在流水线最前面，直接砍量，后面所有环节都省。</p>
+            </div>
+
+            <h3>第二步：分层分流——不是所有文档都值得同等对待</h3>
+            <p>先做一次轻量预判，把文档分成高、中、低三档：高价值的核心业务文档、FAQ、产品手册走完整清洗加结构识别；一般参考资料走规则清洗加自动结构识别；日志、扫描乱码、低质副本只做粗过滤甚至直接丢。很多项目六成算力其实浪费在根本不会被检索到的文档上。</p>
+
+            <h3>第三步：流水线并行</h3>
+            <p>清洗不是一个大函数，而是一条流水线：解析、去重、去页眉页脚、结构识别、质量打分、入库，每个阶段独立并行、独立失败重试、幂等。用消息队列加多 worker，或者 Spark、Ray 这类分布式框架，文档量涨十倍加机器就行，不用改逻辑。</p>
+
+            <h3>第四步：规则优先，模型兜底</h3>
+            <p>八成清洗用正则规则就能搞定——去页眉页脚、去图片占位符、去乱码符号，快且零成本；剩下两成疑难杂症，比如复杂表格还原、版式结构识别，才上布局模型或 LLM 兜底。一上来就 LLM 全量跑，又慢又烧钱。</p>
+
+            <h3>第五步：增量加缓存</h3>
+            <p>用文档内容 Hash 做缓存键，处理过的直接复用；新文档只跑增量，老文档不重跑；清洗规则版本化，规则升级时只重跑受影响的文档。再加一层质量监控，每个阶段输出质量指标，抽样人工评估，发现某类文档洗得差就单独建规则，而不是拖垮全量。</p>
+
+            <div class="highlight-box">
+                核心不是追求全量精洗，而是把算力花在真正会被检索到的高价值文档上，用工程化手段保证吞吐和可扩展性——先去重砍量、再分层分流、然后流水线并行、规则优先模型兜底、增量缓存避免重复、最后质量监控兜底。
+            </div>
+        </div>
+
+        <div class="section" id="selection">
+            <h2>Embedding / Rerank 模型选型</h2>
+            <p>多语言场景下，Embedding 和 Rerank 的选型经验：</p>
+            <ul>
+                <li><strong>Embedding：</strong>首选 <strong>Qwen3-Embedding-8B</strong> 打底，原生支持 100 多种语言，32K 上下文，维度可调，MTEB 多语言榜排名靠前。GPU 预算紧就降到 4B 或 0.6B，多语言基线仍在。</li>
+                <li><strong>Reranker：</strong>直接配套用 <strong>Qwen3-Reranker-4B</strong>，与 Embedding 同源，多语言排序质量有保障，又比 8B 省资源。追求更轻量可选 <strong>jina-reranker-v3</strong>（0.6B），多语言检索指标比基础版 Qwen3-Reranker-0.6B 更高。</li>
+                <li><strong>托管方案：</strong>选 <strong>Cohere Rerank 4</strong>，按精度和延迟需求在 Pro / Fast 之间选择。</li>
+            </ul>
+            <div class="tag-cloud">
+                <span class="tag">Qwen3-Embedding-8B</span>
+                <span class="tag">Qwen3-Reranker-4B</span>
+                <span class="tag">jina-reranker-v3</span>
+                <span class="tag">Cohere Rerank 4</span>
+                <span class="tag">MTEB</span>
+            </div>
+        </div>
+
+        <div class="section" id="metadata">
+            <h2>元数据与关键词匹配在向量数据库中的存在形式</h2>
+            <h3>元数据过滤</h3>
+            <p>元数据不会转成向量，它以结构化字段原样存储，过滤走的是传统索引那套——倒排、B-tree、位图，跟向量检索是两条并行路径。执行上分 <strong>pre-filtering</strong> 和 <strong>post-filtering</strong>：先按元数据筛出子集再向量检索，或先向量检索再过滤。成熟的向量数据库大多用 pre-filtering，靠标量索引保证过滤效率，这样才能实现"语义相关 + 业务过滤"的组合查询，比如只在产品部最近三个月的文档里做语义搜索。</p>
+            <h3>关键词检索</h3>
+            <p>关键词搜索不是传统数据库那种精确相等匹配，底层是倒排索引加 BM25 相关性打分：先分词，用倒排索引召回包含这些词的文档，再用 BM25 按词频、逆文档频率、文档长度算相关性排序——是<strong>带权重的模糊匹配</strong>，不是布尔判断。在 RAG 里它和向量检索互补，专有名词、型号、中文术语这些语义表示弱的场景靠它兜底，两路结果用 <strong>RRF（Reciprocal Rank Fusion）</strong> 按排名融合，避免分数量纲不一致的问题。</p>
+        </div>
+
+        <div class="section" id="debug">
+            <h2>RAG 答不准，怎么排查</h2>
+            <p>先从检索侧、生成侧分别分析。手动查看 top-K 检索结果——如果答案在里面，说明是<strong>生成侧问题</strong>（Prompt、上下文噪声、引用约束、模型能力）；如果答案不在里面，说明是<strong>检索侧问题</strong>（召回率低、Embedding 选型、Chunk 质量、文档覆盖）。再用 Recall@K 等指标量化，针对性调整。</p>
+            <div class="quote-box">
+                构造评估集的做法：选取一批"已知有答案的问题"及其对应的正确 chunk，计算 Recall@K（K 通常取 5 或 10）。一般而言，Recall@5 低于 70% 就说明检索侧有明显问题，需要优先优化。
+            </div>
+        </div>
+
+        <div class="section" id="eval">
+            <h2>RAG 系统怎么评估</h2>
+            <p>评估的核心是分两层看：<strong>检索侧保证"找得到"，生成侧保证"用得好"，最后用线上采用率做最终裁判。</strong>没评估的优化都是盲猜。</p>
+
+            <h3>一、检索侧：能不能找到相关内容</h3>
+            <table>
+                <thead><tr><th>指标</th><th>定义</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>Recall@K</td><td>所有相关 chunk 里，top-K 命中了多少</td><td>第一道防线，Recall 不够，加 Rerank 也救不回来</td></tr>
+                    <tr><td>Precision@K</td><td>top-K 里相关 chunk 占多少</td><td>低说明噪声多，会稀释模型注意力</td></tr>
+                    <tr><td>MRR</td><td>第一个相关结果排名的倒数，多查询取平均</td><td>衡量"最好的有没有排前面"</td></tr>
+                </tbody>
+            </table>
+            <p>工程上的平衡：先用大 K（20–50）保 Recall，再用 Rerank 把 Precision 拉回来，最终只传 3–5 个高质量 chunk 给 LLM。</p>
+
+            <h3>二、生成侧：答案质量怎么衡量（RAGAS 框架）</h3>
+            <p>生成侧难在答案是自然语言、没有标准答案。现在的事实标准是 <strong>RAGAS 框架</strong>，用 LLM 自动化评四个维度：</p>
+            <table>
+                <thead><tr><th>维度</th><th>衡量什么</th><th>低分意味着</th></tr></thead>
+                <tbody>
+                    <tr><td>Faithfulness（忠实度）</td><td>答案能否从上下文推导，有没有幻觉</td><td>模型在自由发挥，这是 RAG 相比纯 LLM 的核心优势指标</td></tr>
+                    <tr><td>Answer Relevancy（答案相关性）</td><td>反向生成问题与原问题的相似度</td><td>答非所问</td></tr>
+                    <tr><td>Context Relevancy（上下文相关性）</td><td>chunk 中真正有用的句子占比</td><td>检索或 Chunking 有问题，噪声多</td></tr>
+                    <tr><td>Context Recall（上下文召回）</td><td>标准答案的关键信息在上下文中出现多少（需 ground truth）</td><td>关键信息根本没检索到，后面再高也没用</td></tr>
+                </tbody>
+            </table>
+            <p>四者关系：Context Recall + Context Relevancy 从生成角度衡量检索质量；Faithfulness + Answer Relevancy 衡量生成质量。<strong>Context Recall 是天花板</strong>，它低，后面所有指标都白搭。</p>
+
+            <h3>三、评估集怎么建</h3>
+            <ul>
+                <li><strong>人工构造：</strong>质量最高、成本最高，核心场景建 50–200 条足以搭 baseline</li>
+                <li><strong>真实日志采样：</strong>质量中等，适合持续监控</li>
+                <li><strong>LLM 生成：</strong>成本最低，适合快速搭框架，但问题可能过于理想化</li>
+            </ul>
+            <p>实践建议：先用 LLM 快速搭框架，再用人工建 50–100 条核心场景高质量集，最后用日志持续补充。</p>
+
+            <h3>四、离线 + 在线，两个都要看</h3>
+            <p><strong>离线评估：</strong>测试集上跑指标，可控可重复，指导优化方向。<strong>在线评估：</strong>真实用户反馈——显式信号有点赞、点踩、纠错；隐式信号有是否追问、是否复制答案、停留时长。</p>
+            <div class="highlight-box orange">
+                关键坑：离线指标漂亮但线上采用率下降，通常三个原因——测试集偏差、延迟变长用户等不及、答案变八股文用户不爱看。<strong>线上采用率是最终裁判，离线指标只是过程指标。</strong>
+            </div>
+
+            <h3>五、评估延迟和成本怎么权衡</h3>
+            <p>RAGAS 四个指标都要调 LLM，一条评估可能额外耗时 1–2 秒，Token 消耗是原问答的 4–8 倍。生产上的分级策略：</p>
+            <ul>
+                <li><strong>高风险场景（约 5%，医疗、法律、金融）：</strong>实时全量评估，宁可多花 500ms 防幻觉</li>
+                <li><strong>中风险场景（约 20%）：</strong>只跑 Faithfulness</li>
+                <li><strong>低风险场景（约 75%）：</strong>只记日志，离线评估</li>
+            </ul>
+            <p>这样既保住核心场景质量，P95 延迟也控得住，成本只增加约 15%。</p>
+
+            <h3>六、评估驱动的优化闭环</h3>
+            <ol>
+                <li><strong>建 baseline：</strong>评估集跑一遍，记录所有指标</li>
+                <li><strong>定位瓶颈：</strong>Recall&lt;70% 优先优化召回；Recall 高但 Precision 低加 Rerank；Context Relevancy 低优化 Chunking；Faithfulness 低改 Prompt</li>
+                <li><strong>针对性优化：</strong>每次只改一个变量</li>
+                <li><strong>对比验证：</strong>比 baseline 好就采纳，差就回滚</li>
+                <li><strong>持续迭代：</strong>新问题加入评估集，定期重评，监控线上</li>
+            </ol>
+
+            <div class="highlight-box green">
+                评估分三层：检索侧看 Recall@K/Precision@K/MRR，生成侧用 RAGAS 评四个维度（其中 Context Recall 是天花板），最后看线上采用率这个真实信号。评估集先人工建核心场景，再用日志持续补充；生产上按风险分级评估控制成本；最终形成"建 baseline → 定位瓶颈 → 单变量优化 → 对比验证 → 持续迭代"的闭环。有框架、有数据、有闭环，才是真正做过 RAG 评估。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

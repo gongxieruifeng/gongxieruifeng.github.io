@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生产级 Agent 系统怎么评估？CompileLight 实战复盘 | 龚谢蕊烽</title>
+    <meta name="description" content="以 CompileLight 项目为例，拆解 Agent 评估体系的核心方法论：成功率分级定义、回放评估保真度、路由决策质量、越权审计机制、评估集分层构造。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --warning: #d97706; --warning-soft: #fef3c7;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 880px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 30px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .metrics-bar {
+            display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 30px;
+            padding: 16px 20px; background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+        }
+        .metric { text-align: center; flex: 1; min-width: 100px; }
+        .metric-value { font-size: 20px; font-weight: 900; color: var(--accent); }
+        .metric-label { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+
+        .toc { background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px; }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; columns: 2; }
+        .toc li { margin-bottom: 4px; break-inside: avoid; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .lead-note {
+            font-size: 14.5px; color: var(--muted); margin-bottom: 32px; line-height: 1.8;
+            padding: 14px 18px; background: #fff; border: 1px dashed var(--hairline); border-radius: 10px;
+        }
+
+        .section { margin-bottom: 30px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .qa-block { margin-bottom: 26px; }
+        .qa-block:last-child { margin-bottom: 0; }
+        .qa-block h3 {
+            font-size: 15.5px; font-weight: 800; color: var(--ink); margin-bottom: 6px;
+            display: flex; gap: 8px; align-items: flex-start;
+        }
+        .qa-block h3 .qa-num {
+            flex-shrink: 0; font-size: 11px; font-weight: 900; color: #fff;
+            background: var(--accent2); width: 20px; height: 20px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+        }
+        .qa-frame { font-size: 13.5px; color: var(--muted); margin-bottom: 10px; padding-left: 28px; }
+        .qa-body { padding-left: 28px; }
+        .qa-body p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .qa-body strong { font-weight: 800; }
+        .qa-body ul, .qa-body ol { padding-left: 20px; margin-bottom: 10px; }
+        .qa-body li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0 14px 28px; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+        .highlight-box.warning { background: var(--warning-soft); border-left-color: var(--warning); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin: 10px 0 14px 28px; width: calc(100% - 28px); font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 8px 12px; text-align: left; font-weight: 700; }
+        td { padding: 8px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .closing-box {
+            background: linear-gradient(135deg, var(--accent-soft) 0%, #f3e8ff 100%);
+            border-radius: 12px; padding: 22px 24px; margin-top: 8px; font-size: 14.5px;
+        }
+        .closing-box strong { color: var(--accent2); }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+            .toc ol { columns: 1; }
+            .qa-frame, .qa-body { padding-left: 0; }
+            .highlight-box, table { margin-left: 0; width: 100%; }
+            .qa-block h3 { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🤖 AI Agent</span>
+            <h1 class="post-title">生产级 Agent 系统怎么评估？CompileLight 实战复盘</h1>
+            <p class="post-subtitle">"成功率 89.4%"这类数字本身没有意义——真正的问题是：成功怎么定义？评估环境能不能代表线上分布？命中率会不会是假命中？门禁松紧怎么调？这篇文章以 <a href="../projects/compilelight.html" style="color:var(--accent);font-weight:700;">CompileLight</a> 项目为例，把 Agent 评估体系拆解到可以复用的方法论层面。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-24</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">Agent评估</span>
+                    <span class="post-meta-tag">CompileLight</span>
+                    <span class="post-meta-tag">LLM-as-Judge</span>
+                </div>
+            </div>
+            <div class="metrics-bar">
+                <div class="metric"><div class="metric-value">89.4%</div><div class="metric-label">综合成功率</div></div>
+                <div class="metric"><div class="metric-value">10,284</div><div class="metric-label">回放流量</div></div>
+                <div class="metric"><div class="metric-value">68%</div><div class="metric-label">有效缓存命中率</div></div>
+                <div class="metric"><div class="metric-value">91%</div><div class="metric-label">路由准确率</div></div>
+                <div class="metric"><div class="metric-value">0</div><div class="metric-label">经审计越权/重复副作用</div></div>
+            </div>
+        </div>
+
+        <div class="lead-note">
+            这套评估体系是围绕 CompileLight 的核心设计——<strong>"LLM 提议、代码批准"</strong>——展开的：模型只负责提议下一步操作，真正的执行判定交给确定性的编译门禁和规则引擎。评估的任务，就是证明这套"人机分工"在每一个环节都经得起推敲，而不是简单报一个成功率数字。
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#q1">成功的定义：四档分级</a></li>
+                <li><a href="#q2">为什么用回放评估，而非直接线上 A/B</a></li>
+                <li><a href="#q3">命中率会不会是"假命中"</a></li>
+                <li><a href="#q4">编译门禁的有效性：拦截率与误杀率的平衡</a></li>
+                <li><a href="#q5">路由决策质量：REUSE/HYBRID/NEW 选对了吗</a></li>
+                <li><a href="#q6">"无越权调用"是怎么证明的</a></li>
+                <li><a href="#q7">资产索引与资产健康度</a></li>
+                <li><a href="#q8">Token 节省是不是拿质量换来的</a></li>
+                <li><a href="#q9">受控探索：区分"真推理"与"碰巧对"</a></li>
+                <li><a href="#q10">LLM-as-Judge 用在哪、局限在哪</a></li>
+                <li><a href="#q11">评估集怎么构建：分层 + 真实流量混合</a></li>
+                <li><a href="#q12">从零设计评估方案，最先回答三个问题</a></li>
+                <li><a href="#q13">580ms 缓存命中延迟拆解</a></li>
+                <li><a href="#q14">执行视图冻结怎么验证</a></li>
+                <li><a href="#q15">硬过滤的精度与召回权衡</a></li>
+                <li><a href="#q16">这套评估体系的局限性</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="q1">
+            <div class="qa-block">
+                <h3><span class="qa-num">1</span>成功的定义：四档分级</h3>
+                <p class="qa-frame">一个 Agent 给出了答案，是真的做对了，还是瞎蒙的？还有一种情况是它做了一半，但诚实地说"我查不到了"——这两种能算同一种"成功"吗？如果只报一个笼统的成功率数字，很容易让人怀疑指标口径有问题。</p>
+                <div class="qa-body">
+                    <p>89.4% 的综合成功率不是"有输出就算成功"，而是按任务完成度分四档统计的：</p>
+                    <ul>
+                        <li><strong>完整完成：</strong>Agent 成功走通 REUSE 或 NEW 模式，给出了被编译门禁验证通过的最终输出，且审计确认无越权调用、无重复副作用</li>
+                        <li><strong>部分完成：</strong>Agent 识别到部分子目标无法在当前预算或权限内完成，主动降级并输出带缺口的中间结果，而不是强行输出</li>
+                        <li><strong>正确失败：</strong>编译门禁（Schema/权限/风险/预算）拦截了模型提议，Agent 正确中止并给出中止原因——计入"正确失败"而非"成功"</li>
+                        <li><strong>错误失败：</strong>Agent 输出了未经验证的结论，或绕过了门禁。经审计确认为 0</li>
+                    </ul>
+                    <p>这个分级的关键在于：完整完成的判定标准是"输出通过了确定性编译的全部门禁校验，且 Replay 回放中轨迹与原始 Trace 的语义一致"。部分完成虽然也算在成功率里，但内部报表会单独列出缺口类型，用于驱动资产补充和 Contract 优化。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q2">
+            <div class="qa-block">
+                <h3><span class="qa-num">2</span>为什么用回放评估，而非直接线上 A/B</h3>
+                <p class="qa-frame">拿历史流量回放，就像拿去年的考卷让今年的考生做——考卷一样，但考生变了（模型更新）、考场变了（工具版本变了）、题型也可能变了（用户意图分布变了）。回放结果凭什么能代表线上表现？</p>
+                <div class="qa-body">
+                    <p><strong>为什么选回放而非直接 A/B：</strong>CompileLight 的核心场景是企业客服 Agent，涉及权限校验、副作用控制、资产复用等敏感操作。直接在生产环境跑 NEW 模式的探索策略有越权和副作用风险，回放先在隔离环境中验证安全性。</p>
+                    <p><strong>回放保真度的三层保障：</strong></p>
+                    <ol>
+                        <li><strong>请求图重建：</strong>每次回放复现完整的请求图——包括当时的 Header、Contract 版本、可用资产快照，保证"执行视图冻结"，避免版本漂移</li>
+                        <li><strong>确定性编译层的一致性：</strong>Normalize→硬过滤→混合召回→SAD→Blueprint→确定性编译这条流水线中，确定性部分（硬过滤、Schema 校验、权限门禁）在回放中与线上完全一致，只有 LLM 提议部分受模型版本影响</li>
+                        <li><strong>分布覆盖检查：</strong>10,284 次回放覆盖了 REUSE/HYBRID/NEW 三种路由模式的实际分布比例，统计确认回放分布与线上 30 天真实流量的意图分布偏差在可接受范围内</li>
+                    </ol>
+                    <div class="highlight-box warning">
+                        <strong>局限性诚实说明：</strong>回放无法覆盖两类场景——回放期间发生的工具行为变化（如 API 超时模式改变），以及全新意图（线上从未出现过的新 Query 类型）。这两类场景依赖灰度放量阶段的小比例真实流量来兜底。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q3">
+            <div class="qa-block">
+                <h3><span class="qa-num">3</span>命中率会不会是"假命中"</h3>
+                <p class="qa-frame">命中率 68% 听起来不错，但如果用户问的是 A，缓存里存的是 B，因为 A 和 B 在向量空间里离得近就直接返回 B 的结果——这种"假命中"用户当场可能看不出来，后果却是灾难性的。</p>
+                <div class="qa-body">
+                    <p>命中率高不等于命中得对。监控体系里，<strong>命中率（Hit Rate）</strong>和<strong>错误命中率（Wrong Hit Rate）</strong>是两个必须同时看的指标。</p>
+                    <p><strong>错误命中的三层监控机制：</strong></p>
+                    <ol>
+                        <li><strong>执行结果反查：</strong>HotCache 命中后不直接返回结果，而是经过轻量级 Schema 校验和权限门禁检查。触发 Schema 不匹配或权限校验失败的命中，标记为"疑似错误命中"，进入人工审核队列</li>
+                        <li><strong>语义缓存验证器（Cache Verifier）：</strong>在相似度匹配之后、返回之前，增加一层验证——将当前 Query 和缓存匹配到的 Query 的关键实体（订单号、客户 ID、产品名称）做对齐检查。实体不匹配即使向量相似度很高也拒绝命中，降级到 HYBRID 模式</li>
+                        <li><strong>动态阈值策略：</strong>相似度阈值按业务域动态调整。事实性强的查询（如"查订单状态"）用较高阈值（~0.92）减少假阳性；通用性咨询用较低阈值（~0.85）保证召回</li>
+                    </ol>
+                    <div class="highlight-box">
+                        68% 是<strong>通过验证后的有效命中率</strong>，已排除被 Cache Verifier 拒绝的假阳性命中。内部还有一个"原始命中率"指标（不做验证的直接相似度命中率），约 76%，其中约 8 个百分点被验证器拦截。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q4">
+            <div class="qa-block">
+                <h3><span class="qa-num">4</span>编译门禁的有效性：拦截率与误杀率的平衡</h3>
+                <p class="qa-frame">LLM 提议什么操作，要经过 Schema、权限、风险、预算四道门禁才能执行。门禁太严，Agent 什么都干不了；太松，又拦不住越权——松紧刚好怎么判断？</p>
+                <div class="qa-body">
+                    <p><strong>三个评估指标：</strong></p>
+                    <ul>
+                        <li><strong>门禁拦截率</strong> = 门禁拦截的提议数 / 总提议数。太低说明门禁形同虚设，太高说明过于保守</li>
+                        <li><strong>误杀率（False Block Rate）：</strong>被拦截、但人工复核后判定"本应放行"的提议占比。过高会让 Agent 频繁走人工 Checkpoint，影响自动化率</li>
+                        <li><strong>漏放率（False Pass Rate）：</strong>被放行、但事后审计发现"本应拦截"的提议占比——这是最关键的指标，漏放意味着越权执行或副作用发生</li>
+                    </ul>
+                    <p><strong>实际数据：</strong>10,284 次回放中，门禁拦截了约 <strong>12%</strong> 的模型提议；人工抽检 500 条被拦截提议，误杀率约 <strong>6%</strong>；漏放率经审计为 <strong>0</strong>。</p>
+                    <p><strong>门禁太严的缓解机制：</strong>被拦截后 Agent 不是简单终止，而是触发 Checkpoint 恢复——冻结当前上下文、标记拦截原因、进入人工审核队列。人工审核后可批准放行并沉淀为新 Contract、拒绝并进入受控探索降级路径、或修改后重新提交。门禁的"严"因此不会导致死锁，而是转化为资产工程的输入信号。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q5">
+            <div class="qa-block">
+                <h3><span class="qa-num">5</span>路由决策质量：REUSE/HYBRID/NEW 选对了吗</h3>
+                <p class="qa-frame">三个模式里，如果该用 NEW 的时候错用了 REUSE，把旧结果硬套到新问题上，用户拿到的是"看起来合理但其实是错的"答案。</p>
+                <div class="qa-body">
+                    <p>路由质量评估分事前门禁、事中监控、事后审计三层：</p>
+                    <ul>
+                        <li><strong>事前：</strong>REUSE 的触发条件是 HotCache 相似度超过阈值 + Contract 匹配成功 + 资产生命周期为 ACTIVE，三个条件有一个不满足就降级到 HYBRID 或 NEW</li>
+                        <li><strong>事中：</strong>REUSE 模式执行前会做一次 Contract 一致性校验，不匹配立即中止降级；HYBRID 模式中复用部分与新增部分之间有交叉验证，结论冲突触发 Refine 循环</li>
+                        <li><strong>事后：</strong>每次执行的 Trace 记录路由决策完整链路。500 条人工抽检中，<strong>路由准确率约 91%</strong>，主要误判集中在 NEW→应选 HYBRID（过度探索）和 HYBRID→应选 NEW（过度复用）两类</li>
+                    </ul>
+                    <p>更细一层看，漏复用和误复用的严重程度完全不同：</p>
+                    <table>
+                        <thead><tr><th>错误类型</th><th>实际数据</th><th>影响</th></tr></thead>
+                        <tbody>
+                            <tr><td>漏复用（False Negative）</td><td>约 8%</td><td>Token 浪费，但不导致错误输出——不致命</td></tr>
+                            <tr><td>有效误复用（False Positive）</td><td>约 2%（经 Cache Verifier 拦截后）</td><td>用户可能拿到"看起来对但实际不对"的答案——正确性风险最高</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="highlight-box">
+                        设计上偏向<strong>"宁可漏复用，不可误复用"</strong>：Cache Verifier 和 Contract 校验的阈值设置偏保守，带来一定漏复用，但有效控制了误复用。评估报告会同时报漏复用率和有效误复用率，而不是只报一个笼统的"路由准确率"。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q6">
+            <div class="qa-block">
+                <h3><span class="qa-num">6</span>"无越权调用"是怎么证明的</h3>
+                <p class="qa-frame">"我检查了，没问题"不能算数，需要一套可重复、可验证的审计机制，让第三方也能确认"这个 Agent 确实没越权"。</p>
+                <div class="qa-body">
+                    <p>审计的核心原则是<strong>可回放、可验证、不可篡改</strong>。每次执行产生一条 Trace，包含每步工具调用的完整参数、工具返回摘要、门禁校验结果、路由决策信号、Token 消耗，以 Append-only 方式写入，不允许事后修改。</p>
+                    <p><strong>越权检测的三重证据：</strong></p>
+                    <ol>
+                        <li><strong>权限矩阵对比：</strong>维护"当前会话可访问资源"的权限矩阵，每次工具调用前比对调用参数中的资源标识；审计时验证的是"权限矩阵本身是否正确"以及"门禁是否漏判"</li>
+                        <li><strong>副作用去重：</strong>有副作用的操作（发送消息、修改状态）维护幂等键（Idempotency Key），审计检查是否存在同一幂等键被多次执行——10,284 次回放中<strong>无重复副作用</strong></li>
+                        <li><strong>Replay 一致性验证：</strong>将审计时的 Trace 重新放入隔离环境回放，对比两次执行的门禁校验结果和工具调用序列。经验证，门禁逻辑的确定性部分在回放中结果一致</li>
+                    </ol>
+                    <p>所以"无越权调用"不是一句声明，而是<strong>权限矩阵比对 + 幂等键去重 + Replay 一致性验证</strong>三重证据得出的结论。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q7">
+            <div class="qa-block">
+                <h3><span class="qa-num">7</span>资产索引与资产健康度</h3>
+                <p class="qa-frame">资产沉淀了很多，但如果检索不到，Agent 就会白白走 NEW 模式浪费成本；沉淀了但从没被复用的资产，就是占索引空间、增加检索噪声的"僵尸资产"。</p>
+                <div class="qa-body">
+                    <p><strong>索引质量：</strong>用 Header 召回层（粗筛，高召回）和 Contract 匹配层（精筛，高精度）两级评估。基于 300 条人工标注 Query 的离线标注集测试，Header 层召回率约 <strong>94%</strong>，Contract 匹配层精确率约 <strong>89%</strong>。</p>
+                    <p><strong>资产沉淀质量：</strong>用三个指标综合评估：</p>
+                    <table>
+                        <thead><tr><th>指标</th><th>定义</th><th>数据</th></tr></thead>
+                        <tbody>
+                            <tr><td>资产利用率</td><td>被至少成功复用一次的资产数 / 总资产数</td><td>5 类资产 62%~88%</td></tr>
+                            <tr><td>复用成功率</td><td>资产被复用后任务成功完成的比例</td><td>整体约 91%</td></tr>
+                            <tr><td>Contract 精确率</td><td>Contract 认定可复用中，人工确认真实可复用的比例</td><td>约 89%</td></tr>
+                        </tbody>
+                    </table>
+                    <p>利用率最低的一类（异常订单处理相关资产）问题是 Contract 前置条件过严，导致泛化 Query 无法匹配；放宽约束和丰富 Header 关键词后，利用率提升了 <strong>15 个百分点</strong>。</p>
+                    <div class="highlight-box">
+                        <strong>健康度 = 利用率 × 复用成功率 × Contract 精确率。</strong>低于阈值的资产先降级为 DRAFT（不再参与 REUSE 路由，但可被 HYBRID 引用），连续 N 轮评估仍不达标则从索引中移除并归档，保证资产池的"新陈代谢"。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q8">
+            <div class="qa-block">
+                <h3><span class="qa-num">8</span>Token 节省是不是拿质量换来的</h3>
+                <p class="qa-frame">如果基线花 100 Token 做对了 95 个任务，优化后花 25 Token 只做对了 60 个任务，这省 Token 有什么意义？Token 节省必须和任务质量捆绑报告，否则就是数字游戏。</p>
+                <div class="qa-body">
+                    <p><strong>对比设计：</strong>基线为 ReAct 范式（无资产复用、无语义缓存、无编译门禁），实验组为 CompileLight 完整闭环，两组在相同的 10,284 次回放流量上跑完全相同的 Query 集合。</p>
+                    <p><strong>质量对齐验证：</strong>ReAct 基线完整完成率约 <strong>81.2%</strong>，CompileLight 为 <strong>89.4%</strong>——Token 节省不是靠降低质量换来的，质量反而更高。</p>
+                    <p><strong>74.8% Token 节省的归因拆解：</strong></p>
+                    <ul>
+                        <li>REUSE 模式贡献约 45%（直接复用 Blueprint，跳过 LLM 推理）</li>
+                        <li>HotCache 命中贡献约 20%（缓存请求 P95 从 8.7s 降至 580ms，且不触发 LLM 调用）</li>
+                        <li>编译门禁的硬过滤贡献约 10%（在 Normalize/硬过滤阶段砍掉大量无效候选，减少后续 LLM 输入 Token）</li>
+                        <li>剩余约 25% 来自确定性 Meta-Executor 减少了 LLM 在路由和重试逻辑中的参与</li>
+                    </ul>
+                    <div class="highlight-box green">
+                        74.8% 的 Token 节省是<strong>在成功率从 81.2% 提升到 89.4% 的同时实现的</strong>，不是以牺牲质量为代价换来的。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q9">
+            <div class="qa-block">
+                <h3><span class="qa-num">9</span>受控探索：区分"真推理"与"碰巧对"</h3>
+                <p class="qa-frame">Agent 在不确定时会在受控白名单内深度探索。探索出的结论是真的推理出来的，还是试来试去碰巧对了？如果是碰巧，下次遇到类似问题它还会翻车。</p>
+                <div class="qa-body">
+                    <p>受控探索的执行流程是"冻结上下文 → 缺口分类 → 有限推理 → 输出验证"，评估不只看最终输出对不对，还看流程每一步是否被正确执行。</p>
+                    <p><strong>"碰巧"与"真推理"的三种区分方法：</strong></p>
+                    <ol>
+                        <li><strong>扰动测试：</strong>对探索成功的 Trace 施加小扰动（改变非关键参数、调换证据呈现顺序）。输出不变说明推理鲁棒，输出变了说明之前的成功可能依赖特定上下文</li>
+                        <li><strong>证据链审计：</strong>审计每一步结论是否被前序证据充分支持，还是存在跳跃。审计不通过的输出即使最终答案正确，也不计入"完整完成"，而是标记为"碰巧正确"</li>
+                        <li><strong>泛化验证：</strong>探索产出被沉淀为资产后，看它在不同于原始探索场景的 Query 上的成功率。低于阈值（如 70%）会被重新审查</li>
+                    </ol>
+                    <p><strong>实际数据：</strong>NEW 模式探索中，约 <strong>72%</strong> 的探索成功通过扰动测试和证据链审计，被判定为"真推理"；剩余 28% 中约 15% 是"碰巧正确"、13% 是证据链不完整。"碰巧正确"的样本不会进入资产沉淀流程，只作为一次性输出返回。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q10">
+            <div class="qa-block">
+                <h3><span class="qa-num">10</span>LLM-as-Judge 用在哪、局限在哪</h3>
+                <p class="qa-frame">LLM 当裁判有个毛病：只看最终输出，看不到 Agent 中间那几十步是怎么走的。一个 Agent 中间乱调了十几次工具，最后碰对了，LLM 裁判只看到对的答案，给了高分——这公平吗？</p>
+                <div class="qa-body">
+                    <p>CompileLight 中 LLM-as-Judge <strong>不用于最终质量判定</strong>，最终判定由规则引擎（门禁校验 + Replay 一致性 + 审计规则）完成，LLM 只用于辅助信号生成：证据链的语义连贯性打分、Contract 表述的泛化性评估、失败原因的根因分类。</p>
+                    <div class="highlight-box warning">
+                        <strong>单次 LLM-as-Judge 在 Agent 场景下的局限：</strong>看不到轨迹（无法判断走了 3 步还是 30 步，规则化审计会统计 avg_steps 和 repeated_action_rate 来弥补）；固有偏见（倾向给"语言流畅、结构完整"的输出高分，即使内容有误）；对长尾分布响应不公正（企业客服场景可能不在其训练分布内）。
+                    </div>
+                    <p>原则是：<strong>确定性规则做硬判定，LLM-as-Judge 做软信号。</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q11">
+            <div class="qa-block">
+                <h3><span class="qa-num">11</span>评估集怎么构建：分层 + 真实流量混合</h3>
+                <p class="qa-frame">如果评估集里全是正常情况，那 Agent 在边界场景下会不会崩，根本无从得知。评估集的质量决定了评估结论的可信度。</p>
+                <div class="qa-body">
+                    <p>评估集不是随机采样，而是<strong>分层构造 + 真实流量混合</strong>：</p>
+                    <ul>
+                        <li><strong>正常流量层（约 60%）：</strong>线上真实流量随机采样，覆盖三种路由模式的自然分布，用于评估基线表现</li>
+                        <li><strong>边界任务层（约 25%）：</strong>工具失败场景（检索超时、空结果）、权限不足场景（验证是否走"正确失败"路径）、资产 Contract 不匹配场景（验证是否正确降级）、低置信度场景（验证受控探索是否触发）</li>
+                        <li><strong>对抗层（约 15%）：</strong>越权尝试（验证门禁是否拦截）、重复副作用诱导（验证幂等键）、缓存假阳性诱导（验证 Cache Verifier 是否拒绝命中）</li>
+                    </ul>
+                    <p>评估集持续迭代：每次发现新的失败模式，构造对应用例加入边界层。评估集从最初约 5,000 条逐步扩展到 10,284 条，新增部分主要集中在边界和对抗层。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q12">
+            <div class="qa-block">
+                <h3><span class="qa-num">12</span>从零设计评估方案，最先回答三个问题</h3>
+                <p class="qa-frame">重新做一遍这个项目的评估设计，不可能一口气把什么都测了。哪三个问题回答不好，后面的评估就都是空中楼阁？</p>
+                <div class="qa-body">
+                    <ol>
+                        <li><strong>什么算对？——定义成功标准。</strong>不是"有输出"就算成功，需要先定义完整完成/部分完成/正确失败/错误失败四档，这个定义决定后面所有指标的计算口径</li>
+                        <li><strong>在哪里测？——确定评估环境和保真度。</strong>是离线回放、在线影子流量、还是真实灰度？CompileLight 的敏感性（权限、副作用、资产版本）决定了不能直接上生产 A/B，选择"离线回放 + 灰度放量"组合</li>
+                        <li><strong>失败长什么样？——构建失败分类体系。</strong>先跑一轮基线，收集失败样本，用规则引擎做初步分类（工具失败、权限不足、路由误判、Contract 不匹配、缓存假阳性、探索未收敛……）。没有这个分类体系，评估就只能给一个笼统的"成功率"，无法驱动迭代</li>
+                    </ol>
+                    <p>这三个问题回答清楚，后面的指标选择、评估集构造、门禁阈值调优才有依据。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q13">
+            <div class="qa-block">
+                <h3><span class="qa-num">13</span>580ms 缓存命中延迟拆解</h3>
+                <p class="qa-frame">如果大部分时间花在权限校验、Schema 检查这些"别的步骤"上，语义缓存本身可能不是真正的瓶颈；而且如果缓存条目从一万涨到一百万，580ms 还能守住吗？</p>
+                <div class="qa-body">
+                    <table>
+                        <thead><tr><th>步骤</th><th>耗时</th><th>说明</th></tr></thead>
+                        <tbody>
+                            <tr><td>pgvector 相似度检索</td><td>~120ms</td><td>约 2 万条 Blueprint 向量规模下，HNSW 索引延迟可控</td></tr>
+                            <tr><td>Cache Verifier 实体对齐</td><td>~80ms</td><td>命中后校验关键实体是否匹配，是"正确性成本"</td></tr>
+                            <tr><td>Contract 一致性校验</td><td>~150ms</td><td>读取 Blueprint 对应 Contract，与当前 Query 解析结果匹配</td></tr>
+                            <tr><td>权限门禁校验</td><td>~100ms</td><td>调用权限矩阵，确认当前会话是否被允许执行</td></tr>
+                            <tr><td>Blueprint 反序列化 + 执行视图冻结</td><td>~130ms</td><td>恢复为可执行视图并冻结版本</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="highlight-box orange">
+                        <strong>可持续性：</strong>2 万条缓存规模下 580ms P95 稳定，但若缓存增长到 10 万条以上，pgvector 检索部分会线性增长、成为主要瓶颈。优化路线是将缓存向量迁移到 Redis + RediSearch 或 FAISS 内存索引，预计检索部分可从 120ms 降至 10ms 级别，整体 P95 控制在 400ms 以内。Contract 一致性校验和权限门禁的 250ms 是固定成本，不随缓存增长而增长。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q14">
+            <div class="qa-block">
+                <h3><span class="qa-num">14</span>执行视图冻结怎么验证</h3>
+                <p class="qa-frame">"冻结"是个承诺，怎么证明它真的冻住了？如果执行到一半底层资产版本变了，Agent 还在用旧版本，但用户以为用的是新版本——这就出事了。</p>
+                <div class="qa-body">
+                    <p>验证依靠<strong>快照哈希 + 执行前校验 + 执行后审计</strong>三层：执行开始时计算所有相关资产（Blueprint、Contract、权限矩阵）版本号的快照哈希并写入 Trace Header；每步工具调用前重新计算当前哈希，与快照哈希不一致则立即中止执行并触发 Checkpoint；执行后审计对比 Trace 中记录的资产版本与实际版本。</p>
+                    <div class="highlight-box">
+                        10,284 次回放中，冻结失效发生了 <strong>7 次（占比 0.07%）</strong>，全部发生在 NEW 模式的受控探索阶段——原因是探索过程中动态生成了新的中间资产（DRAFT 状态），这些资产在冻结时还不存在。这种情况在审计规则中被区分为"预期内冻结扩展"而非"冻结失效"，因为新生成的资产不属于"冻结前已存在的资产"，不影响原有资产的执行一致性。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q15">
+            <div class="qa-block">
+                <h3><span class="qa-num">15</span>硬过滤的精度与召回权衡</h3>
+                <p class="qa-frame">硬过滤直接砍掉不合格的候选，判断标准是死的，但现实是活的。砍错了一个，后面的步骤就全白费了。</p>
+                <div class="qa-body">
+                    <p>硬过滤基于确定性条件（Schema 不匹配、权限白名单外、预算超出硬上限），一票否决、不依赖 LLM 判断。评估分两个维度：</p>
+                    <ul>
+                        <li><strong>过滤精度：</strong>被砍掉的候选中，人工复核确认真实应被砍掉的比例——当前约 <strong>97%</strong>，剩余 3% 主要是 Schema 版本边界情况被误砍</li>
+                        <li><strong>过滤召回：</strong>所有"本应被砍掉"的候选中，实际被砍掉的比例——当前约 <strong>99.2%</strong>，召回低意味着漏网之鱼进入后续阶段，浪费 LLM Token</li>
+                    </ul>
+                    <p><strong>过滤太狠的检测：</strong>监控"硬过滤阶段候选数量"与"最终任务成功率"的相关性，若候选数量骤降但成功率也骤降，说明过滤过严。缓解机制上，被砍候选不是完全丢弃，而是进入"待审查池"——若某类候选被频繁误砍（人工复核确认应放行），会将其规则从"硬过滤"降级为"软过滤"（标记但不直接砍掉）。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="q16">
+            <div class="qa-block">
+                <h3><span class="qa-num">16</span>这套评估体系的局限性</h3>
+                <p class="qa-frame">没有一套评估体系是完美无缺的。清楚自己这套评估的边界在哪、哪里可能出问题、如果资源更多会怎么改进，本身就是评估能力的一部分。</p>
+                <div class="qa-body">
+                    <ol>
+                        <li><strong>回放评估无法覆盖"全新意图"：</strong>10,284 次回放全部来自历史流量，线上从未出现过的 Query 类型无法被回放评估。这类场景依赖灰度放量阶段的小比例真实流量兜底，但样本量有限，统计置信度不如回放</li>
+                        <li><strong>LLM-as-Judge 在证据链审计中的角色仍偏重：</strong>虽然最终判定由规则引擎完成，但证据链的语义连贯性评估依赖 LLM Judge，对长尾场景的评分偏差可能影响审计准确性。如果资源允许，更想引入 Agent-as-a-Judge 范式——用一个支持工具增强验证的 Agent 去审计另一个 Agent 的轨迹，而不是单次 LLM 打分</li>
+                        <li><strong>缓存假阳性的长期影响尚未充分评估：</strong>Cache Verifier 当前拦截了约 8 个百分点的假阳性命中，但这是 2 万条缓存规模下的数据，缓存增长到 10 万级时假阳性率是否稳定需要持续监控——这类问题的危害是延迟爆发的，用户可能不会立即发现，但积累的错误复用会侵蚀系统信任</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="closing-box">
+            如果有更多资源，下一步最想做的是<strong>构建一个自动化的评估集迭代管线</strong>——每次发现新的失败模式，自动构造对应的评估用例加入边界层，让评估集跟随系统的演化而演化，而不是依赖人工手工构造。
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../projects/compilelight.html">查看 CompileLight 项目详情</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

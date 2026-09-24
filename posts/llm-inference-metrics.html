@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM 推理性能指标详解：TTFT、TPOT 与 ITL | 龚谢蕊烽</title>
+    <meta name="description" content="拆解大模型推理服务中最核心的三个延迟指标——TTFT、TPOT、ITL 的定义、计算公式与工程优化方向。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent);
+            padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px; font-weight: 900; line-height: 1.3; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink);
+            margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+
+        .formula-box {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 18px 22px; margin: 14px 0; text-align: center; overflow-x: auto;
+        }
+        .formula-box .formula {
+            font-family: Georgia, "Times New Roman", serif; font-size: 17px; color: var(--ink);
+        }
+        .formula-box .var-def {
+            font-size: 12.5px; color: var(--muted); margin-top: 10px; text-align: left;
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; line-height: 1.8;
+        }
+        .formula-box .var-def code { background: var(--panel); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+        tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 25px; }
+            .page { padding: 28px 16px 60px; }
+            .formula-box .formula { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">
+                <span class="nav-logo-mark">龚</span>
+                龚谢蕊烽
+            </a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🧠 大语言模型</span>
+            <h1 class="post-title">LLM 推理性能指标详解：TTFT、TPOT 与 ITL</h1>
+            <p class="post-subtitle">大模型推理服务的性能评估离不开三个核心延迟指标——它们分别刻画"响应快不快""生成快不快""生成稳不稳"，是做推理系统选型和优化时必须拆解清楚的基本功。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-24</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">LLM推理</span>
+                    <span class="post-meta-tag">性能优化</span>
+                    <span class="post-meta-tag">vLLM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>为什么是这三个指标</h2>
+            <p>评估一个 LLM 推理系统，不能只看"总耗时"这一个笼统数字。用户对延迟的感知在生成的不同阶段是不一样的：第一个字出得快不快、后续吐字流不流畅、吐字节奏稳不稳定，背后对应的是完全不同的系统瓶颈。<strong>TTFT、TPOT、ITL</strong> 正是把"总耗时"拆解到这三个维度上的标准指标，分别对应 Prefill（预填充）和 Decode（解码）两个阶段的不同计算特征。</p>
+        </div>
+
+        <div class="section">
+            <h2>TTFT（Time To First Token）</h2>
+            <p><strong>定义：</strong>从请求发出到收到第一个输出 Token 的时间，核心影响因素是 Prompt 预填充（Prefill）阶段的计算效率。</p>
+            <div class="formula-box">
+                <div class="formula">TTFT = N<sub>prompt</sub> / θ<sub>prefill</sub> + T<sub>fixed</sub></div>
+                <div class="var-def">
+                    <code>N_prompt</code>：输入 Prompt 的 Token 数量<br>
+                    <code>θ_prefill</code>：Prefill 速度（Token/s），依赖硬件并行计算能力（如 GPU 的 FLOPs）<br>
+                    <code>T_fixed</code>：固定开销，包括网络延迟、框架初始化等
+                </div>
+            </div>
+            <p><strong>示例：</strong>Prompt 100 Token，Prefill 速度 500 Token/s，固定开销 10ms：TTFT = 100/500 + 0.01 = <strong>0.21 秒</strong>。</p>
+            <h3>优化方向</h3>
+            <ul>
+                <li>提高硬件并行度（如使用 A100/H100 GPU）</li>
+                <li>优化 Prompt 编码，压缩冗余 Token</li>
+                <li>使用更高效的推理框架（如 vLLM 的 PagedAttention）</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>TPOT（Time Per Output Token）</h2>
+            <p><strong>定义：</strong>解码阶段平均每个输出 Token 的生成时间，核心影响因素是自回归生成的计算量和内存带宽。</p>
+            <div class="formula-box">
+                <div class="formula">TPOT = (E2E − TTFT) / (N<sub>output</sub> − 1)</div>
+                <div class="var-def">
+                    <code>E2E</code>：端到端总延迟&nbsp;&nbsp;<code>TTFT</code>：首 Token 延迟&nbsp;&nbsp;<code>N_output</code>：输出 Token 总数<br>
+                    通常为常量，除非受内存带宽限制波动
+                </div>
+            </div>
+            <p><strong>示例：</strong>生成 50 个 Token 共耗时 2.5 秒：TPOT = (2.5 − 0.2) / 49 ≈ <strong>0.047 秒</strong>。</p>
+            <h3>优化方向</h3>
+            <ul>
+                <li>量化模型（如 FP16/INT8 降低计算量）</li>
+                <li>优化 KV Cache 内存访问（如 FlashAttention）</li>
+                <li>批处理（Batching）提升吞吐量，但可能增加单请求 TPOT</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>ITL（Inter-Token Latency）</h2>
+            <p><strong>定义：</strong>连续两个输出 Token 之间的实际间隔时间，核心影响因素是解码阶段的串行依赖性和系统调度开销。理想情况下 <code>ITL ≈ TPOT</code>，但实际会因框架调度或资源竞争而偏高。</p>
+            <div class="formula-box">
+                <div class="formula">ITL = Decode Phase Time / (m − 1)&nbsp;&nbsp;(m ≥ 2)</div>
+                <div class="var-def"><code>m</code>：解码阶段产出的 Token 数量</div>
+            </div>
+            <p><strong>示例：</strong>若 TPOT 为 50ms，叠加 10ms 调度开销：ITL = 50 + 10 = <strong>60ms</strong>。</p>
+            <h3>优化方向</h3>
+            <ul>
+                <li>减少调度延迟（如使用 TensorRT-LLM 等专用推理后端）</li>
+                <li>避免 CPU-GPU 同步阻塞</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>三者的关系与系统性能</h2>
+            <table>
+                <thead><tr><th>指标</th><th>影响维度</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>TTFT</td><td>用户体验</td><td>较短的 TTFT 让用户感知"响应迅速"</td></tr>
+                    <tr><td>TPOT</td><td>生成速度</td><td>直接影响 Token/s，尤其在长文本场景下</td></tr>
+                    <tr><td>ITL</td><td>稳定性</td><td>波动过大会导致生成过程"卡顿"</td></tr>
+                </tbody>
+            </table>
+            <div class="formula-box">
+                <div class="formula">E2E Latency = TTFT + TPOT × N<sub>output</sub></div>
+            </div>
+            <h3>综合示例</h3>
+            <table>
+                <thead><tr><th>指标</th><th>示例值</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>TTFT</td><td>0.2 秒</td><td>首 Token 响应较快</td></tr>
+                    <tr><td>TPOT</td><td>0.05 秒</td><td>生成速度约 20 Token/s</td></tr>
+                    <tr><td>ITL</td><td>0.06 秒</td><td>存在约 10ms 的调度开销</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>测量工具与方法</h2>
+            <ul>
+                <li><strong>框架内置工具：</strong>如 vLLM 的 metrics 接口、PyTorch Profiler</li>
+                <li><strong>自定义脚本：</strong>记录请求-响应时间戳，逐阶段计算延迟</li>
+                <li><strong>压测工具：</strong>用 locust 或 k6 模拟并发请求，统计指标分布</li>
+            </ul>
+            <div class="highlight-box">
+                这三个指标不是孤立的：优化 TTFT 主要是压缩 Prefill 的计算路径，优化 TPOT/ITL 主要是改善 Decode 阶段的内存带宽利用率和调度效率。评估一个推理系统时，把总延迟拆到这三个维度上，才能定位到真正的瓶颈在哪一层。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>
