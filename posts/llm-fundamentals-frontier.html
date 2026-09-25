@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型基础、Prompt 工程与前沿技术全景 | 龚谢蕊烽</title>
+    <meta name="description" content="梳理大模型训练范式与Agent核心能力（规划/反思/记忆/工具），Prompt工程从Zero-shot/Few-shot到金融NLP实战案例，以及Agent工程化中上下文管理、评测体系设计与幻觉治理的15个技术问答。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --warning: #d97706; --warning-soft: #fef3c7;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 880px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 30px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc { background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px; }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; columns: 2; }
+        .toc li { margin-bottom: 4px; break-inside: avoid; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .lead-note {
+            font-size: 14.5px; color: var(--muted); margin-bottom: 32px; line-height: 1.8;
+            padding: 14px 18px; background: #fff; border: 1px dashed var(--hairline); border-radius: 10px;
+        }
+
+        .section { margin-bottom: 30px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .qa-block { margin-bottom: 26px; }
+        .qa-block:last-child { margin-bottom: 0; }
+        .qa-block h3 {
+            font-size: 15.5px; font-weight: 800; color: var(--ink); margin-bottom: 6px;
+            display: flex; gap: 8px; align-items: flex-start;
+        }
+        .qa-block h3 .qa-num {
+            flex-shrink: 0; font-size: 11px; font-weight: 900; color: #fff;
+            background: var(--accent2); width: 20px; height: 20px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+        }
+        .qa-frame { font-size: 13.5px; color: var(--muted); margin-bottom: 10px; padding-left: 28px; }
+        .qa-body { padding-left: 28px; }
+        .qa-body p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .qa-body strong { font-weight: 800; }
+        .qa-body ul, .qa-body ol { padding-left: 20px; margin-bottom: 10px; }
+        .qa-body li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+        .highlight-box.warning { background: var(--warning-soft); border-left-color: var(--warning); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .closing-box {
+            background: linear-gradient(135deg, var(--accent-soft) 0%, #f3e8ff 100%);
+            border-radius: 12px; padding: 22px 24px; margin-top: 8px; font-size: 14.5px;
+        }
+        .closing-box strong { color: var(--accent2); }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+            .toc ol { columns: 1; }
+            .qa-frame, .qa-body { padding-left: 0; }
+            .qa-block h3 { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🧠 大语言模型</span>
+            <h1 class="post-title">大模型基础、Prompt 工程与前沿技术全景</h1>
+            <p class="post-subtitle">这篇笔记按认知递进的顺序整理三部分内容：大模型的训练范式和从LLM到Agent需要补齐的能力，Prompt工程的方法论与三个金融NLP实战案例，以及当前Agent工程化中一批更接近生产环境的问题——上下文管理、评测体系设计、幻觉治理与多Agent协作。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-23</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">大模型基础</span>
+                    <span class="post-meta-tag">Prompt工程</span>
+                    <span class="post-meta-tag">Agent前沿</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lead-note">
+            内容分三层递进：先讲清楚大模型是什么、怎么训练、以及从LLM到Agent需要补齐哪些能力；再讲Prompt工程的方法论和三个金融NLP实战案例；最后整理Agent工程化中一批更前沿的技术问题。三部分材料时间跨度较大，重叠的概念（比如Agent的规划、记忆能力）只在首次出现时展开，后文不再重复定义。
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#foundation">训练范式与基础模型特征</a></li>
+                <li><a href="#llm-to-agent">从LLM到Agent：为什么需要记忆、工具与规划</a></li>
+                <li><a href="#agent-abilities">智能体的四大能力：规划、反思、记忆与工具</a></li>
+                <li><a href="#concepts">常用概念速查</a></li>
+                <li><a href="#prompt-basics">Prompt工程基础与迭代优化</a></li>
+                <li><a href="#shot-learning">Zero-shot与Few-shot：从学习范式到工程实践</a></li>
+                <li><a href="#finance-cases">三个金融NLP实战案例</a></li>
+                <li><a href="#frontier-design">Agent系统设计核心问题</a></li>
+                <li><a href="#frontier-eval">Agent评测体系怎么从零搭建</a></li>
+                <li><a href="#frontier-general">通用工程问题：幻觉、记忆与多Agent协作</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="foundation">
+            <h2>训练范式与基础模型特征</h2>
+            <p>大模型的训练整体上分三个阶段：<strong>预训练、SFT（监督微调）、RLHF（基于人类反馈的强化学习）</strong>。LLM是NLP中的重要组成部分，本质是预测自然语言文本中下一个词或字符的概率分布，可以看作是对语言规律的学习和抽象。基于Transformer架构的模型通过大规模<strong>无监督学习</strong>来学习语言规律和上下文信息，再在<strong>微调阶段做有监督学习和优化</strong>，从而生成连贯、有意义的文本——预训练阶段常用掩码语言模型或下一句预测等技术，微调阶段则针对具体任务优化。</p>
+            <h3>基础模型的四个特征</h3>
+            <ul>
+                <li><strong>规模和参数量大：</strong>通过从数亿到数千亿级别的参数捕获复杂的数据模式，从而理解和生成极其丰富的信息</li>
+                <li><strong>广泛数据集的预训练：</strong>使用大量多样化数据预训练，学习语言、图像等数据的通用特征表示</li>
+                <li><strong>适应性和灵活性强：</strong>能通过微调（fine-tune）或少样本学习高效迁移到各种下游任务，具备很强的跨域能力</li>
+                <li><strong>计算资源需求大：</strong>巨大的模型规模带来高昂的数据存储、训练时间、能量消耗和硬件成本</li>
+            </ul>
+        </div>
+
+        <div class="section" id="llm-to-agent">
+            <h2>从LLM到Agent：为什么需要记忆、工具与规划</h2>
+            <p>大语言模型可以接受输入、分析推理、输出文字/代码/媒体，但无法像人类一样拥有规划思考能力、运用工具与物理世界互动、以及拥有长期记忆能力。<strong>AI Agent是基于LLM的、能够自主理解、自主规划决策、执行复杂任务的智能体</strong>，设计目的是处理那些简单语言模型无法直接解决的问题——尤其是任务涉及多个步骤或需要外部数据源的情况。可以简单概括为：</p>
+            <div class="highlight-box">LLM = 接受输入、思考、输出。<br>人类 = LLM（接受输入、思考、输出）+ <strong>记忆</strong> + <strong>工具</strong> + <strong>规划</strong> → Agent</div>
+            <p>以智能家居为例：用户说"我觉得有点冷"，系统感知到温度诉求后规划出"检查当前温度 → 决定升高几度 → 调整并反馈"的步骤，执行后再观察用户反馈决定是否继续调整——这个感知、规划、行动、观察的循环，就是Agent决策流程的雏形。要让LLM具备这样的能力，核心要补齐四个模块：<strong>规划（Planning）、记忆（Memory）、工具使用（Tools）、执行（Action）</strong>。</p>
+        </div>
+
+        <div class="section" id="agent-abilities">
+            <h2>智能体的四大能力：规划、反思、记忆与工具</h2>
+            <p>规划，可以理解为"观察和思考"。类比人类接到任务时的思维模式：先想清楚怎么完成，再审视手头的工具、思考如何高效使用，然后把任务拆成子任务，执行过程中不断反思和完善，同时判断任务何时可以终止。让LLM具备这套思维模式，最重要的是解决两个问题：<strong>怎么把任务拆成子任务</strong>，以及<strong>怎么在执行中反思改进</strong>。</p>
+
+            <h3>子任务分解：思维链与思维树</h3>
+            <p><strong>思维链（Chain of Thoughts, CoT）</strong>已经是一种比较标准的提示技术：要求LLM「think step by step」，模型会把问题拆解成多个步骤，一步步思考和解决，使输出结果更加准确——这是一种线性的思维方式。</p>
+            <p><strong>思维树（Tree-of-Thought, ToT）</strong>是对CoT的进一步扩展：在思维链的每一步推理出多个分支，拓扑展开成一棵思维树，用启发式方法评估每个推理分支对问题解决的贡献，再用广度优先搜索（BFS）或深度优先搜索（DFS）等算法探索思维树，并进行前瞻和回溯。</p>
+
+            <h3>反思与改进：ReAct框架</h3>
+            <p>Agent对过去的行动进行自我批评和反思，从错误中学习并改进未来的步骤，从而提高最终结果的质量。实际任务中试错不可避免，自我反思在这个过程中至关重要——它允许Agent通过改进过去的行动决策、纠正以前的错误来进行迭代改进。反思是Agent对事情进行更高层次、更抽象思考的结果，当Agent感知到的最新事件的重要性评分之和超过一定阈值时周期性生成，可以类比"三思而后行"。</p>
+            <p>《ReAct: Synergizing Reasoning and Acting in Language Models》提出了一种结合推理（Reasoning）和行动（Acting）来增强LLM决策效果的方法。三种模式的对比很能说明为什么要把两者结合：</p>
+            <ul>
+                <li><strong>仅推理（Reasoning Only）：</strong>LLM仅基于已有知识推理生成答案——如果LLM本身不具备这些知识，容易出现幻觉，胡乱回答</li>
+                <li><strong>仅行动（Acting Only）：</strong>不加推理，仅用工具（比如搜索引擎）检索——得到的往往是海量资料，不能直接回答问题</li>
+                <li><strong>推理+行动（Reasoning and Acting）：</strong>LLM先基于已有知识并审视拥有的工具，发现知识不足则调用工具获取新信息，再基于新信息重复推理和行动，直到完成任务</li>
+            </ul>
+            <p>ReAct的工作流程是一个循环，每个循环包含三步：<strong>Thought（思考）</strong>——基于当前状态和目标推理下一步该做什么；<strong>Action（行动）</strong>——选择合适的工具并执行，获取外部信息或改变环境状态；<strong>Observation（观察）</strong>——接收行动执行后的结果，作为下一轮思考的输入。这个循环持续到Agent认为任务已完成，最终输出答案。</p>
+            <div class="highlight-box green"><strong>优点：</strong>动态性与适应性（走一步看一步，能根据实时反馈动态调整策略）；可解释性与可控性（每一步思考和行动都被记录，决策过程透明，便于调试和人工干预）；强大的纠错能力（某一步失败时，下一轮思考中能意识到问题并采取补救措施）。</div>
+            <div class="highlight-box warning"><strong>挑战：</strong>效率问题——由于需要多次与LLM和外部工具交互，ReAct的执行延迟和API调用成本相对较高，一个复杂任务可能需要5-10轮甚至更多的循环才能完成。</div>
+            <p>用LangChain构造一个严格遵循ReAct流程的Agent，计算BMI的例子：</p>
+            <pre><code># 一个调用LangChain中的Agent，使用ReAct框架的案例——计算人体的BMI
+from langchain.agents import create_agent
+from langchain_community.chat_models.tongyi import ChatTongyi
+from langchain_core.tools import tool
+
+@tool(description="获取体重，返回值是整数，单位千克")
+def get_weight() -> int:
+    return 90
+
+@tool(description="获取身高，返回值是整数，单位厘米")
+def get_height() -> int:
+    return 172
+
+agent = create_agent(
+    model=ChatTongyi(model="qwen3-max"),
+    tools=[get_weight, get_height],
+    system_prompt="""你是严格遵循ReAct框架的智能体，必须按「思考→行动→观察→再思考」的流程解决问题，
+    且**每轮仅能思考并调用1个工具**，禁止单次调用多个工具。
+    并告知我你的思考过程，工具的调用原因，按思考、行动、观察三个结构告知我""",
+)
+
+for chunk in agent.stream(
+    {"messages": [{"role": "user", "content": "计算我的BMI"}]},
+    stream_mode="values"
+):
+    latest_message = chunk['messages'][-1]
+
+    if latest_message.content:
+        print(type(latest_message).__name__, latest_message.content)
+
+    try:
+        if latest_message.tool_calls:
+            print(f"工具调用： { [tc['name'] for tc in latest_message.tool_calls]  }")
+    except AttributeError as e:
+        pass</code></pre>
+
+            <h3>记忆：从人类记忆机制到智能体记忆</h3>
+            <p>人类的记忆机制通常分三层：<strong>感觉记忆</strong>（保留感官信息的最早阶段，通常只持续几秒钟）、<strong>短期记忆（工作记忆）</strong>（持续时间较短，暂时存储和处理有限信息，比如记住一个电话号码直到拨完）、<strong>长期记忆</strong>（可存储大量信息，从几分钟到一生，再分为可有意识回忆的显性记忆——情景记忆与语义记忆，以及无意识的隐性记忆，如骑车、打字这类技能和习惯）。</p>
+            <p>智能体的记忆机制与之对应：大模型在大量世界知识数据集上预训练，通过调整神经元权重学习理解和生成语言，这个过程可以视为"记忆"的形成，进而形成世界记忆或长期记忆；<strong>短期记忆</strong>是当前任务执行过程中产生的信息（某个工具或子任务的执行结果），在任务完结后被清空；<strong>长期记忆</strong>是长时间保留的信息，一般指外部知识库，通常用向量数据库存储和检索。</p>
+
+            <h3>工具使用</h3>
+            <p>Agent通过学习调用外部API来获取模型权重中所缺少的额外信息，包括当前信息、代码执行能力和访问专有信息源等——这对于预训练后难以修改的模型权重而言非常重要。正如人类通过创造、修改和利用外部工具突破身体和认知的限制，为LLM提供外部工具（计算器、搜索工具、代码执行器、数据库查询工具等）同样能显著提升其能力。</p>
+        </div>
+
+        <div class="section" id="concepts">
+            <h2>常用概念速查</h2>
+            <p>几个在Agent与RAG系统中反复出现的基础概念：</p>
+            <table>
+                <thead><tr><th>概念</th><th>定义</th></tr></thead>
+                <tbody>
+                    <tr><td>知识库</td><td>存储知识和信息的系统，分传统知识库和AI知识库；AI知识库与LLM结合，让AI系统更好地利用本地知识响应查询、执行任务</td></tr>
+                    <tr><td>Embedding（嵌入/向量化）</td><td>将文本转换为数值向量的过程：捕捉语义和语法特征、降低维度、编码语义关系，使语义相似的词汇在向量空间中彼此接近，是信息检索、文本分类、情感分析等任务的基础</td></tr>
+                    <tr><td>RAG（检索增强生成）</td><td>融合信息检索与文本生成：先从大数据中检索信息，再基于检索结果生成文本，目的是提高生成内容的相关性、准确性和深度，尤其适用于需要广泛知识和深度理解的复杂查询</td></tr>
+                    <tr><td>Finetuning（微调）</td><td>对预训练模型做进一步训练，用特定领域/任务的数据调整参数使其更适应具体场景，提升精度、降低错误率或提高处理速度</td></tr>
+                    <tr><td>AGI（通用人工智能）</td><td>人工智能领域的终极目标：一种能够像人类一样跨领域学习、推理和解决问题的智能系统</td></tr>
+                    <tr><td>AIGC（AI生成内容）</td><td>利用AI技术（尤其是机器学习和深度学习模型）自动生成文本、图像、音乐或视频等内容，通常专注于特定创作任务，不具备AGI的广泛智能和通用学习能力</td></tr>
+                </tbody>
+            </table>
+            <div class="tag-cloud">
+                <span class="tag">知识库</span>
+                <span class="tag">Embedding</span>
+                <span class="tag">RAG</span>
+                <span class="tag">Finetuning</span>
+                <span class="tag">AGI</span>
+                <span class="tag">AIGC</span>
+            </div>
+        </div>
+
+        <div class="section" id="prompt-basics">
+            <h2>Prompt工程基础与迭代优化</h2>
+            <p><strong>提示工程（Prompt Engineering，也称In-Context Prompting）</strong>，是指在不更新模型权重的情况下，如何与大模型交互以引导其行为、获得所需结果的方法。现在的LLM主要分两类：<strong>Base LLM</strong>是完成"文字接龙"类工作的基础模型；<strong>指令型LLM</strong>在基础LLM上做了指令微调（Fine-tune），一般采用RLHF方案训练调整，因此在特定任务上有更好的表现。</p>
+            <h3>迭代优化的三步循环</h3>
+            <p>Prompt的优化不是一次写对，而是一个循环：<strong>想法 → 实验验证 → 错误分析 → 想法</strong>。每一轮错误分析的结论反过来修正下一轮的想法，逐步收敛到可用的Prompt。</p>
+            <h3>Prompt能做什么</h3>
+            <p>用Prompt可以让LLM完成：总结文本（摘要）、推理问题（数学问题、代码问题）、样本的主题分类、提取句子/文章的情感（积极/消极/正向/反向）、翻译、转写文章风格、转写格式（例如HTML转JSON）、扩充句子、在上下文记忆条件下做对话式聊天机器人等。</p>
+        </div>
+
+        <div class="section" id="shot-learning">
+            <h2>Zero-shot与Few-shot：从学习范式到工程实践</h2>
+            <p><strong>Zero-shot Learning（零样本学习）：</strong>训练阶段不存在与测试阶段完全相同的类别，但模型可以使用训练过的知识推广到测试集中的新类别——这种能力被称为"零样本"学习，因为模型训练时从未见过测试集中的新类别，在模型训练和提示词优化中均有体现。</p>
+            <p><strong>Few-shot Learning（少样本学习）：</strong>模型在学习了一定类别的大量数据后，对于新类别只需要少量样本就能快速学习；对应的<strong>one-shot learning（单样本学习）</strong>，是样本少到为一的特殊情况。</p>
+            <p>后面三个金融NLP案例，都是基于"Few-Shot + Zero-Shot"的思想设计Prompt：把一批标注好的示例拼接进消息历史里，模型据此在不修改参数的情况下完成分类、抽取、匹配任务——这是Few-shot在工程上最常见的落地形态：不训练模型，用对话历史里的示例做"临时的模式对齐"。</p>
+        </div>
+
+        <div class="section" id="finance-cases">
+            <h2>三个金融NLP实战案例</h2>
+            <p>案例来自金融数据分析场景，三大业务任务都通过 <code>qwen3-max</code>（经由DashScope的OpenAI兼容接口调用）完成：金融文本分类、金融文本信息抽取、金融文本匹配。三个任务复用同一种工程模式——把标注示例拼接成"user/assistant"轮次写入 <code>messages</code>，再把真实待处理的文本作为最后一条user消息发送给模型，让模型基于示例做Few-shot式的模式匹配，而不修改模型参数。</p>
+            <table>
+                <thead><tr><th>任务</th><th>输入 / 输出</th><th>Prompt设计要点</th></tr></thead>
+                <tbody>
+                    <tr><td>文本分类</td><td>输入一段金融文本，输出所属类别（新闻报道/财务报道/公司公告/分析师报告/不清楚类别）</td><td>system prompt限定候选类别集合并声明"不清楚的归为不清楚类别"，4条示例作为user/assistant轮次拼接</td></tr>
+                    <tr><td>信息抽取</td><td>输入非结构化文本，输出结构化JSON（日期/股票名称/开盘价/收盘价/成交量）</td><td>system prompt声明字段schema和"缺失字段用'原文未提及'表示"，用2条示例展示"文本→JSON"的映射</td></tr>
+                    <tr><td>文本匹配</td><td>输入两句话，输出"是/不是"（是否表达同一事实）</td><td>system prompt声明判断标准为"两句话是否匹配"，用4条示例覆盖"是"和"不是"两类</td></tr>
+                </tbody>
+            </table>
+            <p>以文本分类任务为例，完整代码如下：</p>
+            <pre><code>from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+
+examples_data = {       # 示例数据
+    '新闻报道': '今日，股市经历了一轮震荡，受到宏观经济数据和全球贸易紧张局势的影响。投资者密切关注美联储可能的政策调整，以适应市场的不确定性。',
+    '财务报告': '本公司年度财务报告显示，去年公司实现了稳步增长的盈利，同时资产负债表呈现强劲的状况。经济环境的稳定和管理层的有效战略执行为公司的健康发展奠定了基础。',
+    '公司公告': '本公司高兴地宣布成功完成最新一轮并购交易，收购了一家在人工智能领域领先的公司。这一战略举措将有助于扩大我们的业务领域，提高市场竞争力',
+    '分析师报告': '最新的行业分析报告指出，科技公司的创新将成为未来增长的主要推动力。云计算、人工智能和数字化转型被认为是引领行业发展的关键因素，投资者应关注这些趋势'
+}
+
+questions = [
+    "今日，央行发布公告宣布降低利率，以刺激经济增长。这一降息举措将影响贷款利率，并在未来几个季度内对金融市场产生影响。",
+    "ABC公司今日发布公告称，已成功完成对XYZ公司股权的收购交易。本次交易是ABC公司在扩大业务范围、加强市场竞争力方面的重要举措。",
+    # ...省略其余测试文本
+]
+
+messages = [
+    {"role": "system", "content": "你是金融专家，将文本分类为['新闻报道', '财务报道', '公司公告', '分析师报告']，不清楚的分类为'不清楚类别' 下面有示例："},
+]
+
+for key, value in examples_data.items():
+    messages.append({"role": "user", "content": value})
+    messages.append({"role": "assistant", "content": key})
+
+for q in questions:
+    response = client.chat.completions.create(
+        model="qwen3-max",
+        messages=messages + [{"role": "user", "content": f"按照示例，回答这段文本的分类类别：'''{q}'''"}]
+    )
+    print(response.choices[0].message.content)</code></pre>
+            <p>任务二（信息抽取）和任务三（文本匹配）复用相同的拼接模式，只有system prompt和示例结构不同：</p>
+            <pre><code># 任务二：信息抽取
+schema = ['日期', '股票名称', '开盘价', '收盘价', '成交量']
+
+messages = [
+    {"role": "system", "content": f"你帮我完成信息抽取，我给你句子，你抽取{schema}信息，按JSON字符串输出，如果某些信息不存在，用'原文未提及'表示，请参考如下示例："}
+]
+
+for example in examples_data:
+    messages.append({"role": "user", "content": example["content"]})
+    messages.append({"role": "assistant", "content": json.dumps(example["answers"], ensure_ascii=False)})</code></pre>
+            <pre><code># 任务三：文本匹配
+messages = [
+    {"role": "system", "content": "你帮我完成文本匹配，我给你2个句子，被[]包围，你判断它们是否匹配，回答是或不是，请参考如下示例："},
+]
+
+for key, value in examples_data.items():   # key取值为 "是" / "不是"
+    for t in value:
+        messages.append({"role": "user", "content": f"句子1：[{t[0]}]，句子2：[{t[1]}]"})
+        messages.append({"role": "assistant", "content": key})</code></pre>
+        </div>
+
+        <div class="section" id="frontier-design">
+            <h2>Agent系统设计核心问题</h2>
+            <p>当前Agent前沿的焦点，已经从"让模型更聪明"转移到"让Agent在长程任务中保持有效上下文和可积累的记忆"。过去两年模型推理能力提升显著，但Agent在真实部署中的失败往往不是因为"不会思考"，而是<strong>长程任务中的上下文退化</strong>——历史信息衰减、关键证据检索不到、局部决策偏离全局目标。ICML 2026上Context Folding的工作把这个问题讲得很直白：Agent在长任务中"只能把有限的前序工作保持在视野内"，任务越长，越慢、越贵、越容易丢掉关键信息。</p>
+            <p>值得跟踪的方向是<strong>主动式上下文管理</strong>：一类是让Agent学会"折叠"子任务上下文，完成后只保留结构化摘要，用RL训练Agent自主判断何时分支、何时折叠；另一类是统一图与向量记忆的路由机制，MemWeave在LoCoMo上做到F1 73.5%，同时把延迟降低95.7%、token成本降低90%以上。更前沿的思路是把记忆从"保存历史记录"推进到"从经历中沉淀可复用经验"。</p>
+            <div class="highlight-box">上下文管理能力正在成为Agent从demo走向生产部署的核心瓶颈，而且它把记忆、规划、工具调用三个子问题串在了一起——Agent必须学会主动决定"什么该留在上下文中、什么该归档、什么该丢弃"。</div>
+            <p>下面是围绕Agent系统设计整理的一组高频技术问答：</p>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">1</span>Agent的本质是什么？什么场景适合Agent，什么场景适合固定Workflow？</h3>
+                <p class="qa-frame">Agent和写死的Workflow脚本，边界在哪里？分不清楚，很容易把该用规则解决的问题过度设计成一个不可控的Agent。</p>
+                <div class="qa-body">
+                    <p>Agent的本质是"在不确定性环境中做决策并执行的系统"。它和Workflow的核心区别在于——Workflow的控制流是预定义的，Agent的控制流是模型动态决定的。判断标准很简单：<strong>如果步骤可以提前穷举，用Workflow；如果步骤依赖实时信息且分支不可穷举，用Agent。</strong></p>
+                    <p>Agent适合检索、规划、多步工具调用这类可验证的重复任务；但涉及高风险决策、强合规约束或无法自动验证结果的场景，必须保留Human-in-the-Loop——比如订单支付、线上变更这类操作，Agent可以做"建议"，但执行必须有人确认。更常见的落地形态是混合模式：主调度用Agent做意图路由和任务规划，子任务尽量沉淀为确定性Workflow，这样既保留灵活性又控制风险。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">2</span>Agent中台的编排层和执行层，应该耦合到什么程度？</h3>
+                <p class="qa-frame">编排层管得太细，每加一个新能力都要改核心代码；管得太松，又变成什么都不管的黑箱。耦合度怎么拿捏？</p>
+                <div class="qa-body">
+                    <p>倾向于<strong>"松耦合的编排层 + 紧耦合的执行层"</strong>。编排层保持轻量，只做Agent注册、路由、上下文传递和生命周期管理，不把具体业务逻辑焊进去；执行层（Skill/Tool）可以紧耦合到具体领域，但通过标准协议（如MCP）对外暴露能力。</p>
+                    <p>耦合度的判断依据是<strong>变更频率</strong>：编排层的接口应该是低频变更的，执行层的实现可以高频迭代。如果发现每次加一个Skill都要动编排核心，说明耦合过度了。要支撑多个C端场景时，编排层还需要考虑多租户隔离和版本灰度能力。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">3</span>Agent循环怎么控制？终止条件有哪些？</h3>
+                <p class="qa-frame">Agent自己说"我完成了"，能信吗？没有外部校验，它既可能提前收工留下半成品，也可能在原地打转耗光预算。</p>
+                <div class="qa-body">
+                    <p>循环控制设三层终止条件。<strong>第一层是硬性边界</strong>——最大循环次数（一般5-10轮，视任务复杂度）。<strong>第二层是目标完成校验</strong>——每轮结束后用轻量级verifier判断"任务是否已完成"，可以是规则引擎或一个小模型，不需要用主模型。<strong>第三层是异常检测</strong>——重复调用检测（连续两轮调用同一工具且参数相似度超过阈值就中断）、无进展检测（连续N轮没有新增有效信息就中断）。</p>
+                    <p>人工介入的触发点分两类：<strong>主动介入</strong>（模型输出置信度低于阈值时暂停）和<strong>被动介入</strong>（超过硬性边界后转人工）。核心设计原则是——Agent不能自己决定"我完成了"，完成判定必须由外部校验器来做。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">4</span>Agent开发中最大的挑战是什么？怎么验证Skill修改后能达到线上预期？</h3>
+                <p class="qa-frame">代码有单元测试，Agent的回复质量和Skill调用正确性却没有天然的度量标准。改了一个Skill的Prompt，怎么知道它在线上不会变差？</p>
+                <div class="qa-body">
+                    <p>最大的挑战是<strong>"效果不可直接度量"</strong>。解法是把主观问题拆成可自动化的客观子问题：Skill调用是否正确→用参数匹配+工具返回码校验；任务是否完成→用规则+小模型做二值判定；回复质量→用LLM-as-Judge配合人工抽检校准。</p>
+                    <p>验证Skill修改是否达标，核心是<strong>A/B对照+回归测试集</strong>：维护一个覆盖核心场景的黄金测试集（Golden Set），每次修改后跑全量回归，关注通过率和badcase分布的变化；如果修改涉及Prompt，还要额外做一轮LLM-as-Judge的偏好对比，看新版本是否在多数case上不劣于旧版本。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">5</span>如何看待千问、ChatGPT、豆包、Kimi等产品的能力差异？</h3>
+                <p class="qa-frame">同样是大模型驱动的助手产品，差异往往不在模型参数表上，而在工程和场景适配上。</p>
+                <div class="qa-body">
+                    <p>ChatGPT在通用Agent能力（Code Interpreter、多工具编排）上领先；豆包在中文C端交互体验和多模态融合上更顺滑；Kimi的长上下文和文档理解是差异化优势；千问的强项在于中文知识覆盖和电商/本地生活场景的天然数据优势。</p>
+                    <p>千问最应该补齐的短板，不是模型能力，而是<strong>Agent的"确定性体验"</strong>——用户对C端产品的容错率远低于B端。一个典型痛点是：用户说"帮我查一下附近评分4.5以上的火锅店"，Agent可能调用3次工具都失败了，但只回一句"抱歉我没找到"，用户体验断点在于Agent不暴露"我在做什么、做到哪一步了"。需要补齐的是<strong>过程透明化+失败降级策略</strong>：让用户看到Agent的推理链路，失败时有明确的fallback路径（比如"工具暂时不可用，我帮你直接跳到搜索页"）。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="frontier-eval">
+            <h2>Agent评测体系怎么从零搭建</h2>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">6</span>如果从零设计一个Agent评测体系，怎么设计？</h3>
+                <p class="qa-frame">评测体系不是一份指标清单，而是一条从数据构造到闭环迭代的完整链路——哪一层没搭好，后面的数字都不可信。</p>
+                <div class="qa-body">
+                    <p>分四层来搭。</p>
+                    <p><strong>第一层：评测集设计。</strong>核心原则是分层覆盖——正常流量、边缘case、对抗样本、历史badcase四类按比例分配。人工构建保证覆盖率（约60-70%），线上用户反馈持续补充（30-40%）。每条case要标注预期的关键行为节点（调用了什么工具、参数对不对、最终输出应包含什么），而不是只标注最终答案。</p>
+                    <p><strong>第二层：评测执行。</strong>能自动化的坚决自动化——工具调用正确性用规则校验，任务完成度用规则+小模型二值判定，回复质量用LLM-as-Judge配合人工抽检校准。LLM-as-Judge需要定期做一致性校验（与人工评分对比，Kappa系数&gt;0.7才可用）。</p>
+                    <p><strong>第三层：指标定义。</strong>不能只看"答对了没有"，要分维度：任务完成率、工具调用准确率、平均轮次、延迟P50/P95、token成本、安全合规通过率，并定义分层的通过标准——有些case允许工具调用不完美但最终结果对，有些则要求链路完全正确。</p>
+                    <p><strong>第四层：闭环迭代。</strong>评测结果必须回流到数据合成和训练侧。badcase分析要定位到具体环节（路由错误、规划错误、工具选择错误、参数生成错误、还是输出格式化错误），不同环节的修复策略完全不同。评测报告要能回答"这一版比上一版在哪个维度上变好了、哪个维度变差了"。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">7</span>多模态评测集怎么设计？评测执行中有哪些自动化提效的部分？</h3>
+                <p class="qa-frame">图片场景多了一层麻烦：'模型看到了什么'和'模型理解了什么'是两件事，badcase出现时得先分清是哪一层的问题。</p>
+                <div class="qa-body">
+                    <p>多模态评测集采用两层标注：<strong>感知层标注</strong>（图片中有哪些元素、文字、布局关系）和<strong>理解层标注</strong>（对于给定问题，正确的理解应该是什么）。这样badcase出现时，可以定位是感知问题还是推理问题。</p>
+                    <p>自动化提效的原则是<strong>自动化不是替代人工，而是把人工从重复劳动中解放出来去处理真正需要判断力的case</strong>。可自动化的部分包括：批量图片预处理和标准化、调用模型跑全量case并收集原始输出、用规则做初步过滤（比如输出格式不符合要求的直接标记为失败）。需要人工介入的是：边界case的判定标准制定、LLM-as-Judge的评分校准、以及badcase的根因分析。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">8</span>Agent评测的badcase主要集中在哪些部分？解决思路是什么？</h3>
+                <p class="qa-frame">同一类badcase反复出现，如果只是逐个修，修复速度永远赶不上badcase产生的速度。</p>
+                <div class="qa-body">
+                    <p>badcase通常集中在三个区域：<strong>工具调用的参数生成错误</strong>（模型知道该调哪个工具，但参数不对）、<strong>多步任务的上下文丢失</strong>（做到第三步忘了第一步的关键约束）、<strong>模糊输入的意图误判</strong>（用户表达不精确时Agent做了错误假设）。</p>
+                    <p>解决思路按根因分层：参数错误→优化工具定义的schema和示例，必要时加参数校验的二次确认；上下文丢失→引入结构化摘要或关键约束的显式重注入；意图误判→在意图识别层加一层"置信度低于阈值时主动追问"的兜底策略。关键原则是：<strong>badcase修复不能只修单个case，要问"这个错误类型会不会在其他case上复现"</strong>——修一个case的同时要反向扩充评测集，确保同类问题被覆盖。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">9</span>Skill和Tool的区别是什么？</h3>
+                <p class="qa-frame">两个词经常被混着用，但如果架构上不区分，Agent的能力边界会越来越模糊。</p>
+                <div class="qa-body">
+                    <p>从工程视角看，<strong>Tool是原子能力，Skill是面向任务的组合能力</strong>。Tool是最小执行单元（比如"查询数据库""调用搜索API"），Skill是把多个Tool按特定业务逻辑编排成的可复用能力单元（比如"酒店比价"这个Skill可能内部调用了3个Tool）。</p>
+                    <p>区分它们的关键在于<strong>复用粒度和变更频率</strong>：Tool的接口应该极其稳定，Skill可以随业务迭代。Agent做的是"选哪个Skill"，Skill内部做的是"怎么组合Tool"。如果一个Skill被大量Agent直接调用且逻辑简单，说明它可能应该被降级为Tool；反之如果一个Tool被多个Skill以相同方式组合使用，说明应该沉淀为新Skill。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">10</span>模型的上下文压缩怎么做？对话太长了怎么处理？</h3>
+                <p class="qa-frame">上下文窗口不是无限的，硬撑一个几十轮的对话在一个上下文里，成本和延迟都会先垮掉。</p>
+                <div class="qa-body">
+                    <p>关注的是分层策略，而不是单一方法：先用工程手段省token，实在不够再考虑模型层面的压缩。具体分四层：</p>
+                    <p><strong>第一层</strong>，早期对话压缩成结构化摘要——每隔N轮，用模型把已完成的部分压缩成"用户需求+已确认参数+当前进展"的结构化文本，释放原始token。<strong>第二层</strong>，大任务拆子任务——一个30步的任务不要在一个上下文里硬撑，拆成5个子任务，中间结果通过外部存储传递。<strong>第三层</strong>，中间结果落库——工具调用的返回值只提取关键字段存数据库，上下文里只留一句"已完成XX，结果存储在task_123"。<strong>第四层</strong>，按需召回——建立对话的索引（主题+关键实体），需要时按主题精准召回，而不是全量塞回去。</p>
+                    <p>这个设计的关键取舍是：摘要压缩会丢细节，所以摘要模板的设计必须覆盖"哪些信息丢了一定量级"，这需要靠评测来验证。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">11</span>评测集的覆盖度有什么缺陷？线上反馈对优化评测集有什么帮助？</h3>
+                <p class="qa-frame">评测集是在理想条件下构造的，但线上用户的输入永远比想象中脏。</p>
+                <div class="qa-body">
+                    <p>评测集最常见的缺陷是<strong>"实验室偏差"</strong>——评测集在理想条件下构建，但用户真实输入充满噪声、拼写错误、口语化表达、多意图混杂。另一个隐蔽缺陷是<strong>"长尾场景的代表性不足"</strong>，比如评测集里"查天气"有10条case，但"查天气+设置提醒+分享给朋友"这种组合场景只有1条，而线上组合场景占比可能远超预期。</p>
+                    <p>线上反馈的价值在于它天然覆盖了评测集构建时想不到的场景分布。但直接用线上数据补充评测集也有坑——线上数据是有偏的（高频用户贡献了大量样本），需要做重采样和分层。做法是：线上反馈作为"候选池"，人工筛选后按场景维度分层纳入评测集，同时给线上来源的case标注"来源=线上"，分析时可以和人工构建的case分开看。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">12</span>定义Agent评测指标，会关注哪些点？</h3>
+                <p class="qa-frame">指标堆得越多不代表评测越靠谱，如果每个指标都答不出"好坏的阈值在哪、变差了怎么定位"，指标本身就是噪声。</p>
+                <div class="qa-body">
+                    <p>把指标分四个象限：<strong>效果象限</strong>——任务完成率（核心）、工具调用准确率、端到端成功率；<strong>效率象限</strong>——平均轮次、P50/P95延迟、单次任务token成本；<strong>质量象限</strong>——输出格式合规率、幻觉率（通过检索溯源或事实校验）、安全合规通过率；<strong>体验象限</strong>——用户干预率（用户需要手动纠正Agent的次数）、追问率（Agent主动追问的次数，过高说明意图识别有问题）。</p>
+                    <p>关键不是指标数量，而是<strong>每个指标都要有明确的"好/坏"阈值和归因路径</strong>。比如"任务完成率下降2%"，要能快速定位是哪个环节的指标变了——是工具调用准确率降了，还是平均轮次增加导致了超时。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="frontier-general">
+            <h2>通用工程问题：幻觉、记忆与多Agent协作</h2>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">13</span>Agent如何减少幻觉？工业场景怎么做？</h3>
+                <p class="qa-frame">幻觉不可能被彻底消除，工业场景真正要解决的问题是让它可控。</p>
+                <div class="qa-body">
+                    <p>工业场景的幻觉治理要分层防御：<strong>第一层，检索增强</strong>——关键事实必须可溯源，输出附带引用来源，无来源的断言标记为低置信度。<strong>第二层，工具验证</strong>——对可验证的声明用工具做二次校验（比如"北京今天气温25度"调天气API验证）。<strong>第三层，输出约束</strong>——用结构化输出（JSON Schema）限制模型能说什么，自由文本部分只允许生成"解释性内容"而非"事实性内容"。<strong>第四层，不确定性暴露</strong>——当模型置信度低时，明确输出"我不确定"而不是编造。</p>
+                    <p>核心原则是：幻觉不可能消除，但可以检测和降级。工程上要做的是让幻觉的影响可控，而不是追求零幻觉。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">14</span>Memory怎么设计？短期记忆和长期记忆怎么落地？</h3>
+                <p class="qa-frame">短期记忆和长期记忆各自的存储方式不难理解，难点在于——什么时候把一条信息从短期升级进长期，谁来做这个判断？</p>
+                <div class="qa-body">
+                    <p>短期记忆用<strong>滑动窗口+结构化摘要</strong>：最近N轮保留原始对话，更早的压缩成结构化摘要（用户需求、关键参数、当前状态）。长期记忆用<strong>向量检索+元数据过滤</strong>：用户偏好、历史决策模式这类信息存向量库，检索时结合时间衰减和相关性重排。</p>
+                    <p>两者的衔接是设计难点：短期记忆每轮结束后，用一个轻量级分类器判断"这轮对话中是否有值得写入长期记忆的信息"，只有分类器判断有价值的信息才写入长期记忆，避免长期记忆被噪声污染。写入时做去重和冲突检测（同一偏好出现矛盾时标记为"待确认"而非直接覆盖）。</p>
+                </div>
+            </div>
+
+            <div class="qa-block">
+                <h3><span class="qa-num">15</span>多Agent/多异步任务下，如何防止上下文污染？</h3>
+                <p class="qa-frame">多个子Agent共享同一个全局上下文看起来省事，但一个子Agent的错误假设很容易顺着共享上下文污染到其他子Agent。</p>
+                <div class="qa-body">
+                    <p>上下文污染的本质是不同Agent的"视野边界"不清晰。防止污染的核心设计是<strong>每个子Agent只拿到完成自己任务所需的最小上下文，而不是共享全局上下文</strong>。</p>
+                    <p>具体做法：主调度Agent维护全局任务状态，子Agent的输入是"任务描述+必要的输入数据"，输出是"结果+状态更新"，子Agent之间不直接共享上下文；如果两个子Agent需要协作，通过主调度Agent做中转，而不是让它们直接对话。另一个关键点是<strong>每个Agent的消息历史要独立存储</strong>，不能因为复用了同一个LLM session就混在一起。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="closing-box">
+            回过头看，这三份材料横跨的时间不短——从"LLM是什么"的入门笔记，到Prompt工程的具体范式，再到Agent工程化中"如何管理上下文、如何设计可回归的评测体系"这类更接近生产环境的问题。这也是我理解的成长路径：<strong>先建立准确的基础概念，再积累可复用的方法论，最后在真实约束（成本、延迟、可验证性）下打磨工程判断力</strong>。
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

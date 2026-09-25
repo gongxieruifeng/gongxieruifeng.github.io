@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent 框架生态全景：从核心概念到多智能体编排与低代码平台 | 龚谢蕊烽</title>
+    <meta name="description" content="从 Agent = LLM + Memory + Tools + Planning + Action 出发，梳理单智能体的四种执行范式、AutoGen 与 CrewAI 两种多智能体编排范式、MCP 协议与 Function Calling 的关系，以及 Dify 等低代码平台如何把这些能力落成可视化工作流。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🤖 AI Agent</span>
+            <h1 class="post-title">Agent 框架生态全景：从核心概念到多智能体编排与低代码平台</h1>
+            <p class="post-subtitle">从 <strong>Agent = LLM + Memory + Tools + Planning + Action</strong> 这个公式出发，梳理单智能体的四种执行范式、AutoGen 与 CrewAI 两种多智能体编排范式、MCP 协议与 Function Calling 的关系，以及 Dify 等低代码平台如何把这些能力落成可视化的工作流。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-08-01</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">Agent</span>
+                    <span class="post-meta-tag">MCP</span>
+                    <span class="post-meta-tag">多智能体</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#concept">Agent 是什么：从公式到类比</a></li>
+                <li><a href="#frameworks">开发框架层：从单智能体执行范式到多智能体编排</a></li>
+                <li><a href="#protocol">协议层：MCP、Function Calling 与 Agent Skills</a></li>
+                <li><a href="#lowcode">低代码 / 无代码平台：Dify 与 Coze</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="concept">
+            <h2>Agent 是什么：从公式到类比</h2>
+            <p>各家对 Agent 的定义细节不尽相同，但落到工程实现上，可以用一个公式概括它的组成：</p>
+            <div class="highlight-box">
+                <strong>Agent = LLM + Memory + Tools + Planning + Action</strong><br>
+                LLM 提供决策和推理能力，Planning 把目标拆解成可执行的步骤，Tools 负责对接外部世界完成具体操作，Memory 保存对话和任务上下文，Action 是最终落地的执行动作——五者共同构成一个能自主完成任务的智能体，而不只是一个问答机器人。
+            </div>
+            <p>一个比较直观的类比是"打车去西藏玩"这件事：</p>
+            <table>
+                <thead><tr><th>公式组件</th><th>类比角色</th><th>具体表现</th></tr></thead>
+                <tbody>
+                    <tr><td>LLM</td><td>大脑中枢</td><td>规划这趟行程的"你"这个决策主体</td></tr>
+                    <tr><td>Planning</td><td>规划</td><td>步骤一：规划打车路线；步骤二：定饭店、订酒店……</td></tr>
+                    <tr><td>Tools</td><td>调用工具</td><td>调用 MCP 或 Function Calling 等接口——滴滴打车、携程 / 美团订酒店饭店</td></tr>
+                    <tr><td>Memory</td><td>记忆能力</td><td>沟通时要知道上下文，比如订酒店得记住是在去西藏路上的哪一段</td></tr>
+                    <tr><td>Action</td><td>执行</td><td>真正完成下单、支付这些落地操作</td></tr>
+                </tbody>
+            </table>
+            <p>这个类比的价值在于把五个抽象组件全部对应到一次真实决策链路上：LLM 负责"想清楚"，Planning 负责"拆步骤"，Tools 负责"调外部能力"，Memory 负责"不丢上下文"，Action 负责"真正把事办成"。后面几节要讨论的所有框架、协议、平台，本质上都是在工程化地实现或组合这五个组件。</p>
+        </div>
+
+        <div class="section" id="frameworks">
+            <h2>开发框架层：从单智能体执行范式到多智能体编排</h2>
+            <p>Planning 具体怎么落地，业界沉淀出几种可复用的执行范式；当任务复杂到需要多个角色协作时，又演化出 AutoGen、CrewAI 这类多智能体编排框架。这一节按"单智能体范式 → 多智能体编排"的顺序展开。</p>
+
+            <h3>单智能体的四种执行范式</h3>
+            <p>这几种范式都基于 LangChain 生态实现，核心差异在于"怎么组织 LLM 的思考步骤"，适用场景也各不相同。</p>
+
+            <div class="subcard">
+                <h4>Plan-and-Execute：先规划，后执行</h4>
+                <p>先综合考虑任务的多个方面产出一份完整计划，再按计划逐步执行，适合复杂项目管理或需要多步决策的场景。</p>
+                <pre><code>from langchain_openai import ChatOpenAI
+from langchain_experimental.plan_and_execute import PlanAndExecute, load_agent_executor, load_chat_planner
+from langchain import SerpAPIWrapper, LLMMathChain
+from langchain.agents.tools import Tool
+
+llm = ChatOpenAI()
+search = SerpAPIWrapper()
+llm_math_chain = LLMMathChain(llm=llm, verbose=True)
+
+tools = [
+    Tool(name="Search", func=search.run, description="用于回答关于当前事件的问题"),
+    Tool(name="Calculator", func=llm_math_chain.run, description="用于计算或解决问题"),
+]
+
+planner = load_chat_planner(llm)
+executor = load_agent_executor(llm, tools, verbose=True)
+agent = PlanAndExecute(planner=planner, executor=executor, verbose=True)
+
+agent.run("在纽约，100美元能买几束玫瑰？")</code></pre>
+            </div>
+
+            <div class="subcard">
+                <h4>Self-Ask：自问自答，拆解复杂问题</h4>
+                <p>允许模型对自己提出中间问题并逐一回答，以增强对原问题的理解、提高最终答案质量，适合需要深入分析或创造性解决方案的场景，比如创意写作。</p>
+                <pre><code>from langchain import hub
+from langchain.agents import AgentExecutor, create_self_ask_with_search_agent
+from langchain_community.tools.tavily_search import TavilyAnswer
+from langchain_fireworks import Fireworks
+
+llm = Fireworks(model="accounts/fireworks/models/llama-v3p1-405b-instruct", max_tokens=256)
+tools = [TavilyAnswer(max_results=1, name="Intermediate Answer")]
+
+prompt = hub.pull("hwchase17/self-ask-with-search")
+agent = create_self_ask_with_search_agent(llm, tools, prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+
+agent_executor.invoke({"input": "上一届的美国总统是谁?"})</code></pre>
+            </div>
+
+            <div class="subcard">
+                <h4>ReAct：思考 - 行动 - 观察的循环</h4>
+                <p>在 LangChain 里用 Agent 时需要理解四个核心元素：<strong>llm</strong>（提供逻辑的引擎，负责生成预测和处理输入）、<strong>prompt</strong>（指导模型形成推理框架）、<strong>tools</strong>（外部工具，涵盖数据增强、清洗、搜索、API 等）、<strong>Agent Executor</strong>（负责调用合适的外部工具并管理整个流程）。ReAct 的核心是让模型在 Thought → Action → Observation 之间循环，直到能给出 Final Answer。</p>
+                <pre><code>from langchain_openai import ChatOpenAI
+from langchain_community.agent_toolkits.load_tools import load_tools
+from langchain.prompts import PromptTemplate
+from langchain.agents import create_react_agent, AgentExecutor
+
+llm = ChatOpenAI(model='gpt-4-turbo-preview', temperature=0.5)
+tools = load_tools(["serpapi", "llm-math"], llm=llm)
+
+template = '''尽你所能用中文回答以下问题。如果能力不够你可以使用以下工具:
+
+{tools}
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+
+Question: {input}
+Thought:{agent_scratchpad}'''
+prompt = PromptTemplate.from_template(template)
+
+agent = create_react_agent(llm, tools, prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools, handle_parsing_errors=True, verbose=True)
+
+agent_executor.invoke({"input": "目前市场上玫瑰花的一般进货价格是多少？如果我在此基础上加价5%，应该如何定价？"})</code></pre>
+            </div>
+
+            <div class="subcard">
+                <h4>Reflection：执行 - 反思 - 优化的自我迭代</h4>
+                <p>反思机制被越来越多地集成到 Agent 的决策循环中，核心思想是在 Agent 完成一次任务或一个重要步骤后，引入一个"反思"环节：</p>
+                <ol>
+                    <li>Agent 执行任务并生成一个初步结果</li>
+                    <li>Agent（或另一个"批判家"Agent）评估这个结果是否完整、准确，是否存在逻辑错误或更优解</li>
+                    <li>基于反思得出的改进意见，Agent 修改计划或行动并重新执行，产出更高质量的最终结果</li>
+                </ol>
+                <p>这种"行动 - 反思 - 优化"的循环让 Agent 具备了在没有人类监督时自我迭代的能力，<strong>Reflexion</strong> 和 <strong>LATS（Language Agent Tree Search）</strong>是这一思想的代表性实践。</p>
+            </div>
+
+            <div class="highlight-box">
+                这四种范式在实践中并非互斥，而是可以组合使用：先用 Plan-and-Execute 制定宏观计划，在执行每个宏观步骤时用 ReAct 处理细节，并在关键节点后引入 Reflection 进行检查和优化，从而集各家之所长。这套"宏观规划 + 细节循环 + 关键节点反思"的组合模式，我在参与的 GeoME（时空预测方向）相关工作中也验证过其可行性。
+            </div>
+
+            <h3>AutoGen：层级式多智能体架构</h3>
+            <p>AutoGen 可以轻松搭建层级式架构的多智能体系统——由一个协调节点统一管理多个专业 Agent，这和 LangGraph 生态中 <code>langgraph-supervisor</code> 依赖库里 supervisor-Agent 的思路是一致的。</p>
+            <pre><code>┌─────────────────────────────────────────┐
+│           AutoGen Framework             │
+├─────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
+│  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │  │
+│  │(Planner)│  │(Executor│  │(Analyzer│  │
+│  └────┬────┘  └────┬────┘  └────┬────┘  │
+│       └─────────────┼─────────────┘     │
+│                     ↓                   │
+│              ┌─────────────┐            │
+│              │ Group Chat  │            │
+│              │   (对话协调) │            │
+│              └─────────────┘            │
+└─────────────────────────────────────────┘</code></pre>
+            <table>
+                <thead><tr><th>组件</th><th>作用</th><th>类比</th></tr></thead>
+                <tbody>
+                    <tr><td>ConversableAgent</td><td>基础智能体类</td><td>员工基类</td></tr>
+                    <tr><td>AssistantAgent</td><td>LLM 驱动的助手</td><td>专业工程师</td></tr>
+                    <tr><td>UserProxyAgent</td><td>用户代理，可执行代码</td><td>项目经理</td></tr>
+                    <tr><td>GroupChat</td><td>多智能体群组</td><td>团队会议</td></tr>
+                    <tr><td>GroupChatManager</td><td>对话管理器</td><td>会议主持人</td></tr>
+                </tbody>
+            </table>
+            <p>它的核心优势在于：模拟测试团队多角色配合的<strong>多智能体协作</strong>能力、以自然语言交互降低使用门槛的<strong>对话驱动</strong>模式、便于集成现有工具和框架的<strong>灵活扩展</strong>性，以及微软背书下活跃、完善的开源生态。落到具体产品形态上，AutoGen 把这套能力拆成几个可视化模块：<strong>Models</strong> 模块负责接入本地（如 Ollama）或在线的 LLM 服务；<strong>Agents</strong> 模块用来配置普通成员 Agent 和小组管理员 Agent；<strong>Skills</strong> 模块可以为 Agent 导入额外能力；<strong>Workflows</strong> 模块则通过配置用户输入触发器、并指定一个 Agents 模块中配置好的管理员 Agent 作为 Manager 节点，组装出一条完整的多智能体工作流。</p>
+
+            <h3>CrewAI：平等式角色分工架构</h3>
+            <p>CrewAI 是一个精简、快速的 Python 框架，从零开始构建、不依赖 LangChain 或其他代理框架，走的是一种<strong>平等式架构</strong>的多智能体路线。它通过模拟现实世界中的"团队分工"模式，让每个智能体拥有明确角色、目标和技能，能自主委派任务、共享信息，核心目标是协调多个 AI 智能体协作完成复杂任务，实现"1+1>2"的协作效果。</p>
+            <p>核心优势体现在五个方面：<strong>角色驱动设计</strong>（每个智能体有明确角色、目标和背景故事，LLM 能更精准定位任务需求）、<strong>智能协作能力</strong>（智能体间自主委派任务、共享上下文，无需人工干预）、<strong>灵活工具集成</strong>（支持网络搜索、PDF 解析、向量数据库检索等工具）、<strong>生产级就绪</strong>（内置内存管理、知识库、可观测性和安全机制）、<strong>低门槛使用</strong>（简洁 API + YAML 配置，新手也能快速搭建）。典型应用场景包括内容创作（研究员收集资料 → 撰稿人撰写 → 编辑审核）、市场分析（数据采集 → 分析师提炼趋势 → 报告生成）、客户支持（客服解答基础问题 → 技术专家处理复杂故障 → 跟进反馈）等。</p>
+            <table>
+                <thead><tr><th>组件</th><th>作用</th><th>关键属性</th></tr></thead>
+                <tbody>
+                    <tr><td>Agent（智能体）</td><td>执行具体任务的"团队成员"</td><td><code>role</code> / <code>goal</code> / <code>backstory</code> / <code>tools</code> / <code>llm</code></td></tr>
+                    <tr><td>Task（任务）</td><td>智能体需完成的具体工作单元</td><td><code>description</code> / <code>agent</code> / <code>expected_output</code> / <code>context</code></td></tr>
+                    <tr><td>Crew（团队）</td><td>组织智能体和任务的协调者</td><td><code>agents</code> / <code>tasks</code> / <code>process</code> / <code>verbose</code></td></tr>
+                    <tr><td>Flow（流程）</td><td>精细化控制任务流，支持条件逻辑、循环</td><td><code>@start</code> / <code>@listen</code> / <code>@router</code> / 状态持久化</td></tr>
+                    <tr><td>Tool（工具）</td><td>智能体执行任务的"武器"</td><td>通过 <code>@tool</code> 装饰器封装</td></tr>
+                </tbody>
+            </table>
+            <p>以一个"PDF 成绩查询助手"为例：检索智能体优先从 PDF 中提取成绩信息，若无结果则调用网络搜索；响应合成智能体把检索结果整理成自然语言回答；两者由 Crew 按 <code>Process.sequential</code> 顺序执行。角色和任务用 YAML 与代码分离配置，改角色描述不用碰代码：</p>
+            <pre><code># config/agents.yaml
+retriever_agent:
+  role: >
+    成绩信息检索专家: {query}
+  goal: >
+    从可用资源中检索与用户查询{query}最相关的成绩信息，优先使用PDF搜索工具；
+    若PDF无结果，再使用网络搜索工具补充。
+  backstory: >
+    你是一位细致的教育数据分析师，擅长从文档和网络中精准提取学生成绩信息，
+    熟悉成绩单格式，能快速定位姓名、班级、分数等关键信息。</code></pre>
+            <pre><code>from crewai import Agent, Crew, Process, Task, LLM
+from crewai.project import CrewBase, agent, crew, task
+import os
+
+def deepseek_llm():
+    return LLM(
+        model="deepseek/deepseek-chat",
+        api_key=os.getenv("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com/v1",
+        model_kwargs={"llm_provider": "deepseek"}
+    )
+
+@CrewBase
+class GradeQueryCrew:
+    agents_config = "../config/agents.yaml"
+    tasks_config = "../config/tasks.yaml"
+
+    @agent
+    def retriever_agent(self) -> Agent:
+        return Agent(config=self.agents_config['retriever_agent'],
+                     tools=[pdf_tool, ddgs_text_search], llm=deepseek_llm())
+
+    @agent
+    def response_synthesizer_agent(self) -> Agent:
+        return Agent(config=self.agents_config['response_synthesizer_agent'], llm=deepseek_llm())
+
+    @task
+    def retrieval_task(self) -> Task:
+        return Task(config=self.tasks_config['retrieval_task'])
+
+    @task
+    def response_task(self) -> Task:
+        # context 显式声明依赖：先检索，再合成
+        return Task(config=self.tasks_config['response_task'],
+                    context=[self.retrieval_task()], output_file='成绩查询结果.md')
+
+    @crew
+    def crew(self) -> Crew:
+        return Crew(agents=self.agents, tasks=self.tasks, process=Process.sequential, verbose=True)</code></pre>
+
+            <table>
+                <thead><tr><th>维度</th><th>AutoGen</th><th>CrewAI</th></tr></thead>
+                <tbody>
+                    <tr><td>架构范式</td><td>层级式，GroupChatManager 统一调度</td><td>平等式，角色分工、自主委派</td></tr>
+                    <tr><td>定位类比</td><td>会议主持人协调多个专业工程师</td><td>团队按角色分工协作</td></tr>
+                    <tr><td>配置方式</td><td>对话驱动 + 代码 / 可视化工作流面板</td><td>YAML 分离配置与逻辑，门槛更低</td></tr>
+                    <tr><td>适合场景</td><td>需要中心节点统一调度、层级管控的任务</td><td>角色边界清晰、可拆成顺序任务链的场景</td></tr>
+                </tbody>
+            </table>
+            <div class="highlight-box green">
+                单智能体范式（ReAct / Plan-and-Execute / Reflection）解决的是一个 Agent 内部"怎么想"的问题；AutoGen 和 CrewAI 解决的是多个 Agent 之间"怎么协作"的问题——前者靠中心节点层级调度，后者靠角色分工平等协作。选型的关键不是哪个更先进，而是任务本身的结构更接近"指挥链"还是"团队分工"。
+            </div>
+        </div>
+
+        <div class="section" id="protocol">
+            <h2>协议层：MCP、Function Calling 与 Agent Skills</h2>
+            <p>Tools 这一环要落地，光有框架不够，还需要"模型怎么发现工具""模型怎么调用工具"的统一规范——这正是 MCP、Function Calling 和 Agent Skills 三者共同覆盖、又各自分工的问题。</p>
+
+            <h3>MCP 协议：把 M×N 问题变成 M+N 问题</h3>
+            <p><strong>MCP（Model Context Protocol，模型上下文协议）</strong>是 2024 年 11 月底由 Anthropic 推出的一种开放标准，目标是让应用程序以统一的方式向大语言模型提供工具调用能力，极大简化了大语言模型与外部世界的交互方式。</p>
+            <div class="highlight-box orange">
+                在 MCP 之前，为每个数据源单独构建连接是一个 <strong>M × N</strong> 问题——M 个应用对接 N 个数据源，就要写 M×N 套集成代码，架构碎片化、难以扩展，限制了 AI 获取上下文信息的能力。MCP 提供统一且可靠的访问方式后，这个问题变成了 <strong>M + N</strong>：每个应用只需对接 MCP 协议一次，每个数据源只需实现一个 MCP Server。
+            </div>
+            <p>MCP 遵循客户端 - 服务器架构：</p>
+            <table>
+                <thead><tr><th>角色</th><th>定位</th></tr></thead>
+                <tbody>
+                    <tr><td>MCP Host</td><td>运行 MCP 的主应用程序（如 Claude Desktop、Cursor、Cline），为用户提供与 LLM 交互的界面，同时集成 MCP Client 以连接 MCP Server</td></tr>
+                    <tr><td>MCP Client</td><td>嵌入在 Host 中，充当 LLM 与 MCP Server 之间的桥梁：接收 LLM 请求 → 转发给对应 Server → 把结果返回给 LLM</td></tr>
+                    <tr><td>MCP Server</td><td>提供一组特定工具，负责从本地数据或远程服务中检索信息；本质是运行在电脑上的一个 Node.js 或 Python 程序——TypeScript 写的通过 <code>npx</code> 运行，Python 写的通过 <code>uvx</code> 运行，可以理解为客户端用命令行调用了本地程序</td></tr>
+                    <tr><td>本地 / 远程资源</td><td>MCP Server 实际读取或操作的数据源，可以是本地文件系统，也可以是远程 API</td></tr>
+                </tbody>
+            </table>
+            <p>通信机制上，MCP 目前支持两种传输方式：</p>
+            <table>
+                <thead><tr><th>机制</th><th>适用场景</th><th>特点</th></tr></thead>
+                <tbody>
+                    <tr><td>stdio（标准输入输出）</td><td>本地服务，操作本地软件或文件，比如没有在线服务的 Blender，是 MCP 默认的通信方式</td><td>无需外部网络依赖，速度快、可靠性高、易调试；但配置较复杂（需预装命令行工具），单进程通信，无法并行处理多个客户端请求</td></tr>
+                    <tr><td>SSE（Server-Sent Events）</td><td>远程在线服务，比如访问邮箱、查天气这类本身就有在线 API 的场景</td><td>配置简单，一个连接地址就能用，适合实时数据更新、消息推送、轻量级监控和日志流；缺点是长连接一旦中断或波动容易丢数据</td></tr>
+                    <tr><td>Streamable HTTP</td><td>网络不够稳定的远程服务场景</td><td>支持按会话 ID 重新建立 SSE 流，网络恢复后接续执行之前未完成的传输，解决了 SSE 的稳定性问题</td></tr>
+                </tbody>
+            </table>
+            <p>MCP 的核心 API 只有两个：<code>tools/list</code>（列出 Server 支持的所有工具）和 <code>tools/call</code>（Client 请求 Server 执行某个工具并返回结果）。另外，应用层还有一个 <strong>A2A（Agent-to-Agent）协议</strong>，设计目的是让不同平台上的 Agent 之间能以自然的方式协作，例如阿里云上创建的 Agent 可以通过 A2A 协议与火山云上创建的 Agent 无缝通信协作——这解决的是 Agent 与 Agent 之间的互联问题，和 MCP 解决 Agent 与工具之间互联的问题是两个层面。</p>
+
+            <h3>Function Calling 与 MCP：能力与协议的关系</h3>
+            <p><strong>Function Calling</strong> 指的是模型具备调用函数的能力，这个能力不是函数和服务器之间的沟通能力，而是模型（或者更准确地说，模型对应的 API）和服务器之间的沟通能力——毕竟很多模型是闭源的，我们直接用的往往是模型 API 与服务提供商服务器之间的这层交互。</p>
+            <div class="highlight-box orange">
+                两者不在同一层面，不是竞争关系：<strong>MCP 规定的是 MCP Server 和 MCP Client 之间如何通信</strong>，即如何发现和调用函数，这套规范和模型本身无关；<strong>Function Calling 是模型的一种能力</strong>，是大模型告诉服务器（或代理）"这个任务可以调用某个工具"的决策能力。换句话说，大模型只扮演"大脑"的角色——给出该调用什么工具的方案，但并不能真正执行调用，真正的调用和执行是由服务器 / 代理完成的，而 MCP 正是规范这层执行怎么发生的协议。
+            </div>
+
+            <h3>Agent Skills：渐进式披露的另一种工具供给范式</h3>
+            <p>Skills 的本质是一个特殊命名的文件夹（约定名为 <code>skills</code>），里面包含每个技能的 <code>SKILL.md</code> 简要说明文档、对应的详细参考文档，以及技能可以调用的脚本文件（比如查询网页、数学运算、操作本地文件系统的能力）：</p>
+            <pre><code>pdf-processor/                     # Skill 根目录，名称需与 name 字段一致
+├── SKILL.md                       # 核心文件，包含元数据和操作指南
+├── scripts/                       # 存放可执行脚本
+│   └── extract_pdf.py
+└── references/                    # 存放参考资料
+    └── api_docs.md</code></pre>
+            <table>
+                <thead><tr><th>文件 / 目录</th><th>角色与内容</th><th>生效时机</th></tr></thead>
+                <tbody>
+                    <tr><td>SKILL.md（YAML 头）</td><td>技能的"身份牌"：<code>name</code>、<code>description</code>、<code>allowed-tools</code> 等元数据</td><td>始终常驻，Agent 启动时自动预加载到系统提示，用于快速识别和匹配任务</td></tr>
+                    <tr><td>SKILL.md（正文）</td><td>技能的"操作手册"：详细步骤、工具用法、约束规则</td><td>按需加载，Agent 判断任务相关时才读取全文</td></tr>
+                    <tr><td>scripts / references / assets</td><td>技能的"工具箱与资料库"：可执行脚本、参考文档、模板</td><td>按需引用，仅在 SKILL.md 指令中明确要求时才被读取或执行</td></tr>
+                </tbody>
+            </table>
+            <p>这套<strong>渐进式披露</strong>策略的核心是分层加载：初始阶段只加载所有技能的 name 和 description，用很少的 token 让模型知道自己"持有哪些技能"；需要用到某个技能时，才进一步加载它的 SKILL.md 了解细节；真正执行时，再按 SKILL.md 里的指引去读取更细粒度的参考文档或脚本。相比 MCP 需要在模型上下文中全量注册所有工具的信息，这套策略解决了两个实际问题：一是简单任务场景下，大量工具信息仍要占用上下文，造成 token 浪费；二是大量工具注册容易导致模型注意力涣散，即便是能力更强的模型，正确理解任务并调用对应工具的压力也会增大。Skill 的漏斗式引导让模型只关注当下最相关的能力，同时书写一个 Skill 的门槛也远低于实现一个 MCP Server。</p>
+            <div class="highlight-box green">
+                三者分工清晰：MCP 解决"多个工具如何被统一接入"的协议标准化问题，Function Calling 是模型本身"决定调用哪个工具"的能力，Agent Skills 解决的是"大量工具信息如何不淹没上下文"的组织效率问题。三者不互斥，一个成熟的 Agent 系统往往同时依赖这三层。
+            </div>
+        </div>
+
+        <div class="section" id="lowcode">
+            <h2>低代码 / 无代码平台：Dify 与 Coze</h2>
+            <p>当以上这些能力需要快速交付给业务方使用时，低代码平台把"选模型、接知识库、配工具、编排流程"都变成了可视化操作，Dify 是其中比较有代表性的一个。</p>
+
+            <h3>Dify：知识库、Function Calling 与工作流的可视化编排</h3>
+            <p>本地部署走的是标准 Docker Compose 路径：克隆仓库、把 <code>.env.example</code> 复制为 <code>.env</code>、执行 <code>docker compose up -d</code> 拉起全部服务，几分钟就能在本地访问控制台完成注册登录。</p>
+            <p>知识库是 Dify 里最基础的能力之一：创建知识库、上传文档完成切片和向量化之后，把它挂载给某个应用，应用在回答问题时就能引用知识库内容作为依据，而不是仅依赖模型的参数记忆——这也是没挂知识库和挂了知识库之后，同一个应用回答质量差异最直观的来源。</p>
+            <p>除了知识库，Dify 也支持接入自定义 Function Calling 工具。比如用 FastAPI 包一个天气查询接口，核心逻辑是校验请求头里的 Authorization、按城市名查编码、请求外部天气 API 并解析成自然语言：</p>
+            <pre><code>from fastapi import FastAPI, Request, HTTPException
+from pydantic import BaseModel
+import requests
+
+app = FastAPI()
+VALID_TOKEN = "your-token-here"
+CITY_CODES = {"北京": "101010100", "上海": "101020100"}
+
+class WeatherRequest(BaseModel):
+    location: str
+
+@app.post("/weather")
+def get_current_weather(request: Request, body: WeatherRequest):
+    auth_header = request.headers.get("Authorization")
+    if auth_header != f"Bearer {VALID_TOKEN}":
+        raise HTTPException(status_code=403, detail="Invalid Authorization header")
+
+    city_code = CITY_CODES.get(body.location)
+    if not city_code:
+        return {"status": "error", "message": f"暂不支持 {body.location}，目前支持：{','.join(CITY_CODES.keys())}"}
+
+    url = f"http://t.weather.itboy.net/api/weather/city/{city_code}"
+    try:
+        data = requests.get(url, timeout=10).json()
+        forecast = data["data"]["forecast"][0]
+        high = forecast["high"].replace("高温 ", "")
+        low = forecast["low"].replace("低温 ", "")
+        return f"{body.location}今天是{forecast['type']}，温度{high}/{low}"
+    except Exception as e:
+        return {"status": "error", "message": f"天气数据获取失败: {str(e)}"}</code></pre>
+            <p>本地起服务后用 <code>localtunnel</code>（<code>lt --port 8081</code>）做一层公网穿透方便调试，拿到公网地址后，把接口的 OpenAPI Schema 粘贴到 Dify「插件」→「创建插件」页面，配置好 Authentication 请求头、测试通过后启用，就能在应用的「工具」面板里勾选这个插件，让 Agent 在识别到天气相关问题时自动调用：</p>
+            <pre><code>用户输入：北京今天天气怎么样？
+Agent 回复：让我帮您查询北京的天气...
+          北京今天是多云，温度32℃/22℃
+
+用户输入：上海明天会下雨吗？
+Agent 回复：我只能查询当前天气，无法预测明天。当前上海的天气是：上海今天是晴，温度35℃/28℃</code></pre>
+            <p>Dify 里编排应用有两种模式，选型的核心是看任务需要"确定性"还是"灵活性"：</p>
+            <table>
+                <thead><tr><th>维度</th><th>工作流（Workflow）</th><th>智能体（Agent）</th></tr></thead>
+                <tbody>
+                    <tr><td>流程控制</td><td>固定不变，显式定义</td><td>自主决策，动态规划</td></tr>
+                    <tr><td>可预测性</td><td>★★★★★</td><td>★★★☆☆</td></tr>
+                    <tr><td>灵活性</td><td>★★★☆☆</td><td>★★★★★</td></tr>
+                    <tr><td>运行成本</td><td>低（Token 消耗可控）</td><td>高（多轮推理消耗大）</td></tr>
+                    <tr><td>调试难度</td><td>容易（路径清晰）</td><td>困难（黑盒决策）</td></tr>
+                </tbody>
+            </table>
+            <p>应用编排完成后，可以通过 Service API 对外暴露：Base URL 固定为 <code>http(s)://your-dify-host/v1</code>，鉴权走 <code>API-Key</code>，所有请求都要在 <code>Authorization</code> HTTP Header 中携带，格式为 <code>Authorization: Bearer app-*********</code>，强烈建议把 API-Key 放在后端存储而不是客户端或前端代码里，避免泄露导致损失。</p>
+
+            <h3>Coze：与 Dify 高度同源的另一条低代码路径</h3>
+            <p>Coze 的使用方式和操作流程与 Dify 高度类似，知识库配置、Function Calling 工具接入、Workflow / Agent 编排这些核心概念可以直接从 Dify 的使用经验中迁移过来，这里不再展开。</p>
+            <div class="highlight-box">
+                工作流保证确定性和成本可控，Agent 保证灵活性；实践中更常见的做法是两者混合——用工作流兜住主干流程，在需要动态决策的节点上嵌入一个 Agent 子节点，兼顾可控性和应变能力。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

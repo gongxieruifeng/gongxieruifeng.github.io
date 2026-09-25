@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>强化学习基础：从价值函数到 PPO | 龚谢蕊烽</title>
+    <meta name="description" content="从状态、动作、奖励、策略、价值函数等基本概念出发，系统梳理贝尔曼方程、策略梯度定理与 PPO 的裁剪目标函数、KL 约束、优势估计机制，并简述 GRPO、DPO 等对齐算法与 PPO 的差异。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent);
+            padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 32px; font-weight: 900; line-height: 1.3; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink);
+            margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+
+        .formula-box {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 18px 22px; margin: 14px 0; text-align: center; overflow-x: auto;
+        }
+        .formula-box .formula {
+            font-family: Georgia, "Times New Roman", serif; font-size: 17px; color: var(--ink);
+        }
+        .formula-box .var-def {
+            font-size: 12.5px; color: var(--muted); margin-top: 10px; text-align: left;
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; line-height: 1.8;
+        }
+        .formula-box .var-def code { background: var(--panel); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+        tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 25px; }
+            .page { padding: 28px 16px 60px; }
+            .formula-box .formula { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">
+                <span class="nav-logo-mark">龚</span>
+                龚谢蕊烽
+            </a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">⚡ 深度学习</span>
+            <h1 class="post-title">强化学习基础：从价值函数到 PPO</h1>
+            <p class="post-subtitle">从状态、动作、奖励这些基本概念出发，梳理价值函数、贝尔曼方程与策略梯度的关系，再深入 PPO 的角色分工、KL 约束与裁剪目标函数——这是理解 DPO、GRPO 等大模型对齐算法设计动机的必经基础。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-08-02</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">强化学习</span>
+                    <span class="post-meta-tag">PPO</span>
+                    <span class="post-meta-tag">策略梯度</span>
+                    <span class="post-meta-tag">Actor-Critic</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>强化学习基本框架</h2>
+            <p>强化学习（Reinforcement Learning, RL）研究的是一个智能体（Agent）如何通过与环境（Environment）的持续交互，在"试错—反馈"中学习一套让长期回报最大化的行为策略。以训练一只小狗坐下为例：发出指令后小狗做出反应，做对了给零食（奖励），做错了给一点惩罚，重复足够多次后，小狗会自发地趋利避害——这是强化学习最朴素的直觉起点，也是"奖惩机制"这个核心思想的来源。</p>
+            <table>
+                <thead><tr><th>概念</th><th>符号</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>Agent（智能体）</td><td>—</td><td>待训练的决策主体，在 LLM 语境下通常就是模型本身</td></tr>
+                    <tr><td>Environment（环境）</td><td>—</td><td>智能体所处并与之交互的外部系统</td></tr>
+                    <tr><td>State（状态）</td><td><code>s_t</code></td><td>t 时刻智能体观察到的环境信息</td></tr>
+                    <tr><td>Action（动作）</td><td><code>a_t</code></td><td>智能体在状态 s_t 下做出的决策</td></tr>
+                    <tr><td>Reward（奖励）</td><td><code>r_t</code></td><td>环境对动作 a_t 的即时反馈，是一个标量</td></tr>
+                    <tr><td>Policy（策略）</td><td><code>π_θ(a|s)</code></td><td>决定"在状态 s 下应该做什么"的函数，由参数 θ 控制</td></tr>
+                    <tr><td>Value（价值）</td><td><code>V(s) / Q(s,a)</code></td><td>基于当前状态对未来累积回报的预测</td></tr>
+                </tbody>
+            </table>
+            <p>Policy 和 Value 对应智能体的两种能力：Policy 负责在动作之前做判断（"这一步该怎么做"），Value 负责基于状态对未来做预测（"照这样下去大概能得多少分"）。这两者的分工，在后文的 Actor-Critic 架构里会被直接实体化为两个独立训练的神经网络。</p>
+        </div>
+
+        <div class="section">
+            <h2>价值函数、回报与贝尔曼方程</h2>
+            <p>要让 Value 具备"预测"能力，需要先定义清楚它预测的到底是什么。智能体在一条轨迹上获得的不是单步奖励，而是折扣累积回报（Return）：</p>
+            <div class="formula-box">
+                <div class="formula">G<sub>t</sub> = r<sub>t</sub> + γr<sub>t+1</sub> + γ<sup>2</sup>r<sub>t+2</sub> + ... = Σ<sub>k=0</sub><sup>∞</sup> γ<sup>k</sup>r<sub>t+k</sub></div>
+                <div class="var-def">
+                    <code>G_t</code>：从时刻 t 开始的累积折扣回报<br>
+                    <code>γ ∈ [0,1]</code>：折扣因子，越接近 1 越重视长期回报
+                </div>
+            </div>
+            <p>状态价值函数 V<sup>π</sup>(s) 和动作价值函数 Q<sup>π</sup>(s,a) 分别衡量"处于某状态"和"在某状态下执行某动作"的长期期望收益：</p>
+            <div class="formula-box">
+                <div class="formula">V<sup>π</sup>(s) = E<sub>π</sub>[G<sub>t</sub> | s<sub>t</sub>=s]</div>
+                <div class="formula" style="margin-top:8px;">Q<sup>π</sup>(s,a) = E<sub>π</sub>[G<sub>t</sub> | s<sub>t</sub>=s, a<sub>t</sub>=a]</div>
+                <div class="var-def">V<sup>π</sup>(s)：策略 π 下从状态 s 出发能获得的期望回报，即 Value 模型要预测的量<br>Q<sup>π</sup>(s,a)：策略 π 下在状态 s 执行动作 a 之后能获得的期望回报</div>
+            </div>
+            <p>这两个价值函数满足一个递归关系——贝尔曼方程（Bellman Equation）：当前状态的价值，等于"即时奖励"加上"折扣后下一状态的价值"：</p>
+            <div class="formula-box">
+                <div class="formula">V<sup>π</sup>(s<sub>t</sub>) = E[ r<sub>t</sub> + γV<sup>π</sup>(s<sub>t+1</sub>) ]</div>
+            </div>
+            <p>这也是 Critic 模型训练的理论基础：它不需要等到整条轨迹结束才知道对错，而是可以按贝尔曼方程做单步自举（bootstrapping），用真实奖励与自己历史预测之间的差异（TD 误差）不断修正预测——这正是价值方法（Value-based）的核心工作方式。</p>
+        </div>
+
+        <div class="section">
+            <h2>策略梯度与 Actor-Critic</h2>
+            <p>强化学习有两条经典技术路线。价值方法（Value-based）先学准 V(s) / Q(s,a)，再通过"选价值最高的动作"间接得到策略；策略梯度方法（Policy Gradient）则反过来，直接用神经网络参数化策略 π<sub>θ</sub>(a|s)，让梯度直接作用在策略参数 θ 上。LLM 的强化学习对齐场景几乎都走第二条路——动作空间（词表）巨大，枚举所有 Q(s,a) 并不现实，直接对策略做梯度上升更自然。</p>
+            <p>判断"哪些动作该被强化"需要一个信号，这就是优势函数（Advantage Function）：</p>
+            <div class="formula-box">
+                <div class="formula">A<sup>π</sup>(s,a) = Q<sup>π</sup>(s,a) − V<sup>π</sup>(s)</div>
+                <div class="var-def">衡量"在状态 s 下选择动作 a，比这个状态下的平均水平好多少"：A &gt; 0 说明这个动作值得被强化，A &lt; 0 说明应该被抑制</div>
+            </div>
+            <p>用优势替代原始回报作为权重，是策略梯度降方差的标准手段，更新方向由策略梯度定理给出：</p>
+            <div class="formula-box">
+                <div class="formula">∇<sub>θ</sub>J(θ) = E<sub>τ~πθ</sub>[ Σ<sub>t</sub> ∇<sub>θ</sub>log π<sub>θ</sub>(a<sub>t</sub>|s<sub>t</sub>) · A<sup>π</sup>(s<sub>t</sub>, a<sub>t</sub>) ]</div>
+                <div class="var-def">J(θ)：策略的期望回报目标；直接用蒙特卡洛采样得到的 G_t 做权重方差很大，用一个额外训练的价值网络去估计 baseline 并计算优势，可以显著降低更新方差、加快收敛</div>
+            </div>
+            <p>这就是 Actor-Critic 架构的由来：Actor（策略网络）负责生成动作，Critic（价值网络）负责评估状态、辅助降方差，二者配合完成一次更新。PPO，正是这套 Actor-Critic 思想在大模型对齐场景下的具体实现，核心理解可以概括为"自己做题、自己预测、对答案后修改"。</p>
+        </div>
+
+        <div class="section">
+            <h2>PPO：角色分工与训练目标</h2>
+            <p>在 LLM 对齐场景下，完整的 PPO 训练涉及四个模型，分工明确：</p>
+            <table>
+                <thead><tr><th>模型名称</th><th>角色</th><th>它是谁</th><th>更新参数</th><th>作用</th></tr></thead>
+                <tbody>
+                    <tr><td>Actor（演员）</td><td>Agent</td><td>需要训练的 LLM</td><td>是</td><td>负责生成回答，所有 LLM Loss 最终都是为了让它变强</td></tr>
+                    <tr><td>Critic（评论家）</td><td>教练</td><td>Value Model</td><td>是</td><td>预测当前状态大概能得多少分，辅助 Actor 减少方差</td></tr>
+                    <tr><td>Reward（裁判）</td><td>考官</td><td>奖励模型</td><td>否（冻结）</td><td>给 Actor 的回答打出真实的 Reward 分数</td></tr>
+                    <tr><td>Ref（参考）</td><td>镜子</td><td>SFT 原始模型</td><td>否（冻结）</td><td>防止模型"忘本"，计算 KL 散度，确保 Actor 不偏离初始语言能力太远</td></tr>
+                </tbody>
+            </table>
+            <h3>Critic：预测"照这样写下去还能得多少分"</h3>
+            <p>Critic 与 Actor 结构相似（Transformer + Value Head），但输出是一个标量价值而非下一个 token 的概率分布，输入是当前已生成的文本，输出是对未来累积奖励的估计。它与 Actor 一起训练，用真实奖励和自己历史估计之间的 TD 误差（对应上一节的贝尔曼方程）不断修正预测。</p>
+            <h3>Reward：给出真实但静止的分数</h3>
+            <p>Reward 模型通常是一个基于 Transformer 的分类器，输入是 prompt + response，输出一个标量分数；它用人工标注的偏好数据（两个回答，人选择哪个更好）通过对比学习训练，训练完成后冻结参数，不再更新——它定义"什么是好"，但本身不参与优化。</p>
+            <div class="highlight-box orange">
+                <strong>核心区别：</strong>Reward 模型是<strong>真实的外部反馈</strong>（基于人类偏好），固定不变，用来定义"什么是好"；Critic 模型是<strong>内部的价值估计</strong>，随 Actor 一起进化，用来让学习过程更平滑高效。
+            </div>
+            <h3>Ref：防止模型"忘本"的锚点</h3>
+            <p>Ref 就是训练开始前的 SFT 原始模型，冻结参数，不参与训练。它的作用是提供一个"行为锚点"——通过 KL 散度约束 Actor 的新策略不要偏离这个锚点太远，防止模型为了讨好 Reward 而丢掉基础的语言能力。</p>
+        </div>
+
+        <div class="section">
+            <h2>PPO 核心机制：KL 约束、裁剪目标函数与优势估计</h2>
+            <p>PPO 的优化目标是在"奖励最大化"与"和 Ref 模型保持接近"之间做平衡：</p>
+            <div class="formula-box">
+                <div class="formula">Max(总目标) = Reward(期望奖励) − β × KL散度(Actor 新策略 ‖ Ref 参考策略)</div>
+                <div class="var-def">KL 散度衡量新策略（Actor）与参考策略（Ref）分布的差异，差异越大扣分越多；β 是可调节系数，决定"不忘本"约束的强度。优化时需要让期望奖励上升、KL 散度下降，才能让总目标变大</div>
+            </div>
+            <p>另一个关键机制是裁剪（Clip）。PPO 是 on-policy 算法，希望用旧策略采集的数据更新新策略，但更新幅度不能太大。为此需要比较同一个 token、同一个位置在新旧策略下的生成概率比值：</p>
+            <div class="formula-box">
+                <div class="formula">r(θ) = π<sub>θ</sub>(a<sub>t</sub> | s<sub>t</sub>) / π<sub>old</sub>(a<sub>t</sub> | s<sub>t</sub>)</div>
+                <div class="var-def">分子是当前 Actor 在状态 s_t 下选择动作 a_t（某个具体 token）的概率，分母是采集数据那一刻（旧策略）对同一个 token 的概率。这个比值只针对实际被采样到的那个 token，而不是对整个词表分布做比较</div>
+            </div>
+            <p>当 r(θ) 过大，说明新策略在这个动作上概率提升过猛，需要被限制。PPO 的裁剪目标函数（Clipped Surrogate Objective）把优势 Â_t 和这个比值结合起来：</p>
+            <div class="formula-box">
+                <div class="formula">L<sup>CLIP</sup>(θ) = E<sub>t</sub>[ min( r<sub>t</sub>(θ)·Â<sub>t</sub>, clip(r<sub>t</sub>(θ), 1−ε, 1+ε)·Â<sub>t</sub> ) ]</div>
+                <div class="var-def">ε：裁剪范围超参数（常取 0.1~0.2），clip 把 r_t(θ) 截断在 [1−ε, 1+ε] 区间内；取 min 保证目标函数是真实目标的悲观（下界）估计，避免单步更新幅度过大</div>
+            </div>
+            <p>优势 Â_t 的具体估计方式，PPO 通常采用 GAE（Generalized Advantage Estimation），结合多步 TD 误差按 λ 加权求和：</p>
+            <div class="formula-box">
+                <div class="formula">δ<sub>t</sub> = r<sub>t</sub> + γV(s<sub>t+1</sub>) − V(s<sub>t</sub>)</div>
+                <div class="formula" style="margin-top:8px;">Â<sub>t</sub><sup>GAE</sup> = Σ<sub>l=0</sub><sup>∞</sup> (γλ)<sup>l</sup> δ<sub>t+l</sub></div>
+                <div class="var-def">δ_t 即 TD 误差（单步贝尔曼残差）；λ ∈ [0,1] 控制偏差与方差的权衡——λ=0 退化为单步 TD 估计，λ=1 接近蒙特卡洛估计</div>
+            </div>
+            <p>Critic 自身的优化目标则是让预测价值逼近真实回报，用均方误差衡量：</p>
+            <div class="formula-box">
+                <div class="formula">Value Loss = (真实回报 − 预测价值)<sup>2</sup></div>
+                <div class="var-def">该损失只更新 Critic 参数，不直接影响 Actor；真实回报来自 Reward 模型给出的最终得分与后续步骤奖励的累计</div>
+            </div>
+            <h3>训练流程速览</h3>
+            <p><strong>前向：</strong>① Actor 逐 token 生成回答 → ② Reward 对完整回答打出真实分数 → ③ Critic 在每一步预测"照这样写下去大概能得多少分" → ④ Ref 在同样输入下给出参考概率，用于后续计算 KL。</p>
+            <p><strong>后向：</strong>① 用真实奖励和 Critic 估计计算优势 Â_t → ② 用新旧策略概率比值和 Â_t 计算裁剪损失 → ③ 加上与 Ref 的 KL 惩罚项 → ④ 用 MSE 更新 Critic → ⑤ Actor 损失（裁剪项与 KL 惩罚的组合）与 Critic 损失分别反向传播，更新各自参数。</p>
+            <div class="highlight-box">
+                PPO 的最终目标，是让 Actor 写出既受人类偏好（高奖励）、又不偏离原始语言能力（小 KL）的回答，同时借助 Critic 提供的优势信号，让每一步更新都保持稳健（clip 限制）。
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>从 PPO 到更轻量的对齐算法</h2>
+            <p>PPO 需要同时维护 Actor、Critic、Reward、Ref 四个模型，训练链路复杂、显存开销大。围绕"如何砍掉一部分模型、保留核心思想"这个问题，后续出现了一系列变体。<strong>GRPO</strong>（Group Relative Policy Optimization，群组相对策略优化，DeepSeek 团队提出）是其中最具代表性的一支：它去掉了 Critic，对同一个 prompt 一次性采样一组（如 4 个）回答，用组内奖励的均值和标准差做标准化，直接得到每个回答的相对优势，替代原本需要 Critic 估计的 Â_t：</p>
+            <div class="formula-box">
+                <div class="formula">Â<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1</sub>, ..., r<sub>G</sub>)) / std(r<sub>1</sub>, ..., r<sub>G</sub>)</div>
+                <div class="var-def">r_i 是同一 prompt 下第 i 个回答的奖励得分，G 是组内回答数量；标准化后的 Â_i 替代 PPO 中由 Critic 估计的优势，再套用同样的裁剪目标函数和 KL 惩罚项更新策略</div>
+            </div>
+            <p><strong>DPO</strong>（Direct Preference Optimization）走的是另一条路——连 Reward 模型也一并去掉，直接在人工标注的偏好对（chosen/rejected）上做一个二分类式的优化，不需要在线采样。<strong>DAPO</strong> 在 GRPO 基础上引入动态采样和解耦裁剪，应对长思维链场景下的多样性和训练效率问题；<strong>ORPO</strong> 则是一种无需参考模型的偏好优化方法。几种方法与 PPO 的核心差异可以归纳为：</p>
+            <table>
+                <thead><tr><th>方法</th><th>优势估计</th><th>是否需要 Critic</th><th>是否需要采样</th><th>训练数据</th></tr></thead>
+                <tbody>
+                    <tr><td>PPO</td><td>GAE（用 Critic 估计）</td><td>需要</td><td>在线</td><td>奖励模型打分</td></tr>
+                    <tr><td>DPO</td><td>直接比较偏好对</td><td>不需要</td><td>离线</td><td>人类偏好对</td></tr>
+                    <tr><td>GRPO</td><td>组内相对标准化</td><td>不需要</td><td>在线</td><td>奖励模型打分</td></tr>
+                </tbody>
+            </table>
+            <p>这些算法在大模型对齐中的具体应用——包括 DPO 的 LoRA 双适配器工程实现、GRPO 相比 PPO 的显存优化路径——可参考另一篇《<a href="finetuning-alignment.html">大模型微调与对齐全流程</a>》。</p>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

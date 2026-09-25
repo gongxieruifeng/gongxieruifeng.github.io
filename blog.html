@@ -352,6 +352,87 @@
                 categoryLabel: "🧠 大语言模型",
                 tags: ["LLM推理", "vLLM", "性能优化", "TTFT"],
                 url: "posts/llm-inference-metrics.html"
+            },
+            {
+                title: "大模型基础、Prompt 工程与前沿技术全景",
+                excerpt: "从大模型训练范式与 Agent 能力缺口讲起，走到 Prompt 工程方法论与金融 NLP 实战案例，再到 Agent 工程化中的上下文管理、评测体系设计与幻觉治理——一份跨越认知层到工程层的技术全景。",
+                date: "2026-09-23",
+                category: "llm",
+                categoryLabel: "🧠 大语言模型",
+                tags: ["大模型基础", "Prompt工程", "Agent前沿", "LLM-as-Judge", "上下文管理"],
+                url: "posts/llm-fundamentals-frontier.html"
+            },
+            {
+                title: "后端工程全景：技术栈选型、中间件面试与容器化实践",
+                excerpt: "把后端技术选型的判断逻辑、中间件面试高频考点和容器化/API框架实践整合成一条知识链路：从数据存储、缓存、向量检索怎么选，到消息队列可靠性、分布式事务落地，再到 Docker 与 FastAPI 的具体实践。",
+                date: "2026-09-13",
+                category: "engineering",
+                categoryLabel: "🔧 工程实践",
+                tags: ["后端架构", "中间件", "分布式系统", "向量检索", "容器化"],
+                url: "posts/backend-engineering-overview.html"
+            },
+            {
+                title: "RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践",
+                excerpt: "拆解 RAG 检索链路更底层的环节——HNSW 与 IVF-PQ 两种近似最近邻算法的工程权衡、LlamaIndex 框架的设计定位，以及 Self-RAG/CRAG 等检索优化与 ReAct 范式下的 Agentic RAG 实践。",
+                date: "2026-09-05",
+                category: "engineering",
+                categoryLabel: "🔧 工程实践",
+                tags: ["ANN检索", "HNSW", "LlamaIndex", "Agentic RAG", "ReAct"],
+                url: "posts/rag-retrieval-advanced.html"
+            },
+            {
+                title: "强化学习基础：从价值函数到 PPO",
+                excerpt: "从状态、动作、奖励等基本概念出发，梳理价值函数、贝尔曼方程与策略梯度的关系，再深入 PPO 的角色分工、KL 约束与裁剪目标函数，最后简述 GRPO、DPO 等对齐算法与 PPO 的核心差异。",
+                date: "2026-08-02",
+                category: "dl",
+                categoryLabel: "⚡ 深度学习",
+                tags: ["强化学习", "PPO", "策略梯度", "Actor-Critic", "RLHF"],
+                url: "posts/reinforcement-learning-basics.html"
+            },
+            {
+                title: "Agent 框架生态全景：从核心概念到多智能体编排与低代码平台",
+                excerpt: "从「Agent = LLM + Memory + Tools + Planning + Action」出发，梳理 ReAct 等单智能体执行范式、AutoGen 与 CrewAI 两种多智能体编排范式的差异，再深入 MCP 协议与 Function Calling 的关系，最后落到 Dify 等低代码平台。",
+                date: "2026-08-01",
+                category: "agent",
+                categoryLabel: "🤖 AI Agent",
+                tags: ["AI Agent", "MCP", "多智能体", "AutoGen", "Dify"],
+                url: "posts/agent-frameworks-ecosystem.html"
+            },
+            {
+                title: "LangGraph 与 Deep Agent：LangChain 1.0 的新范式",
+                excerpt: "从 StateGraph 的 State/Node/Edge 心智模型，到 Checkpoint 与人机协作机制，再到 Deep Agent 把规划、文件系统、子 Agent 委托打包成开箱即用的中间件——梳理 LangChain 1.0 生态从底层运行时到高层封装的完整脉络。",
+                date: "2026-08-01",
+                category: "agent",
+                categoryLabel: "🤖 AI Agent",
+                tags: ["LangGraph", "Deep Agent", "LangChain 1.0", "Agent工程"],
+                url: "posts/langgraph-deep-agent.html"
+            },
+            {
+                title: "大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩",
+                excerpt: "从数据格式怎么组织、训练参数怎么调、Loss 曲线怎么读，到用 LLaMA-Factory 跑通一次完整的 LoRA 训练并导出部署，再到模型蒸馏技术，整理落地时真正会碰到的工程细节，并厘清 Embedding 模型与词嵌入模型的区别。",
+                date: "2026-04-08",
+                category: "llm",
+                categoryLabel: "🧠 大语言模型",
+                tags: ["LoRA", "LLaMA-Factory", "模型蒸馏", "Embedding", "微调实战"],
+                url: "posts/llm-finetuning-practice.html"
+            },
+            {
+                title: "LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性",
+                excerpt: "LangChain 的模块列表很长，但真正决定能不能用好它的，是几个反复出现的核心抽象：Runnable 协议、LCEL 的组合方式、Memory 的分级设计、Retrieval 的六环节流水线。按机制而非 API 目录重新梳理了一遍。",
+                date: "2026-04-07",
+                category: "engineering",
+                categoryLabel: "🔧 工程实践",
+                tags: ["LangChain", "LCEL", "Memory", "Agent", "LangSmith"],
+                url: "posts/langchain-core-mechanics.html"
+            },
+            {
+                title: "深度学习模型架构精讲：从经典网络到 MoE 与多模态",
+                excerpt: "深度学习模型的演进，很大程度上是「给网络内置多少先验假设」与「计算怎么分配」的取舍——卷积假设空间局部性，循环假设时间依赖性，Transformer 则用注意力把这些假设换成了可学习机制。从前向/反向传播讲到 MoE 稀疏路由与 ViT 图像 Token 化。",
+                date: "2026-03-31",
+                category: "dl",
+                categoryLabel: "⚡ 深度学习",
+                tags: ["Transformer", "MoE", "多模态", "注意力机制", "神经网络架构"],
+                url: "posts/deep-learning-architectures.html"
             }
         ];
 

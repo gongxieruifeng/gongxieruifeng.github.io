@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph 与 Deep Agent：LangChain 1.0 的新范式 | 龚谢蕊烽</title>
+    <meta name="description" content="从 LangGraph 的 State/Node/Edge 心智模型与 Checkpoint 持久化，到 Agent 循环中的人机协作机制，再到 Deep Agent 如何用中间件把规划、文件系统与子 Agent 委托打包成开箱即用的能力，梳理 LangChain 1.0 生态里从运行时到高层封装的完整脉络。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🤖 AI Agent</span>
+            <h1 class="post-title">LangGraph 与 Deep Agent：LangChain 1.0 的新范式</h1>
+            <p class="post-subtitle">从 StateGraph 的 State / Node / Edge 心智模型，到 Checkpoint 与人机协作机制，再到 Deep Agent 把"规划、文件系统、子 Agent 委托"打包成开箱即用的中间件套餐——这是 LangChain 1.0 生态里从底层运行时到高层封装的一条完整脉络。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-08-01</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">LangGraph</span>
+                    <span class="post-meta-tag">Deep Agent</span>
+                    <span class="post-meta-tag">LangChain 1.0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#mental-model">从 Chain 到 Graph：State、Node、Edge 的心智模型</a></li>
+                <li><a href="#memory">Checkpoint 与 Store：短期记忆与长期记忆</a></li>
+                <li><a href="#patterns">用 State/Node/Edge 搭出的常见编排模式</a></li>
+                <li><a href="#agent-loop">Agent 循环、中断与人机协作</a></li>
+                <li><a href="#deep-agent">Deep Agent：比 ReAct 更高一层的范式</a></li>
+                <li><a href="#deep-agent-config">Deep Agent 的可插拔能力</a></li>
+                <li><a href="#langchain-10">LangChain 1.0：中间件化的 Agent 基础框架</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="mental-model">
+            <h2>从 Chain 到 Graph：State、Node、Edge 的心智模型</h2>
+            <p>LangGraph 可以看作是在 LangChain 的 API 之上做的进一步封装，用来协调多个 Chain、Agent、Tool 完成更复杂的任务。LangChain 里的 Chain 本质上是一条固定顺序的调用链——上一步的输出是下一步的输入，流程在写代码的那一刻就已经定死；LangGraph 把执行流程本身建模成一张图，图里的节点可以根据运行时的状态动态决定下一步去哪，甚至循环回到之前的节点。支撑这套心智模型的只有三个概念：<strong>State（状态）</strong>、<strong>Node（节点）</strong>、<strong>Edge（边）</strong>。</p>
+
+            <h3>State：不属于任何一个节点，属于整张图</h3>
+            <p>State 是在图中所有节点之间共享的"记忆"，用来记录 Agent 已经学到和决策的全部信息。它的存储原则很明确：<strong>State 里应该存原始数据，而不是格式化好的文本</strong>，格式化应该留到具体节点里按需处理。</p>
+            <div class="highlight-box">
+                这样做的好处：不同节点可以对同一份数据做不同的格式化；改提示词模板不需要改动状态结构；调试时能准确看到每个节点收到的原始数据；迭代优化时不会破坏已有状态。
+            </div>
+            <p>State 可以是 <code>TypedDict</code>，也可以是 Pydantic 的 <code>BaseModel</code>。一个 LangGraph 图在运行时只能维护一个共享的 State 对象，如果需要管理多种不同的数据，就把它们定义成这一个 State 类下的属性，配合 Reducer 函数定义各自的更新逻辑：</p>
+            <pre><code>from typing import TypedDict, Annotated
+from langgraph.graph.message import add_messages
+
+class State(TypedDict):
+    messages: Annotated[list[AnyMessage], add_messages]  # 追加合并
+    list_field: Annotated[list[int], add]                 # 列表拼接
+    extra_field: int                                       # 无 reducer，默认覆盖</code></pre>
+            <p><code>messages</code> 字段配合 <code>add_messages</code> reducer，多个节点返回的新消息会追加到已有列表末尾；<code>list_field</code> 配合 <code>operator.add</code> 做列表拼接；没有标注 reducer 的 <code>extra_field</code> 则是普通覆盖语义——后写入的值替换旧值。任何可序列化的 Python 类型都能放进 State，关键是想清楚每个字段该"追加"还是"覆盖"。</p>
+
+            <h3>Node：接收 State，返回一份局部更新</h3>
+            <p>Node 通常就是一个 Python 函数（也可以是子图或另一个 Agent），接收当前 State，返回一个字典形式的<strong>局部更新</strong>——不是把整个新状态传给下一个节点，而是交给 LangGraph 运行时，由运行时把这份更新合并进全局 State，再传给下一个节点。这保证了每个节点只需要关心自己要修改的字段，不用手动搬运整个状态。LangGraph 还给每个节点提供了重试策略和结果缓存（传入参数相同时优先复用缓存结果）：</p>
+            <pre><code>from langgraph.types import RetryPolicy
+
+builder.add_node("node1", node_1, retry=RetryPolicy(max_attempts=4))</code></pre>
+
+            <h3>Edge：普通边、条件边与 Send 动态路由</h3>
+            <p>Edge 负责把节点连接成一张图。LangGraph 内置了 <code>START</code> 和 <code>END</code> 两个默认节点，作为图的入口和出口。最基本的连接方式是 <code>add_edge</code>：</p>
+            <pre><code>graph.add_edge("node_1", "node_2")</code></pre>
+            <p>真正体现"图"和"链"区别的是 <code>add_conditional_edges</code>——路由决策可以在运行时由函数动态给出，而不是写死在代码结构里：</p>
+            <pre><code>def routing_func(state: State) -&gt; bool:
+    if state["number"] &gt; 5:
+        return True
+    else:
+        return False
+
+builder.add_conditional_edges(START, routing_func, {True: "node_a", False: "node_b"})</code></pre>
+            <p>如果一个节点后面需要同时路由到多个节点实例（比如给列表里的每一条数据分别派发一个处理任务），条件边可以返回 <code>Send</code> 对象列表，<code>Send</code> 的两个参数分别是目标节点名和要传给它的输入：</p>
+            <pre><code>from langgraph.types import Send
+
+def routing_func(state: State):
+    result = []
+    for message in state["messages"]:
+        result.append(Send("node", {"msg": message}))
+    return result
+
+builder.add_conditional_edges(START, routing_func, ["node"])
+builder.add_edge("node", END)</code></pre>
+            <p>除了条件边，节点函数本身也可以返回一个 <code>Command</code> 对象，同时完成"更新状态"和"决定下一跳"两件事，效果上相当于把路由逻辑内嵌进了节点：</p>
+            <pre><code>from langgraph.types import Command
+
+return Command(
+    update={"classification": classification},
+    goto=goto
+)</code></pre>
+            <div class="quote-box">
+                Chain 的每一步在写代码时就已经确定了顺序；Graph 靠条件边和 <strong>Command</strong> 让节点自己决定"接下来去哪"，天然支持分支、并行和循环——Agent 那种"要不要再调用一次工具"的循环结构，正是建立在这套路由机制之上。
+            </div>
+        </div>
+
+        <div class="section" id="memory">
+            <h2>Checkpoint 与 Store：短期记忆与长期记忆</h2>
+            <p>LangGraph 把"记忆"拆成了两层：<strong>Checkpoint</strong> 负责单次会话内的短期记忆，<strong>Store</strong> 负责跨会话、跨用户的长期记忆。两者解决的是完全不同的问题，编译图时可以同时传入。</p>
+
+            <h3>Checkpoint：保存执行状态，支持暂停与恢复</h3>
+            <p>Checkpoint 机制会在每个节点执行完后记录一次状态快照，图可以在中断后从最近的检查点继续，而不用从头重跑。它主要用在两个场景：节点调用 <code>interrupt()</code> 时自动保存状态、等待外部输入；以及调试时通过 <code>get_state()</code> 回溯到任意历史节点。</p>
+            <p>启用检查点需要在编译时传入一个实现了 <code>BaseCheckpointSaver</code> 的实例——<code>MemorySaver</code> 用于临时测试，<code>SqliteSaver</code> 支持进程间共享，生产环境常用 <code>PostgresSaver</code> 或 <code>RedisSaver</code>。运行时通过 <code>configurable</code> 里的 <code>thread_id</code> 区分不同会话，同一个 <code>thread_id</code> 的多次调用会共享检查点：</p>
+            <pre><code>from langgraph.graph import StateGraph, START
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.types import interrupt
+
+builder = StateGraph(dict)
+builder.add_node("step1", lambda state: {"value": state["value"] + 1})
+builder.add_node("step2", lambda state: interrupt("需要用户确认") or state)
+builder.add_edge(START, "step1")
+builder.add_edge("step1", "step2")
+
+checkpointer = MemorySaver()
+graph = builder.compile(checkpointer=checkpointer)
+
+thread_config = {"configurable": {"thread_id": "user-123"}}
+for event in graph.stream({"value": 0}, config=thread_config):
+    print(event)
+
+# 恢复执行，传入相同的 thread_id
+resumed_state = graph.invoke(None, config=thread_config)</code></pre>
+
+            <h3>短期记忆需要定期清理</h3>
+            <p>短期记忆（也就是历史消息）会不断累积，LangGraph 的 Agent 提供了 <code>pre_model_hook</code>，在每次调用大模型之前触发，用来清理消息历史。常见的两种方式是<strong>总结</strong>和<strong>裁剪</strong>：</p>
+            <pre><code># 方式一：用大模型总结历史消息
+from langmem.short_term import SummarizationNode
+from langchain_core.messages.utils import count_tokens_approximately
+from langgraph.prebuilt import create_react_agent
+
+summarization_node = SummarizationNode(
+    token_counter=count_tokens_approximately,
+    model=llm,
+    max_tokens=384,
+    max_summary_tokens=128,
+    output_messages_key="llm_input_messages"
+)
+
+agent = create_react_agent(
+    model=llm, tools=tools,
+    pre_model_hook=summarization_node,
+    checkpointer=checkpointer
+)</code></pre>
+            <pre><code># 方式二：直接裁掉最旧的消息
+from langchain_core.messages.utils import trim_messages, count_tokens_approximately
+
+def pre_model_hook(state):
+    trimmed_messages = trim_messages(
+        state["messages"], strategy="last",
+        token_counter=count_tokens_approximately,
+        max_tokens=384, start_on="human", end_on=("human", "tool")
+    )
+    return {"llm_input_messages": trimmed_messages}
+
+agent = create_react_agent(model=llm, tools=[], pre_model_hook=pre_model_hook, checkpointer=checkpointer)</code></pre>
+
+            <h3>Store：跨线程共享的长期记忆</h3>
+            <p>Checkpoint 用 <code>thread_id</code> 隔离不同会话，Store 用 <strong>namespace</strong>（一个字符串元组，作用类似文件夹路径）隔离不同的命名空间，二者是完全独立的机制。Store 提供 <code>get</code> / <code>put</code> / <code>search</code> / <code>delete</code> 几个基础操作：</p>
+            <pre><code>from langgraph.store.memory import InMemoryStore
+from langgraph.config import get_store
+from langgraph.prebuilt import create_react_agent
+from langchain_core.tools import tool
+
+store = InMemoryStore()
+store.put(("users",), "user_123", {"name": "楼兰", "age": "33"})
+
+@tool(return_direct=True)
+def get_user_info(config) -&gt; str:
+    """查找用户信息"""
+    store = get_store()
+    user_id = config["configurable"].get("user_id")
+    user_info = store.get(("users",), user_id)
+    return str(user_info.value) if user_info else "Unknown user"
+
+agent = create_react_agent(model=llm, tools=[get_user_info], store=store)
+agent.invoke(
+    {"messages": [{"role": "user", "content": "查找用户信息"}]},
+    config={"configurable": {"user_id": "user_123"}}
+)</code></pre>
+            <p>编译图时同时传入 <code>checkpointer</code> 和 <code>store</code> 即可让两套机制并存：<code>graph = builder.compile(checkpointer=checkpointer, store=store)</code>。</p>
+
+            <div class="subcard">
+                <h4>Time Travel：从任意检查点重放或分叉</h4>
+                <p>因为每一步都有检查点，LangGraph 可以用 <code>get_state_history</code> 拿到某个 <code>thread_id</code> 下的全部历史状态，找到想要回到的那个检查点，再用 <code>invoke</code> 注入该检查点的配置重新执行——之前的节点不会重复运行，只会从选定的检查点继续：</p>
+                <pre><code>history = list(graph.get_state_history(config))
+before_joke = next(s for s in history if s.next == ("write_joke",))
+replay_result = graph.invoke(None, before_joke.config)</code></pre>
+                <p>如果不想直接重放，而是想在某个历史状态上改几个值再往下走，可以用 <code>update_state</code> 先分叉出一个新的检查点配置，再执行：<code>fork_config = graph.update_state(before_joke.config, values={"topic": "chickens"})</code>。这个能力在调试复杂图逻辑、或者需要"回到某一步换个输入重新试"时非常直接。</p>
+            </div>
+        </div>
+
+        <div class="section" id="patterns">
+            <h2>用 State/Node/Edge 搭出的常见编排模式</h2>
+            <p>State、Node、Edge 是搭积木的基本件，LangGraph 官方文档总结了几种反复出现的图形状，本质上都是这三个概念的不同组合方式：</p>
+            <table>
+                <thead><tr><th>模式</th><th>核心思路</th><th>典型场景</th></tr></thead>
+                <tbody>
+                    <tr><td>Prompt Chaining（提示链）</td><td>每次 LLM 调用处理上一次调用的输出，中间可插入门控函数做校验，不通过则跳转到修正节点</td><td>把明确任务拆成可验证的小步骤，比如翻译后再校验一致性</td></tr>
+                    <tr><td>Parallelization（并行）</td><td>多个节点从 START 同时展开，各自独立跑完后汇入同一个聚合节点</td><td>拆分子任务并行加速；或多次跑同一任务、从不同维度打分以提高置信度</td></tr>
+                    <tr><td>Routing（路由）</td><td>用一个带结构化输出的 LLM 先做分类判断，条件边根据分类结果转发到对应的专门节点</td><td>先判断问题类型，再分流到定价、退款、退货等具体处理流程</td></tr>
+                    <tr><td>Orchestrator-Worker（编排-工作）</td><td>编排器把任务拆成数量不定的子任务，用 <code>Send</code> 动态派发给多个 worker 并行执行，合成器再汇总结果</td><td>子任务数量运行时才能确定的场景，比如按大纲拆分章节后并行撰写</td></tr>
+                    <tr><td>Evaluator-Optimizer（评估-优化）</td><td>一个节点生成，另一个节点评估并给反馈，条件边根据评估结果决定是结束还是带反馈回到生成节点</td><td>有明确成功标准但需要多轮迭代的任务，比如两种语言间的语义对齐翻译</td></tr>
+                </tbody>
+            </table>
+            <p>这几种模式都是"确定性工作流"——图的形状在设计时就已经想清楚，运行时只是按流程走。而真正的 <strong>Agent</strong> 模式不一样：图里只有一个循环，要不要再走一次循环、要不要调用工具，是模型在运行时自己决定的。这也是下一节要展开的内容。</p>
+        </div>
+
+        <div class="section" id="agent-loop">
+            <h2>Agent 循环、中断与人机协作</h2>
+            <h3>Agent 的基本形态：LLM 与 Tool 之间的往返循环</h3>
+            <p>把 LLM 绑定一组工具，让它在一个循环里自己判断"要不要调用工具、调用完之后要不要继续"，这就是 LangGraph 里 Agent 模式的完整实现，核心只有一条从 <code>tool_node</code> 回到 <code>llm_call</code> 的边：</p>
+            <pre><code>from langgraph.graph import StateGraph, MessagesState, START
+from langchain.tools import tool
+
+@tool
+def multiply(a: int, b: int) -&gt; int:
+    """Multiply a and b."""
+    return a * b
+
+tools = [add, multiply, divide]
+tools_by_name = {tool.name: tool for tool in tools}
+llm_with_tools = llm.bind_tools(tools)
+
+def llm_call(state: MessagesState):
+    """LLM decides whether to call a tool or not"""
+    return {"messages": [llm_with_tools.invoke(
+        [SystemMessage(content="You are a helpful assistant...")] + state["messages"]
+    )]}
+
+def tool_node(state: dict):
+    """Performs the tool call"""
+    result = []
+    for tool_call in state["messages"][-1].tool_calls:
+        tool = tools_by_name[tool_call["name"]]
+        observation = tool.invoke(tool_call["args"])
+        result.append(ToolMessage(content=observation, tool_call_id=tool_call["id"]))
+    return {"messages": result}
+
+def should_continue(state: MessagesState) -&gt; Literal["tool_node", END]:
+    last_message = state["messages"][-1]
+    if last_message.tool_calls:
+        return "tool_node"
+    return END
+
+agent_builder = StateGraph(MessagesState)
+agent_builder.add_node("llm_call", llm_call)
+agent_builder.add_node("tool_node", tool_node)
+agent_builder.add_edge(START, "llm_call")
+agent_builder.add_conditional_edges("llm_call", should_continue, ["tool_node", END])
+agent_builder.add_edge("tool_node", "llm_call")  # 循环回到 LLM
+agent = agent_builder.compile()</code></pre>
+            <p>这就是最基本的 ReAct 循环：<code>should_continue</code> 每一轮都重新判断，模型自己决定这个循环要走几圈。Chain 做不到这一点——它没有"回到上一个节点"的边。</p>
+
+            <h3>Node 出错时，该由谁来修复</h3>
+            <p>Agent 循环里节点失败的原因五花八门，LangGraph 把处理策略按"谁该负责修复"分成四类：</p>
+            <table>
+                <thead><tr><th>错误类型</th><th>谁来修复</th><th>策略</th><th>使用时机</th></tr></thead>
+                <tbody>
+                    <tr><td>瞬态错误（网络问题、限流）</td><td>系统自动</td><td>重试策略</td><td>临时故障通常重试后就能解决</td></tr>
+                    <tr><td>LLM 可恢复错误（工具故障、解析问题）</td><td>大模型</td><td>把错误存进 State，循环回去</td><td>LLM 能看到错误信息并调整方法</td></tr>
+                    <tr><td>用户可修复的错误（信息缺失、指令不清）</td><td>人类</td><td><code>interrupt()</code> 暂停</td><td>必须要有用户输入才能继续</td></tr>
+                    <tr><td>意外错误</td><td>开发者</td><td>直接抛出，不做包装</td><td>需要调试的未知问题</td></tr>
+                </tbody>
+            </table>
+            <p>对应的实现分别是：</p>
+            <pre><code># 瞬态错误——重试策略
+from langgraph.types import RetryPolicy
+workflow.add_node("search_documentation", search_documentation,
+                   retry_policy=RetryPolicy(max_attempts=3, initial_interval=1.0))
+
+# LLM 可恢复错误——把错误写回 State，路由回 agent 节点
+def execute_tool(state: State) -&gt; Command[Literal["agent", "execute_tool"]]:
+    try:
+        result = run_tool(state["tool_call"])
+        return Command(update={"tool_result": result}, goto="agent")
+    except ToolError as e:
+        return Command(update={"tool_result": f"Tool error: {str(e)}"}, goto="agent")
+
+# 用户可修复错误——interrupt() 暂停，等待输入后回到同一个节点重试
+def lookup_customer_history(state: State) -&gt; Command[Literal["draft_response"]]:
+    if not state.get("customer_id"):
+        user_input = interrupt({
+            "message": "Customer ID needed",
+            "request": "请提供客户账号ID以查询其订阅历史"
+        })
+        return Command(update={"customer_id": user_input["customer_id"]}, goto="lookup_customer_history")
+    customer_data = fetch_customer_history(state["customer_id"])
+    return Command(update={"customer_history": customer_data}, goto="draft_response")
+
+# 意外错误——直接抛出
+def send_reply(state: EmailAgentState):
+    try:
+        email_service.send(state["draft_response"])
+    except Exception:
+        raise</code></pre>
+
+            <h3>Human-in-the-loop：把工具调用的决定权交还给人</h3>
+            <p>Agent 能自己决定要不要调用工具，这既是它的优势也是风险来源——面对模糊或高风险的请求，模型可能会做出错误判断。LangGraph 用 <code>interrupt()</code> 实现人机协作：中断当前执行、保存状态、等待用户输入，确认后再恢复。具体实现需要满足四个条件：</p>
+            <ul>
+                <li>必须指定一个 <code>checkpointer</code>，否则无法保存任务状态</li>
+                <li>执行图时必须提供带 <code>thread_id</code> 的配置，之后才能定位到要恢复的线程</li>
+                <li>在需要人工判断的节点内调用 <code>interrupt()</code>，中断任务</li>
+                <li>人类确认后，提交一个 <code>Command(resume=...)</code> 恢复任务——<code>resume</code> 可以是简单的 <code>True</code> / <code>False</code>，也可以是一个字典以传递更丰富的判断信息</li>
+            </ul>
+            <p>中断发生时通常配合 <code>stream()</code> 流式方法使用，便于第一时间感知到任务已经暂停。上一节 <code>lookup_customer_history</code> 的例子就是完整的 interrupt 用法：中断、等待、用相同的节点名 <code>goto</code> 回去重新执行。</p>
+
+            <h3>从单 Agent 到多 Agent：Supervisor 模式</h3>
+            <p>当一个 Agent 不够用时，LangGraph 提供了 <code>langgraph-supervisor</code> 库，用一个 Supervisor 节点对任务做分发，再交给专门的子 Agent 处理：</p>
+            <pre><code>from langgraph.prebuilt import create_react_agent
+from langgraph_supervisor import create_supervisor
+
+flight_assistant = create_react_agent(model=llm, tools=[book_flight],
+                                       prompt="You are a flight booking assistant", name="flight_assistant")
+hotel_assistant = create_react_agent(model=llm, tools=[book_hotel],
+                                      prompt="You are a hotel booking assistant", name="hotel_assistant")
+
+supervisor = create_supervisor(
+    agents=[flight_assistant, hotel_assistant],
+    model=llm,
+    prompt="You manage a hotel booking assistant and a flight booking assistant. Assign work to them."
+).compile()</code></pre>
+            <p>Supervisor 模式解决了"一个 Agent 做所有事"的耦合问题，但分发逻辑、每个子 Agent 的 prompt 和工具都需要自己手工搭建。如果这套"任务分解 → 委托子任务 → 汇总结果"的能力能被打包成开箱即用的封装，就是接下来要说的 Deep Agent。</p>
+        </div>
+
+        <div class="section" id="deep-agent">
+            <h2>Deep Agent：比 ReAct 更高一层的范式</h2>
+            <p>LangGraph、LangChain、Deep Agent 三者不是互相替代的关系，而是逐层封装：</p>
+            <table>
+                <thead><tr><th>层次</th><th>对应角色</th><th>核心职责</th></tr></thead>
+                <tbody>
+                    <tr><td>LangGraph</td><td>运行时引擎（Runtime）</td><td>提供稳定的执行环境，管理流程和状态，支持人机协作——规定"锅怎么热，菜怎么炒"</td></tr>
+                    <tr><td>LangChain</td><td>基础框架（Framework）</td><td>提供标准化组件（模型、工具），定义 Agent 的"基础循环"——提供"菜谱"和基本厨具</td></tr>
+                    <tr><td>Deep Agent</td><td>高级封装 / 工具套件（Harness）</td><td>直接提供一份开箱即用的"主厨套餐"，把规划、文件系统等高级能力内置好，隐藏底层技术细节</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Deep Agent 要解决什么问题</h3>
+            <p>上一节的 Agent 循环——LLM 判断要不要调用工具，循环几轮直到结束——本身没有任务分解能力，没有上下文管理机制，也没有子任务隔离：所有对话历史都堆在同一个 State 里，任务一复杂、跑的轮次一多，就容易把上下文窗口撑爆，或者让模型在长任务中间迷失方向。这些能力此前需要开发者自己拼中间件或写 prompt 工程来补，Deep Agent 把这套常见组合直接预置了下来。</p>
+            <p>LangChain 官方把 Deep Agent 定位为 <strong>"Agent Harness"（智能体套件）</strong>：核心 API <code>create_deep_agent</code> 本质上是在 LangChain 的 <code>create_agent</code> 函数之上，通过一系列预置中间件（Middleware）组装而成的工厂函数——把一个功能基础的空 Agent，变成一个功能完整的"预定义"Agent。</p>
+            <pre><code>pip install -qU deepagents</code></pre>
+            <pre><code>import os
+from typing import Literal
+from tavily import TavilyClient
+from deepagents import create_deep_agent
+
+tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+
+def internet_search(
+    query: str,
+    max_results: int = 5,
+    topic: Literal["general", "news", "finance"] = "general",
+    include_raw_content: bool = False,
+):
+    """Run a web search"""
+    return tavily_client.search(
+        query,
+        max_results=max_results,
+        include_raw_content=include_raw_content,
+        topic=topic,
+    )
+
+research_instructions = "You are an expert researcher. Your job is to conduct thorough research, and then write a polished report."
+
+agent = create_deep_agent([internet_search], research_instructions)
+
+result = agent.invoke({
+    "messages": [{"role": "user", "content": "请帮我调研LangGraph的主要特性和应用场景，并生成一份简短的报告。"}]
+})</code></pre>
+            <p>执行这个搜索任务时，Agent 会自己先规划出"调研特性""调研场景""撰写报告"等步骤，把中间结果存进文件系统，而不是全部堆在对话历史里，从而避免上下文溢出。</p>
+
+            <h3>预置了哪些中间件</h3>
+            <table>
+                <thead><tr><th>中间件</th><th>提供的能力</th></tr></thead>
+                <tbody>
+                    <tr><td>TodoListMiddleware</td><td>提供 <code>write_todos</code> 工具，让 Agent 自主把复杂任务拆解成可追踪的待办列表并按顺序执行</td></tr>
+                    <tr><td>FilesystemMiddleware</td><td>提供 <code>ls</code>、<code>read_file</code>、<code>write_file</code>、<code>edit_file</code>、<code>glob</code>、<code>grep</code> 等工具，管理海量上下文，避免撑爆模型窗口，工具返回的大结果会自动转储到文件系统</td></tr>
+                    <tr><td>SubAgentMiddleware</td><td>提供 <code>task</code> 工具，让主 Agent 可以生成拥有独立上下文的子 Agent 并行处理专门任务</td></tr>
+                    <tr><td>Backend（可插拔后端）</td><td>控制文件系统的存储位置：<code>StateBackend</code>（临时）、<code>FilesystemBackend</code>（本地磁盘）、<code>StoreBackend</code>（持久化）、<code>CompositeBackend</code>（混合路由）</td></tr>
+                </tbody>
+            </table>
+            <p>除此之外还有消息压缩、提示词缓存、工具调用修复等中间件，进一步提升系统的鲁棒性。SubAgentMiddleware 和上一节的 Supervisor 模式解决的是同一类问题，只是把"定义子 Agent、委托任务"从手工搭图变成了一个参数：</p>
+            <pre><code>research_subagent = {
+    "name": "research-agent",
+    "description": "Used to research in-depth questions and provide detailed answers",
+    "system_prompt": "You are a great researcher. Conduct thorough research and provide comprehensive answers.",
+    "tools": [internet_search],
+    "model": "openai:gpt-4o",  # 可选：覆盖主 Agent 的模型
+}
+
+agent = create_deep_agent(
+    model="anthropic:claude-sonnet-4-20250514",
+    subagents=[research_subagent],
+    system_prompt="You are an orchestrator agent. Delegate research tasks to the research-agent when needed."
+)</code></pre>
+            <p>更复杂的场景还可以用 <code>CompiledSubAgent</code> 把一个预编译好的 LangGraph 图直接包装成子 Agent 使用。值得注意的是，即使不主动指定 <code>subagents</code>，<code>create_deep_agent</code> 默认也会创建一个"通用子代理"（general-purpose subagent），共享主 Agent 的系统提示词和工具，但拥有独立的执行环境，用来在处理复杂任务时隔离上下文、避免信息过载；需要关闭时可以通过对应的配置项禁用。</p>
+
+            <div class="quote-box">
+                <strong>高度封装不等于失去灵活性</strong>：每个中间件都可以独立替换——比如把默认的 <code>FilesystemMiddleware</code> 后端从临时内存换成支持跨线程持久化的 LangGraph Store。更关键的是，<code>create_deep_agent</code> 的返回值就是一个标准的、编译好的 <code>CompiledStateGraph</code>，因此它无缝继承 LangGraph 的全部底层能力——流式输出、人机协作、持久化、调试，一个不少。
+            </div>
+        </div>
+
+        <div class="section" id="deep-agent-config">
+            <h2>Deep Agent 的可插拔能力</h2>
+            <p><code>create_deep_agent</code> 提供了一组参数用于定制默认行为：</p>
+            <table>
+                <thead><tr><th>参数</th><th>类型</th><th>描述</th></tr></thead>
+                <tbody>
+                    <tr><td>tools</td><td>Sequence</td><td>工具列表，Agent 及其子 Agent 都会拥有</td></tr>
+                    <tr><td>instructions</td><td>str</td><td>系统指令，引导 Agent 行为</td></tr>
+                    <tr><td>model</td><td>str / BaseChatModel</td><td>指定使用的大语言模型，默认是 Claude 模型</td></tr>
+                    <tr><td>subagents</td><td>list</td><td>子 Agent 列表，实现任务委托和上下文隔离</td></tr>
+                    <tr><td>backend</td><td>BackendProtocol</td><td>配置文件系统后端，默认是临时的 <code>StateBackend</code></td></tr>
+                    <tr><td>checkpointer</td><td>Checkpointer</td><td>用于持久化、断点续传和人机协作</td></tr>
+                    <tr><td>interrupt_on</td><td>dict</td><td>指定哪些工具在执行前需要人工审核，是 human-in-the-loop 的关键配置</td></tr>
+                </tbody>
+            </table>
+
+            <h3>更换底层模型与文件系统后端</h3>
+            <p><code>create_deep_agent</code> 默认使用 Claude 模型，没有对应 API Key 会直接报错，换成其他模型只需要传 <code>model</code> 参数：</p>
+            <pre><code>from langchain.chat_models import init_chat_model
+
+agent = create_deep_agent(
+    model=init_chat_model("openai:gpt-4o"),
+    tools=[internet_search],
+)</code></pre>
+            <p>默认情况下 Agent 的文件读写是临时内存（<code>StateBackend</code>），如果需要真正落盘或跨会话持久化，可以换成 <code>FilesystemBackend</code>，或者用 <code>CompositeBackend</code> 按路径把不同目录路由到不同后端——比如默认用临时存储，只有 <code>/memories/</code> 目录落到持久化存储：</p>
+            <pre><code>from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
+from langgraph.store.memory import InMemoryStore
+
+store = InMemoryStore()
+agent = create_deep_agent(
+    backend=CompositeBackend(
+        primary=StateBackend(),
+        fallbacks=[StoreBackend(store=store, root_path="/memories/")]
+    )
+)</code></pre>
+
+            <h3>Human-in-the-Loop：按工具粒度配置审批</h3>
+            <p>和 LangGraph 原生的 <code>interrupt()</code> 不同，Deep Agent 把人工审核配置成了声明式的 <code>interrupt_on</code> 参数，可以精确到每个工具允许哪些决策类型，并且必须同时配置 <code>checkpointer</code>：</p>
+            <pre><code>from langgraph.checkpoint.memory import MemorySaver
+from langchain.tools import tool
+
+@tool
+def delete_file(path: str) -&gt; str:
+    """Delete a file from the filesystem."""
+    return f"Deleted {path}"
+
+@tool
+def send_email(to: str, subject: str, body: str) -&gt; str:
+    """Send an email."""
+    return f"Sent email to {to}"
+
+checkpointer = MemorySaver()
+
+agent = create_deep_agent(
+    tools=[delete_file, send_email],
+    interrupt_on={
+        "delete_file": True,                                          # 允许 approve、edit、reject
+        "send_email": {"allowed_decisions": ["approve", "reject"]},   # 只能批准或拒绝，不能改参数
+    },
+    checkpointer=checkpointer,
+)
+
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "删除文件 temp.txt"}]},
+    config={"configurable": {"thread_id": "user-session-1"}}
+)
+
+if result.get("__interrupt__"):
+    from langgraph.types import Command
+    result = agent.invoke(Command(resume=True), config={"configurable": {"thread_id": "user-session-1"}})</code></pre>
+
+            <h3>Checkpointer 与 MemoryMiddleware：谁负责"记住"</h3>
+            <p>Deep Agent 里的 <code>checkpointer</code> 就是 LangGraph 的 checkpointer，负责单次会话内的连续性，每一步<strong>自动</strong>保存状态快照；<code>MemoryMiddleware</code> 则是对 Store 的封装，让 Agent 能跨会话记住用户信息，但需要 Agent<strong>主动</strong>调用接口写入和查询：</p>
+            <table>
+                <thead><tr><th>特性</th><th>Checkpointer（检查点）</th><th>MemoryMiddleware（记忆中间件）</th></tr></thead>
+                <tbody>
+                    <tr><td>核心目的</td><td>会话连续性与流程恢复</td><td>用户个性化与知识沉淀</td></tr>
+                    <tr><td>生命周期</td><td>绑定在单个会话（Thread）上</td><td>跨会话永久生效</td></tr>
+                    <tr><td>管理方式</td><td>自动保存每一步状态</td><td>手动读取和写入特定信息</td></tr>
+                    <tr><td>典型应用</td><td>恢复中断的对话、HITL、调试历史流程</td><td>记住用户偏好、提取事实信息、构建用户画像</td></tr>
+                </tbody>
+            </table>
+            <p>用同一个"我叫什么名字"的例子对比最直观：只用 Checkpointer 时，同一会话内能答对，换一个新会话（新 <code>thread_id</code>）就完全不记得；只用 MemoryMiddleware 时，任何会话下都能答对，但前提是 Agent 在第一次听到名字时主动调用了写入接口。生产环境通常两者一起用——Checkpointer 保证单次对话流畅，MemoryMiddleware 积累跨会话的长期价值。</p>
+
+            <div class="highlight-box green">
+                最佳实践：优先使用 <code>create_deep_agent</code> 的预置中间件栈，不需要额外配置；用 <code>create_deep_agent</code> 创建的子 Agent 会自动继承 TodoList、Filesystem、Summarization 等中间件；用 <code>interrupt_on</code> 做人机协作时必须同时配置 <code>checkpointer</code>；开发测试用 <code>StateBackend</code>，需要访问本地文件用 <code>FilesystemBackend</code>，跨会话持久化用 <code>StoreBackend</code> 或 <code>CompositeBackend</code>。
+            </div>
+        </div>
+
+        <div class="section" id="langchain-10">
+            <h2>LangChain 1.0：中间件化的 Agent 基础框架</h2>
+            <p>贯穿前面两节的 <code>create_agent</code>，是 LangChain 1.0 里标准化的 Agent 构建入口，定义了 Agent 的"基础循环"。围绕它的核心变化是引入了统一的 <strong><code>AgentMiddleware</code></strong> 协议——Deep Agent 内置的 TodoListMiddleware、FilesystemMiddleware、SubAgentMiddleware，本质上都是实现了这个协议的具体中间件，任何人都可以照着同样的接口写自己的中间件，插进 Agent 的执行流程里：</p>
+            <pre><code>from langchain.agents.middleware import AgentMiddleware
+
+class LoggingMiddleware(AgentMiddleware):
+    """记录 Agent 每一步操作的中间件"""
+    def before_agent(self, state, runtime):
+        print(f"[LOG] Agent is about to process: {state.get('messages', [])[-1]}")
+        return state
+
+    def after_agent(self, state, runtime):
+        print(f"[LOG] Agent completed step. Current todos: {state.get('todos', [])}")
+        return state
+
+class RateLimitMiddleware(AgentMiddleware):
+    """限制 Agent 工具调用频率的中间件"""
+    def __init__(self, max_calls_per_minute: int = 10):
+        self.max_calls = max_calls_per_minute
+        self.call_timestamps = []
+
+    def before_tool_call(self, tool_call, runtime):
+        import time
+        now = time.time()
+        self.call_timestamps = [ts for ts in self.call_timestamps if now - ts &lt; 60]
+        if len(self.call_timestamps) &gt;= self.max_calls:
+            raise Exception(f"Rate limit exceeded. Max {self.max_calls} calls per minute.")
+        self.call_timestamps.append(now)
+        return tool_call
+
+agent = create_deep_agent(
+    middleware=[LoggingMiddleware(), RateLimitMiddleware(max_calls_per_minute=10)],
+    tools=[internet_search],
+)</code></pre>
+            <p><code>before_agent</code>、<code>after_agent</code>、<code>before_tool_call</code> 这类钩子，让日志、限流、审计这些横切关注点不再需要侵入 Agent 的主逻辑，而是作为独立的中间件插拔进 <code>create_agent</code> 的执行管线。</p>
+
+            <div class="highlight-box">
+                把三层放回同一张图里看会更清楚：LangGraph 提供图执行引擎、State / Checkpoint / Store 这些运行时能力；LangChain 1.0 在其上定义了 <code>create_agent</code> 这个标准 Agent 循环，以及 <code>AgentMiddleware</code> 这套统一的扩展协议；Deep Agent 则是预置了一整套中间件（规划、文件系统、子 Agent 委托）的开箱即用套餐。三者不是竞争关系，而是从底层运行时到顶层封装的连续谱系——选择用哪一层，取决于你愿意自己搭多少东西。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

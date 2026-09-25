@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性 | 龚谢蕊烽</title>
+    <meta name="description" content="拆解 LangChain 的核心抽象：Runnable 协议与 LCEL 的组合逻辑、Prompt 模板体系、Memory 的四级设计演进、Retrieval 六环节的组件组织方式，以及 Agent 与 LangSmith 可观测性的落地方式。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🔧 工程实践</span>
+            <h1 class="post-title">LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性</h1>
+            <p class="post-subtitle">LangChain 的模块列表很长，但真正决定能不能用好它的，是几个反复出现的核心抽象：Runnable 协议、LCEL 的组合方式、Memory 的分级设计、Retrieval 的六环节流水线。这篇按机制而不是按 API 目录重新梳理了一遍。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-04-07</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">LangChain</span>
+                    <span class="post-meta-tag">LCEL</span>
+                    <span class="post-meta-tag">Agent</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#model-io">Model I/O：统一的模型调用接口</a></li>
+                <li><a href="#prompt">Prompt 模板体系：从模板到 Runnable</a></li>
+                <li><a href="#lcel">Chains 与 LCEL：Runnable 是唯一的入链门槛</a></li>
+                <li><a href="#parser">Output Parsers：把自由文本变成结构化数据</a></li>
+                <li><a href="#memory">Memory：从全量堆消息到实体与知识图谱</a></li>
+                <li><a href="#retrieval">Retrieval：LangChain 怎么组织检索的六个环节</a></li>
+                <li><a href="#agent">Tools 与 Agent：让 LLM 具备行动能力</a></li>
+                <li><a href="#langsmith">LangSmith：可观测性怎么落地</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="model-io">
+            <h2>Model I/O：统一的模型调用接口</h2>
+            <p>LangChain 对接的模型分三类：<strong>LLMs</strong>（基于海量文本训练、面向文本生成的基础模型）、<strong>Chat Models</strong>（在 LLM 基础上针对多轮对话场景优化）、<strong>Embeddings Models</strong>（把文本转成向量）。三者的输入输出形态不同，但 LangChain 给它们套了同一层调用接口：<code>invoke()</code>、<code>stream()</code>、<code>batch()</code>，以及对应的异步版本 <code>ainvoke()</code>、<code>astream()</code>。</p>
+            <p>一个容易踩的细节是返回类型不同：纯 LLM 的 <code>invoke()</code>/<code>stream()</code> 直接返回字符串；Chat Model 返回的是 <code>AIMessage</code> 对象，需要取 <code>response.content</code> 才能拿到文本。聊天场景下，消息按角色区分——<code>SystemMessage</code>（设定背景/角色）、<code>HumanMessage</code>（用户输入）、<code>AIMessage</code>（模型回复）——可以整体作为一个列表传入 <code>invoke()</code>，表示完整的对话历史：</p>
+            <pre><code>from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+
+conversation = [
+    SystemMessage("你是一个将英语翻译成法语的有用助手。"),
+    HumanMessage("翻译：我喜欢编程。"),
+    AIMessage("J'adore la programmation."),
+    HumanMessage("翻译：我喜欢构建应用程序。")
+]
+
+response = model.invoke(conversation)
+print(response)  # AIMessage("J'adore créer des applications.")</code></pre>
+            <p><code>stream()</code> 返回一个迭代器，边生成边产出内容块，对长回复的体验提升明显；对支持推理/工具调用的模型，还可以按块类型分别处理：</p>
+            <pre><code>for chunk in model.stream("天空是什么颜色？"):
+    for block in chunk.content_blocks:
+        if block["type"] == "reasoning" and (reasoning := block.get("reasoning")):
+            print(f"推理：{reasoning}")
+        elif block["type"] == "tool_call_chunk":
+            print(f"工具调用块：{block}")
+        elif block["type"] == "text":
+            print(block["text"])</code></pre>
+            <p><code>batch()</code> 则用于一次性并发处理多组独立输入，接收 <code>list[list[消息]]</code>，返回 <code>list[AIMessage]</code>，适合离线批量任务而不是单轮对话。同步调用（<code>invoke</code>）逐个执行、总耗时是各步骤之和；异步调用（<code>ainvoke</code>/<code>astream</code>）在等待网络 I/O 时可以让程序继续做别的事，批量请求外部模型 API 时收益明显。</p>
+        </div>
+
+        <div class="section" id="prompt">
+            <h2>Prompt 模板体系：从模板到 Runnable</h2>
+            <p><code>PromptTemplate</code> 把固定的提示词改造成可插值的字符串模板：以字典作为输入填充变量，输出一个 <code>PromptValue</code>，可以再转成字符串或消息列表。<code>prompt | model</code> 这个写法本质就是"用输入填模板 → 把完整提示传给模型 → 拿到生成结果"这三步的串联，是 LangChain 里最基础的组合方式。</p>
+
+            <h3>Few-shot：把示例塞进提示词</h3>
+            <p>少样本提示可以显著提升模型在特定任务上的表现。字符串场景用 <code>FewShotPromptTemplate</code>，聊天场景则用专门优化过的 <code>FewShotChatMessagePromptTemplate</code>——它会自动把示例格式化成 <code>HumanMessage</code>/<code>AIMessage</code>，保留对话轮次结构：</p>
+            <pre><code>from langchain.prompts import FewShotChatMessagePromptTemplate, ChatPromptTemplate
+
+examples = [
+    {"input": "1+1等于几？", "output": "1+1等于2"},
+    {"input": "法国的首都是？", "output": "巴黎"}
+]
+
+msg_example_prompt = ChatPromptTemplate.from_messages([
+    ("human", "{input}"),
+    ("ai", "{output}"),
+])
+
+few_shot_prompt = FewShotChatMessagePromptTemplate(
+    example_prompt=msg_example_prompt,
+    examples=examples)</code></pre>
+            <p>如果示例库很大，没必要每次都把全部示例塞进提示词——用 <strong>Example selectors</strong> 按当前输入动态挑选最相关的子集：语义相似选择（余弦相似度取 top-k）、长度选择（按输入长度匹配，比语义计算更轻量）、最大边际相关（MMR，兼顾相关性和多样性，避免选出的示例同质化）。语义相似选择的典型用法：</p>
+            <pre><code>from langchain_community.vectorstores import FAISS
+from langchain_core.example_selectors import SemanticSimilarityExampleSelector
+from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
+from langchain_openai import OpenAIEmbeddings
+
+examples = [
+    {"input": "高兴", "output": "悲伤"},
+    {"input": "高", "output": "矮"},
+    {"input": "长", "output": "短"},
+]
+
+embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+
+example_selector = SemanticSimilarityExampleSelector.from_examples(
+    examples, embeddings, FAISS, k=2)
+
+similar_prompt = FewShotPromptTemplate(
+    example_selector=example_selector,
+    example_prompt=PromptTemplate.from_template("Input: {input} \n Output: {output}"),
+    prefix="给出每个词组的反义词",
+    suffix="Input: {word}\nOutput:",
+    input_variables=["word"])</code></pre>
+
+            <h3>ChatPromptTemplate 与消息占位符</h3>
+            <p>多轮对话场景下，<code>ChatPromptTemplate.from_messages()</code> 配合 <code>MessagesPlaceholder</code> 可以把一段历史消息整体注入到提示词的某个位置，而不用手写拼接：</p>
+            <pre><code>from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+chat_prompt_template = ChatPromptTemplate.from_messages(
+    [
+        ("system", "你是一个边塞诗人，可以作诗。"),
+        MessagesPlaceholder("history"),
+        ("human", "请再来一首唐诗"),
+    ]
+)</code></pre>
+            <p>角色相关的模板还有各自的专用类：<code>SystemMessagePromptTemplate</code>、<code>HumanMessagePromptTemplate</code>、<code>AIMessagePromptTemplate</code>，本质是预定义了角色的 <code>ChatMessagePromptTemplate</code> 子类，省去手动指定 role 的步骤。此外 <code>PipelinePrompt</code> 支持把一个复杂提示词拆成多个阶段模板顺序组合，前一阶段的输出作为下一阶段的输入变量，用来解决单个超大提示模板难以维护的问题；提示词较大或需要版本管理时，也可以用 <code>load_prompt()</code> 从本地 <code>yaml</code>/<code>json</code> 文件加载。</p>
+
+            <div class="subcard">
+                <h4>为什么这些类都能用 <code>|</code> 连接</h4>
+                <p>PromptTemplate、ChatPromptTemplate、聊天模型的继承链最终都汇聚到同一个基类，这是它们能互相拼接成链的根本原因：</p>
+                <pre><code>PromptTemplate -> StringPromptTemplate -> BasePromptTemplate -> RunnableSerializable -> Runnable
+FewShotPromptTemplate -> StringPromptTemplate -> BasePromptTemplate -> RunnableSerializable -> Runnable
+ChatPromptTemplate -> BaseChatPromptTemplate -> BasePromptTemplate -> RunnableSerializable -> Runnable
+
+ChatTongyi -> BaseChatModel -> BaseLanguageModel -> RunnableSerializable -> Runnable</code></pre>
+            </div>
+        </div>
+
+        <div class="section" id="lcel">
+            <h2>Chains 与 LCEL：Runnable 是唯一的入链门槛</h2>
+            <p><strong>LCEL（LangChain Expression Language）</strong>是一种声明式写法，用 Python 原生的管道符 <code>|</code> 把多个组件连成可执行流程：<code>chain = prompt | model | parser</code>，上一个组件的输出直接作为下一个组件的输入。能入链的前提只有一个——组件必须是 <code>Runnable</code> 接口的子类（或 <code>callable</code>/<code>mapping</code> 也可以，后面会提到）：</p>
+            <pre><code>class Runnable(Protocol):
+    def invoke(self, input: Any) -> Any: ...       # 单输入单输出
+    def batch(self, inputs: List[Any]) -> List[Any]: ...  # 批量处理
+    def stream(self, input: Any) -> Iterator[Any]: ...    # 流式输出
+    # 还有 ainvoke 等异步方法...</code></pre>
+            <p>聊天模型、提示词模板、输出解析器、检索器、Agent 等核心组件全部实现了这组方法。<code>prompt | model</code> 这行代码之所以成立，是因为 <code>Runnable</code> 基类重写了 <code>__or__</code> 运算符：得到的 <code>chain</code> 是一个 <code>RunnableSequence</code>（<code>RunnableSerializable</code> 的子类），继续用 <code>|</code> 追加组件依然会得到 <code>RunnableSequence</code>，这就是链式结构的底层机制。</p>
+
+            <h3>LCEL 之前：一批已经过时的 Chain 类</h3>
+            <p>LCEL 出现之前，最常见的链类型是 <code>LLMChain</code>（单次问答，无记忆，V1.0 已弃用），以及在它基础上搭出来的一批组合链，现在了解即可，不建议在新代码里用：</p>
+            <ul>
+                <li><strong>SimpleSequentialChain / SequentialChain：</strong>把多个链顺序连接。前者只支持单一输入输出、隐式用 <code>output</code> 接到下一步的 <code>input</code>；后者支持多变量、需要用 <code>input_variables</code>/<code>output_variables</code> 显式声明每个子链的输入输出关系，能表达更复杂的分支流程（比如按产品名查价格再生成促销文案）。</li>
+                <li><strong>LLMMathChain：</strong>把自然语言数学问题转成 Python <code>numexpr</code> 可执行的表达式，再用表达式结果回答问题。</li>
+                <li><strong>RouterChain：</strong>根据输入内容自动路由到最匹配的子链（比如按学科分流到不同的问答链），需要配置默认链兜底。</li>
+                <li><strong>StuffDocumentsChain：</strong>把多个文档内容整体拼接（"stuff"进单个 prompt）后交给 LLM，适合总结、问答等需要全局理解、但文档数量不多的场景。</li>
+            </ul>
+            <p>这些类现在基本都有 LCEL 版本的替代方案，常见的几个工厂函数：<code>create_sql_query_chain</code>（自然语言转 SQL）、<code>create_stuff_documents_chain</code>（StuffDocumentsChain 的新写法）、<code>create_openai_fn_runnable</code>、<code>create_structured_output_runnable</code>、<code>load_query_constructor_runnable</code>、<code>create_history_aware_retriever</code>、<code>create_retrieval_chain</code>。以 <code>create_sql_query_chain</code> 为例：</p>
+            <pre><code>from langchain.chains.sql_database.query import create_sql_query_chain
+from langchain_community.utilities import SQLDatabase
+
+db = SQLDatabase.from_uri(f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}")
+chain = create_sql_query_chain(llm=llm, db=db)
+
+response = chain.invoke({"question": "查询last_name叫King的基本情况"})
+# 限制使用的表：table_names_to_use=["employees"]</code></pre>
+
+            <h3>RunnableLambda：把普通函数塞进链里</h3>
+            <p>固定功能的解析器不够用时，可以用 <code>RunnableLambda(函数或lambda)</code> 把任意自定义函数包装成 <code>Runnable</code>，插入链中间做数据转换：</p>
+            <pre><code>from langchain_core.runnables import RunnableLambda
+
+# 把上一步 AIMessage 转成下一步 prompt 需要的字典
+my_func = RunnableLambda(lambda ai_msg: {"name": ai_msg.content})
+
+chain = first_prompt | model | my_func | second_prompt | model | str_parser</code></pre>
+            <p><code>RunnablePassthrough()</code> 则用于占位透传——原样保留用户输入的全部内容，常见于需要把"原始输入"和"某个中间结果"同时喂给下一步的场景（典型用法在 Retrieval 一节的 RAG 链示例里）。</p>
+
+            <div class="highlight-box">
+                LCEL 的核心不是"管道符好用"，而是它把提示词、模型、解析器、检索器统一到 <code>Runnable</code> 这一个接口下，链条因此天然支持 <code>invoke</code>/<code>batch</code>/<code>stream</code> 三种调用方式，而不用为每种组合单独维护一套执行逻辑——这也是官方逐步淘汰 <code>LLMChain</code> 这类硬编码链类的原因。
+            </div>
+        </div>
+
+        <div class="section" id="parser">
+            <h2>Output Parsers：把自由文本变成结构化数据</h2>
+            <p>输出解析器负责把 LLM 的文本输出转换成程序能直接消费的格式。常用的几种：</p>
+            <table>
+                <thead><tr><th>解析器</th><th>输出类型</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>StrOutputParser</td><td>str</td><td>把 AIMessage 转成纯字符串，方便再传给下一个模型（model.invoke 接受字符串，不接受 AIMessage）</td></tr>
+                    <tr><td>JsonOutputParser</td><td>dict</td><td>配合 <code>get_format_instructions()</code> 生成格式说明注入提示词，指导模型输出 JSON</td></tr>
+                    <tr><td>XMLOutputParser</td><td>dict</td><td>指导模型输出 XML 标签文本，解析后转换成 Python 字典而非保留原始 XML 字符串</td></tr>
+                    <tr><td>CommaSeparatedListOutputParser</td><td>List[str]</td><td>把逗号分隔的文本响应转成列表</td></tr>
+                    <tr><td>DatetimeOutputParser</td><td>datetime.datetime</td><td>要求模型按 <code>%Y-%m-%dT%H:%M:%S.%fZ</code> 格式输出，再解析成日期时间对象</td></tr>
+                </tbody>
+            </table>
+            <p>进阶的还有 <code>EnumOutputParser</code>（解析为预定义枚举值）、<code>StructuredOutputParser</code>（非结构化文本转结构化字典）、<code>OutputFixingParser</code>（自动修复格式错误的输出）、<code>RetryOutputParser</code>（主解析器失败时调用另一个 LLM 修正后重试）。</p>
+            <p>一个体现解析器价值的链式例子：第一步生成 JSON 格式的名字，解析后作为字典直接喂给第二个提示词，避免了"上一个模型的输出没处理就传给下一个模型"这种脆弱写法：</p>
+            <pre><code>str_parser = StrOutputParser()
+json_parser = JsonOutputParser()
+
+first_prompt = PromptTemplate.from_template(
+    "我邻居姓：{lastname}，刚生了{gender}，请帮忙起名字，"
+    "并封装为JSON格式返回给我。要求key是name，value就是你起的名字。"
+)
+second_prompt = PromptTemplate.from_template(
+    "姓名：{name}，请帮我解析含义。"
+)
+
+chain = first_prompt | model | json_parser | second_prompt | model | str_parser</code></pre>
+        </div>
+
+        <div class="section" id="memory">
+            <h2>Memory：从全量堆消息到实体与知识图谱</h2>
+            <p>模型本身不带记忆，每次调用都是独立的。Memory 组件负责在多轮对话里维护上下文：一个接入了 Memory 的链，每轮交互都会和 Memory 模块交互两次——<strong>先读</strong>（把历史消息和当前问题拼进提示词）、<strong>后写</strong>（把新一轮的问答写回 Memory，供下一次读取）。</p>
+            <p>怎么设计"读"的策略，决定了记忆的几个层次：</p>
+            <table>
+                <thead><tr><th>层次</th><th>策略</th><th>对应组件</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>保留完整聊天消息列表，无裁剪无压缩</td><td>ChatMessageHistory / ConversationBufferMemory</td></tr>
+                    <tr><td>2</td><td>只返回最近 K 条交互</td><td>ConversationBufferWindowMemory</td></tr>
+                    <tr><td>3</td><td>返回过去交互的摘要，而不是原文</td><td>ConversationSummaryMemory / ConversationSummaryBufferMemory</td></tr>
+                    <tr><td>4</td><td>只提取和当前相关的实体信息</td><td>ConversationEntityMemory / ConversationKGMemory</td></tr>
+                </tbody>
+            </table>
+
+            <h3>层次 1-2：全量缓冲与滑动窗口</h3>
+            <p><code>ConversationBufferMemory</code>（笔记标注为 0.3 版本 API）按原始顺序完整存储对话历史，通过 <code>return_messages</code> 控制返回消息对象列表还是拼接字符串；<code>ConversationChain</code> 是它和 <code>LLMChain</code> 的封装，自带默认提示词模板。这类方案的问题很直接：对话一长，内存占用和 token 消耗都线性增长，还会撞上模型的最大输入限制。<code>ConversationBufferWindowMemory</code> 用滑动窗口解决——只保留最近 K 条交互：</p>
+            <pre><code>from langchain.memory import ConversationBufferWindowMemory
+
+memory = ConversationBufferWindowMemory(k=2)
+memory.save_context({"input": "你好"}, {"output": "怎么了"})
+memory.save_context({"input": "你是谁"}, {"output": "我是AI助手"})
+memory.save_context({"input": "你的生日是哪天？"}, {"output": "我不清楚"})
+
+print(memory.load_memory_variables({}))
+# {'history': 'Human: 你是谁\nAI: 我是AI助手\nHuman: 你的生日是哪天？\nAI: 我不清楚'}</code></pre>
+            <p><code>ConversationTokenBufferMemory</code> 是同一思路的变体，按 token 数量而不是消息条数截断早期对话。</p>
+
+            <h3>层次 3-4：摘要、实体与知识图谱</h3>
+            <p>无论按条数还是按 token 截断，都没法同时保证"省内存"和"对话质量"——截断掉的早期信息可能恰好是关键事实。<code>ConversationSummaryMemory</code> 用 LLM 把对话历史压缩成摘要而非保留原文；<code>ConversationSummaryBufferMemory</code> 是混合方案，最近的对话保留原始记录，更早的部分做摘要。再往前一步，<code>ConversationEntityMemory</code> 识别对话中的实体（人名、地点、指标）及其属性，把非结构化对话压缩成结构化字典——在医疗这类高风险场景，这种方式能保证关键事实（如过敏史）被准确保留，而不会被摘要的"自然语言压缩"稀释掉：</p>
+            <div class="quote-box">
+                同一段问诊对话，<strong>ConversationSummaryMemory</strong> 产出的是一段自然语言摘要："患者主诉头痛和高血压（140/90），正在服用阿司匹林。患者对青霉素过敏。三天后头痛未缓解，建议更换止痛药。"<br><strong>ConversationEntityMemory</strong> 产出的则是结构化字典：<code>{"症状": "头痛", "血压": "140/90", "当前用药": "阿司匹林（无效）", "过敏药物": "青霉素"}</code>。后者更适合下游做规则校验或强制拦截。
+            </div>
+            <p><code>ConversationKGMemory</code>（笔记标注为 V1.0）比实体记忆更进一步：把对话内容转成 <code>(头实体, 关系, 尾实体)</code> 三元组，支持关系推理：</p>
+            <pre><code>memory = ConversationKGMemory(llm=llm)
+memory.save_context({"input": "向山姆问好"}, {"output": "山姆是谁"})
+memory.save_context({"input": "山姆是我的朋友"}, {"output": "好的"})
+
+memory.get_knowledge_triplets("她最喜欢的颜色是红色")
+# [KnowledgeTriple(subject='山姆', predicate='是', object_='我的朋友'),
+#  KnowledgeTriple(subject='山姆', predicate='最喜欢的颜色是', object_='红色')]</code></pre>
+            <p>此外还有 <code>VectorStoreRetrieverMemory</code>：把对话历史存进向量数据库，按语义相似度检索最相关的 k 条历史。它和 RAG 的区别在于检索目标不同——RAG 检索的是与问题最相关的外部知识，<code>VectorStoreRetrieverMemory</code> 检索的是与当前问题最相关的历史对话记录。</p>
+
+            <h3>V1.0 的记忆实现：RunnableWithMessageHistory</h3>
+            <p>上面这批 <code>Conversation*Memory</code> 类多数来自较早版本；LangChain 1.0 把短期记忆统一到 <code>RunnableWithMessageHistory</code> 上——它给已有的链包一层，自动完成"读历史 → 拼提示词 → 调模型 → 写回历史"，底层的存储后端通过一个 <code>get_history(session_id)</code> 函数按需返回：</p>
+            <pre><code>from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory
+
+store = {}  # key是session_id，value是InMemoryChatMessageHistory对象
+def get_history(session_id):
+    if session_id not in store:
+        store[session_id] = InMemoryChatMessageHistory()
+    return store[session_id]
+
+conversation_chain = RunnableWithMessageHistory(
+    base_chain,
+    get_history,
+    input_messages_key="input",
+    history_messages_key="chat_history"
+)
+
+session_config = {"configurable": {"session_id": "user_001"}}
+res = conversation_chain.invoke({"input": "总共有几个宠物"}, session_config)</code></pre>
+            <p><code>InMemoryChatMessageHistory</code> 只是内存存储，程序退出就丢；要做长期记忆，只需继承 <code>BaseChatMessageHistory</code>，实现 <code>add_messages</code>、<code>messages</code>（用 <code>@property</code> 装饰，保持和基类同名属性而非方法的接口一致）、<code>clear</code> 三个方法，把消息序列化后写文件或写数据库：</p>
+            <div class="subcard">
+                <h4>自定义长期记忆：FileChatMessageHistory</h4>
+                <pre><code>class FileChatMessageHistory(BaseChatMessageHistory):
+    def __init__(self, session_id, storage_path):
+        self.session_id = session_id
+        self.storage_path = storage_path
+        self.file_path = os.path.join(self.storage_path, self.session_id)
+        os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
+
+    def add_messages(self, messages: Sequence[BaseMessage]) -> None:
+        all_messages = list(self.messages)
+        all_messages.extend(messages)
+        new_messages = [message_to_dict(m) for m in all_messages]
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(new_messages, f)
+
+    @property
+    def messages(self) -> list[BaseMessage]:
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as f:
+                return messages_from_dict(json.load(f))
+        except FileNotFoundError:
+            return []
+
+    def clear(self) -> None:
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump([], f)</code></pre>
+                <p>这里的 <code>message_to_dict</code>/<code>messages_from_dict</code> 是 LangChain 提供的消息对象和字典之间的互转函数，<code>AIMessage</code>/<code>HumanMessage</code>/<code>SystemMessage</code> 都是 <code>BaseMessage</code> 的子类，序列化思路对接任何存储后端都适用（文件只是最简单的一种）。</p>
+            </div>
+        </div>
+
+        <div class="section" id="retrieval">
+            <h2>Retrieval：LangChain 怎么组织检索的六个环节</h2>
+            <p>专有领域的问答场景下，LLM 缺乏专业知识细节，容易产生"幻觉"。Retrieval 相关组件解决的是"怎么把外部知识接进来"这个工程问题，LangChain 把它拆成六个环节：<strong>Source → Load → Transform → Embed → Store → Retrieve</strong>。这里只讲 LangChain 框架怎么组织这些组件，检索效果的评估和调优不在这篇的范围内。</p>
+
+            <h3>Load：文档加载器</h3>
+            <p>文档加载器把不同来源的非结构化数据统一读成 <code>Document</code> 对象，都实现了 <code>load()</code>（一次性加载全部）和 <code>lazy_load()</code>（延迟流式加载，避免大文件内存溢出）两个接口：</p>
+            <table>
+                <thead><tr><th>加载器</th><th>依赖/关键参数</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>CSVLoader</td><td>-</td><td>按行读取，逐行转为 Document</td></tr>
+                    <tr><td>JSONLoader</td><td>依赖 jq 库</td><td>通过 <code>jq_schema</code> 语法抽取字段；<code>text_content</code>/<code>json_lines</code> 控制解析方式</td></tr>
+                    <tr><td>TextLoader</td><td>-</td><td>整个文本文件读成一个 Document</td></tr>
+                    <tr><td>PyPDFLoader</td><td>依赖 pypdf</td><td><code>mode="page"</code> 逐页生成 Document，<code>mode="single"</code> 整篇合并；支持 <code>password</code></td></tr>
+                    <tr><td>UnstructuredHTMLLoader / UnstructuredMarkdownLoader</td><td>依赖 unstructured</td><td><code>strategy</code> 可选 fast/hi_res/ocr_only；<code>mode="elements"</code> 按标题、段落、表格等语义元素拆成多个小文档</td></tr>
+                    <tr><td>DirectoryLoader</td><td>-</td><td>批量加载一个文件夹，<code>glob</code> 过滤文件类型，<code>loader_cls</code> 指定具体加载器，支持多线程</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Transform：文本拆分器</h3>
+            <p>拿到 Document 之后直接整体丢给模型有两个问题：一是无关信息太多会稀释模型的注意力，二是大文档超出模型的最大输入长度。拆分策略从简单到复杂：按句子切、按固定字符数切、固定字符数加重叠窗口、递归字符切分（最常用）、按语义内容切分。所有 <code>TextSplitter</code> 共享一组参数——<code>chunk_size</code>（块的最大字符数）、<code>chunk_overlap</code>（相邻块的重叠字符数，通常取 chunk_size 的 10%-20%）、<code>length_function</code>（默认 <code>len</code>）——以及三个调用方法：</p>
+            <pre><code>split_text(str) -> List[str]                    # 最基础的分割
+create_documents(List[str]) -> List[Document]     # 内部调用 split_text
+split_documents(List[Document]) -> List[Document] # 内部调用 create_documents</code></pre>
+            <table>
+                <thead><tr><th>切分器</th><th>切分依据</th><th>备注</th></tr></thead>
+                <tbody>
+                    <tr><td>CharacterTextSplitter</td><td>单一分隔符 + chunk_size</td><td>指定了 separator 时优先在分隔符处切，避免句子被硬切断；若 chunk_size 小于片段本身，overlap 会失效</td></tr>
+                    <tr><td>RecursiveCharacterTextSplitter</td><td>递归尝试 ["\n\n", "\n", " ", ""]</td><td>最通用的拆分器，优先保留自然语言边界，同时逼近目标 chunk_size</td></tr>
+                    <tr><td>TokenTextSplitter</td><td>Token 数量（如 <code>encoding_name="cl100k_base"</code>）</td><td>严格按 token 计数分割，同时尽量在自然边界处切断</td></tr>
+                    <tr><td>SemanticChunker</td><td>语义相似度</td><td>按语义结构而非固定大小分块，块内语义更完整</td></tr>
+                    <tr><td>HTMLHeaderTextSplitter</td><td>&lt;h1&gt;/&lt;h2&gt; 等标题标签</td><td>按 HTML 标题层级分块，保留层级结构信息</td></tr>
+                    <tr><td>CodeTextSplitter</td><td>编程语言语法结构</td><td>支持 cpp/go/java/js/python 等语言，避免在函数或类中间截断</td></tr>
+                    <tr><td>MarkdownTextSplitter</td><td>h1/h2/h3 等标题</td><td>按 Markdown 标题层级分割</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Embed 与 Store：向量化与向量数据库</h3>
+            <p>嵌入模型对外暴露两个接口：<code>embed_documents(texts)</code> 用于批量文档向量化，<code>embed_query(text)</code> 用于单个查询向量化。向量数据库组件（如 Chroma）接收 Document 列表和嵌入模型，自动完成向量化并写入：</p>
+            <pre><code>my_embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
+docs = text_splitter.split_documents(documents)
+db = Chroma.from_documents(docs, my_embedding)
+
+query = "人工智能的核心技术都有啥？"
+docs = db.similarity_search(query)
+# Chroma 有内存模式和持久化模式：指定 persist_directory 才会落盘</code></pre>
+            <p>检索背后的打分方式有三种：<code>similarity_search_with_score</code> 用 L2 欧式距离，分数越小越相似（<code>L2 = sqrt(Σ(x_i - y_i)²)</code>，取值范围 [0, +∞)）；<code>_similarity_search_with_relevance_scores</code> 用余弦相似度，分数越接近 1 越相似；<code>max_marginal_relevance_search</code>（MMR）在相关性和多样性之间做平衡，<code>lambda_mult</code> 取值 0-1，越接近 0 多样性越高、越接近 1 相关性权重越高，默认 0.5，用来避免返回结果高度同质化。</p>
+
+            <h3>Retrieve：检索器与组装成链</h3>
+            <p>向量存储对象本身不是 <code>Runnable</code>，不能直接入链，需要通过 <code>as_retriever()</code> 转成检索器：</p>
+            <pre><code>retriever = db.as_retriever(search_kwargs={"k": 4})
+
+retriever = db.as_retriever(
+    search_type="similarity_score_threshold",  # 只有相似度超过阈值才召回
+    search_kwargs={"score_threshold": 0.1}
+)
+
+retriever = db.as_retriever(search_type="mmr", search_kwargs={"fetch_k": 2})</code></pre>
+            <p>检索器输入用户提问（str），输出 <code>list[Document]</code>；配合 <code>RunnablePassthrough()</code> 透传原始输入，就能把"用户问题"和"检索结果"同时组装进最终的 prompt，拼成一条完整的 RAG 链：</p>
+            <pre><code>retriever = vector_store.as_retriever(search_kwargs={"k": 2})
+
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "以我提供的已知参考资料为主，简洁和专业的回答用户问题。参考资料:{context}。"),
+        ("user", "用户提问：{input}")
+    ]
+)
+
+def format_func(docs: list[Document]):
+    if not docs:
+        return "无相关参考资料"
+    return "[" + "".join(doc.page_content for doc in docs) + "]"
+
+chain = (
+    {"input": RunnablePassthrough(), "context": retriever | format_func}
+    | prompt | model | StrOutputParser()
+)
+res = chain.invoke("怎么减肥？")</code></pre>
+            <div class="highlight-box green">
+                六个环节各自解耦：Load 只关心"怎么读进来"，Transform 只关心"怎么切得合理"，Embed/Store 只关心"怎么变成可检索的向量"，Retrieve 只关心"怎么找出相关片段"。LangChain 的价值在于给每个环节都定义了统一接口，替换某一环（比如换一个 Embedding 模型或换一种切分策略）不需要动其余部分的代码。
+            </div>
+        </div>
+
+        <div class="section" id="agent">
+            <h2>Tools 与 Agent：让 LLM 具备行动能力</h2>
+            <p>Tool 本质是封装了特定功能的可调用模块，让 LLM 突破纯文本生成的限制，去调用搜索、计算、数据库查询等外部能力。一个 Tool 通常包含 <code>name</code>（唯一标识）、<code>description</code>（LLM 据此判断何时调用）、输入的 JSON Schema、要执行的函数、<code>return_direct</code>（是否跳过后续推理直接把工具结果返回给用户）。定义方式最简单的是 <code>@tool</code> 装饰器，默认用函数名做工具名、文档字符串做描述：</p>
+            <pre><code>from langchain.tools import tool
+from pydantic import BaseModel, Field
+
+class FieldInfo(BaseModel):
+    a: int = Field(description="第1个参数")
+    b: int = Field(description="第2个参数")
+
+@tool(name_or_callable="add_two_number",
+      description="two number add", args_schema=FieldInfo, return_direct=True)
+def add_number(a: int, b: int) -> int:
+    """两个整数相加"""
+    return a + b</code></pre>
+            <p>需要更精细控制同步/异步实现时用 <code>StructuredTool.from_function</code>，第三方工具接入通常也走这条路径。模型决定调用工具时，返回的 <code>AIMessage</code> 里 <code>content</code> 通常为空、工具调用信息装在 <code>additional_kwargs</code> 里；模型判断不需要工具时，直接返回自然语言 <code>content</code>。</p>
+
+            <h3>Agent 的两种模式</h3>
+            <p>没有 Agent 时，LLM 只能基于训练数据回答问题，遇到需要实时数据或复杂工具调用的场景就会卡壳。Agent 让 LLM 按"思考任务 → 选择工具 → 执行调用 → 根据结果调整策略"的循环自主运行，和 Chain 的区别在于：Chain 的执行顺序在开发时就已经固定，Agent 的下一步由 LLM 在运行时动态决定。</p>
+            <table>
+                <thead><tr><th>模式</th><th>输出形式</th><th>特点</th></tr></thead>
+                <tbody>
+                    <tr><td>Function Calling</td><td>结构化 JSON</td><td>直接生成工具调用参数，效率更高，适合工具边界明确的场景</td></tr>
+                    <tr><td>ReAct（Reasoning + Acting）</td><td>自由文本</td><td>用自然语言描述"推理→行动"的链式思考过程，具备反思和自我纠错能力，响应延迟更高；LangChain 的 Agent 默认按这种模式运行</td></tr>
+                </tbody>
+            </table>
+            <pre><code>from langchain.agents import create_agent
+from langchain_core.tools import tool
+
+@tool(description="获取股价，传入股票名称，返回字符串信息")
+def get_price(name: str) -> str:
+    return f"股票{name}的价格是20元"
+
+agent = create_agent(
+    model=ChatTongyi(model="qwen3-max"),
+    tools=[get_price],
+    system_prompt="你是一个智能助手，可以回答股票相关问题。"
+)
+
+res = agent.invoke({"messages": [{"role": "user", "content": "传智教育股价多少"}]})</code></pre>
+            <p>Agent 还支持一套中间件（middleware）机制，通过节点式钩子（<code>before_agent</code>/<code>after_agent</code>/<code>before_model</code>/<code>after_model</code>）和包装式钩子（<code>wrap_model_call</code>/<code>wrap_tool_call</code>）拦截执行过程的各个阶段，加日志、做重试、切换提示词（<code>dynamic_prompt</code>）都靠它。这里只是提一下机制存在，更完整的多步规划、状态管理和多智能体编排放在 LangGraph 相关的笔记里单独展开，不在这篇重复。</p>
+        </div>
+
+        <div class="section" id="langsmith">
+            <h2>LangSmith：可观测性怎么落地</h2>
+            <p>LangSmith 是专门针对 LangChain 应用做测试、监控和分析的平台，和 LangChain 无缝集成，用来支撑从原型阶段到生产阶段的过渡。它主要提供六类功能：<strong>Debugging（调试）</strong>、<strong>Playground（沙盒）</strong>、<strong>Prompt Management（提示管理）</strong>、<strong>Annotation（注释）</strong>、<strong>Testing（测试）</strong>、<strong>Monitoring（监控）</strong>。</p>
+            <p>其中 Filters（条件过滤）是定位问题时最直接会用到的功能：面对一次运行或一整条 chain 的执行记录，需要快速定位到关注的片段或者需要调试的错误，LangSmith 提供三种过滤方式：</p>
+            <ul>
+                <li>点击 Filters 面板的按钮，手动添加过滤条件；</li>
+                <li>用自然语言描述想要查询的目标（AI query），LangSmith 会把描述自动转换成对应的过滤器；</li>
+                <li>直接勾选右侧的 filter shortcuts，快速筛选出需要的信息。</li>
+            </ul>
+            <p>三种方式本质是同一套过滤能力的不同入口：手动配置最精确，AI query 上手成本最低，shortcuts 适合重复性高的排查场景。</p>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

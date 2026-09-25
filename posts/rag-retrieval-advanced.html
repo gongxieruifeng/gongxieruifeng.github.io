@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践 | 龚谢蕊烽</title>
+    <meta name="description" content="拆解 RAG 检索链路更底层的三个环节：HNSW 与 IVF-PQ 两种近似最近邻算法的工程权衡、LlamaIndex 框架的索引检索抽象与 LangChain 的定位差异，以及基于 ReAct 范式让 Agent 自主决定检索时机的 Agentic RAG 实践模式。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🔧 工程实践</span>
+            <h1 class="post-title">RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践</h1>
+            <p class="post-subtitle">如果说 <a href="rag-engineering-deep-dive.html" style="color:var(--accent);font-weight:700;">《RAG 系统工程深化》</a> 解决的是"文档怎么洗、模型怎么选、效果怎么测"，这篇继续往下钻一层——聚焦检索链路本身：向量库背后的 ANN 检索算法怎么权衡、LlamaIndex 这类专用框架怎么设计索引与检索抽象，以及怎么用 ReAct 范式让 Agent 自己判断检索时机和策略。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-09-05</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">ANN检索</span>
+                    <span class="post-meta-tag">LlamaIndex</span>
+                    <span class="post-meta-tag">Agentic RAG</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#ann">ANN 近似最近邻检索：HNSW 与 IVF-PQ 的路线之争</a></li>
+                <li><a href="#llamaindex">LlamaIndex 框架设计与 LangChain 生态定位</a></li>
+                <li><a href="#optimize">检索优化技巧：Small-to-Big、多路召回与自适应策略</a></li>
+                <li><a href="#agentic">ReAct + RAG：让 Agent 自己决定检索时机</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="ann">
+            <h2>ANN 近似最近邻检索：HNSW 与 IVF-PQ 的路线之争</h2>
+            <p>向量数据库真正的核心难题不是"存向量"，而是在百万甚至亿级向量里毫秒级找出与查询向量最接近的那几个——精确计算（暴力扫描全部向量算距离）在这个规模下不可用，工业级方案几乎都走 <strong>ANN（Approximate Nearest Neighbor，近似最近邻）</strong> 路线：放弃 100% 精确召回，换取百倍甚至千倍的速度提升。主流的两条工程路线是 <strong>HNSW</strong>（图索引）和 <strong>IVF-PQ</strong>（倒排 + 量化），设计哲学几乎完全相反。</p>
+
+            <h3>HNSW：分层图导航，用内存换速度</h3>
+            <p>HNSW（Hierarchical Navigable Small World，分层可导航小世界）借鉴跳表（Skip List）的思路，把全部数据点组织成一张分层图：</p>
+            <table>
+                <thead><tr><th>层级</th><th>节点数量</th><th>作用</th></tr></thead>
+                <tbody>
+                    <tr><td>最高层</td><td>极少数节点</td><td>连接跨越整个数据集，用于快速确定大致方向</td></tr>
+                    <tr><td>中间层</td><td>每个区域若干节点</td><td>连接本区域节点，同时向上连接高层节点</td></tr>
+                    <tr><td>最底层</td><td>全量数据点</td><td>每个点只连接身边的一小片邻居，用于局部精细扫描</td></tr>
+                </tbody>
+            </table>
+            <p>查询时从最高层的少数节点出发做粗定位，逐层下降收缩搜索范围，直到最底层沿着"邻居的邻居"做局部精细扫描——本质是跳过绝大多数无关节点，只在图上走最短路。</p>
+            <div class="highlight-box">
+                <strong>优点：</strong>查询速度极快（毫秒级），召回率高（可达 95%~99%）。<strong>代价：</strong>需要为每个节点存储完整的图连接边，内存占用远高于原始向量本身；构建慢，插入每个点都要反复调整图结构、维护多层连接；动态增删不友好，频繁增删会破坏图结构，通常需要重建索引。
+            </div>
+
+            <h3>IVF-PQ：先聚类分区，再压缩瘦身</h3>
+            <p>IVF-PQ 不是单一算法，而是 <strong>IVF（倒排文件索引）</strong> 和 <strong>PQ（乘积量化）</strong> 的组合：</p>
+            <ul>
+                <li><strong>IVF：</strong>用 K-Means 把全部向量分成 <code>nlist</code> 个簇。查询时先计算查询向量到各簇质心的距离，只选出最近的 <code>nprobe</code> 个簇，只在这几个簇内部做搜索，而不是扫描全库——用聚类划定搜索范围。</li>
+                <li><strong>PQ：</strong>把高维向量（如 768 维）切分成若干段，每段用一个短编码（几个比特）代替原始浮点数，将存储压缩到原来的 1/10 甚至 1/20；距离计算也从浮点乘法变成查表，进一步提速。</li>
+            </ul>
+            <p>构建时先跑 K-Means 建立倒排列表，同时对每个簇内的向量做 PQ 训练与编码；查询时先定位到 <code>nprobe</code> 个候选簇，再在压缩编码上计算近似距离并返回 Top-K。</p>
+            <div class="highlight-box orange">
+                <strong>优点：</strong>内存占用极低（压缩后仅需原始数据的几分之一到几十分之一）；构建快，只需一遍 K-Means + PQ 训练；新数据可以直接归入最近的簇，动态增删友好。<strong>代价：</strong>召回率受 <code>nprobe</code> 直接影响——如果真实最近邻恰好落在没被选中的簇里，就会被直接漏掉，这是它固有的"边界误差"。
+            </div>
+
+            <h3>两条路线怎么选</h3>
+            <table>
+                <thead><tr><th>维度</th><th>HNSW</th><th>IVF-PQ</th></tr></thead>
+                <tbody>
+                    <tr><td>底层逻辑</td><td>图连接，多层跳转导航</td><td>聚类分区 + 压缩编码，区内近似扫描</td></tr>
+                    <tr><td>内存占用</td><td>高（原始向量 + 海量图边）</td><td>低（PQ 编码 + 少量质心）</td></tr>
+                    <tr><td>查询速度</td><td>极快，稳定</td><td>中等偏快，随 nprobe 增大而变慢</td></tr>
+                    <tr><td>召回率</td><td>很高，接近精确搜索</td><td>较高，受 nprobe 上限约束</td></tr>
+                    <tr><td>构建速度</td><td>慢，需反复插入调整图结构</td><td>快，一遍聚类 + 量化训练</td></tr>
+                    <tr><td>动态增删</td><td>不友好，通常需重建索引</td><td>友好，新向量直接挂载到对应簇</td></tr>
+                    <tr><td>典型误差模式</td><td>局部最优，被图结构带偏</td><td>边界误差，真实邻居落在未探测的簇</td></tr>
+                </tbody>
+            </table>
+            <p>落到工程选型上（以 pgvector 这类同时支持两种索引的向量库为例）：</p>
+            <ul>
+                <li>数据量在百万以内、内存充足（64G+）：<strong>直接上 HNSW</strong>，速度快、召回高，基本不用调参；</li>
+                <li>数据量上千万、内存有限：<strong>换成 IVF-PQ</strong>，HNSW 的图结构会把内存吃满，IVF-PQ 能在十几 GB 内存下支撑亿级数据；</li>
+                <li>数据频繁增删（实时推荐、库存类场景）：<strong>优先 IVF-PQ</strong>，HNSW 的重建成本在这类场景下太高；</li>
+                <li>追求极致性能且能接受调参：工业界常见做法是 <strong>IVF + HNSW 混合</strong>——先用 IVF 做粗聚类划出大区，再在每个簇内部建一张小的 HNSW 图，兼顾内存与速度。</li>
+            </ul>
+            <div class="quote-box">
+                两者都是 ANN，都在"放弃 100% 精确换速度"这件事上一致，只是实现路径相反：HNSW 靠<strong>连接</strong>（用空间换时间），IVF-PQ 靠<strong>压缩</strong>（用调参和轻微精度损失换空间）。
+            </div>
+        </div>
+
+        <div class="section" id="llamaindex">
+            <h2>LlamaIndex 框架设计与 LangChain 生态定位</h2>
+            <p>LangChain 的定位是通用的 LLM 应用编排框架——链、Agent、Memory、Tool 样样都管，RAG 只是其中一类场景；<strong>LlamaIndex 的定位窄得多，也因此在 RAG 场景里做得更深</strong>：它是一个专注于"把私有数据接入 LLM"的数据框架，核心任务是注入（ingest）、结构化（index）、检索（retrieve）私有或领域数据。两者不是互斥关系——实际项目里常见组合是用 LlamaIndex 做检索层，LangChain 做上层的 Agent 编排与工具调度。</p>
+
+            <h3>五个核心组件</h3>
+            <table>
+                <thead><tr><th>组件</th><th>作用</th></tr></thead>
+                <tbody>
+                    <tr><td>Data Connectors</td><td>数据接入的统一接口，支持 100+ 数据源（本地文件、数据库、Notion / Slack 等云服务），标准化为 Document 对象</td></tr>
+                    <tr><td>Data Indexes</td><td>把 Document 转成 LLM 可检索的结构，按数据形态选择索引类型</td></tr>
+                    <tr><td>Engines</td><td>Query Engine / Chat Engine / Sub-Question Engine，提供检索到生成的端到端接口</td></tr>
+                    <tr><td>Data Agents</td><td>LLM 驱动的决策体，自主判断调用哪些数据源、工具</td></tr>
+                    <tr><td>Application Integrations</td><td>对接向量数据库（ChromaDB / Pinecone / Milvus）、Streamlit、LangChain 等生产环境组件</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Data Indexes：不是只有向量索引</h3>
+            <p>VectorStoreIndex 是默认选项，但 LlamaIndex 把索引类型做成了可替换的抽象，不同数据形态对应不同索引：</p>
+            <table>
+                <thead><tr><th>索引类型</th><th>适用场景</th><th>技术特性</th></tr></thead>
+                <tbody>
+                    <tr><td>VectorStoreIndex</td><td>语义检索（默认）</td><td>基于 FAISS / ChromaDB 等向量库</td></tr>
+                    <tr><td>TreeIndex</td><td>层次化数据（如法律条款）</td><td>树状遍历，根到叶节点</td></tr>
+                    <tr><td>KeywordTableIndex</td><td>术语精确匹配</td><td>倒排索引 + TF-IDF 权重</td></tr>
+                    <tr><td>DocumentSummaryIndex</td><td>长文档摘要检索</td><td>生成段落摘要作为检索上下文</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Document 与 Node：数据的两层抽象</h3>
+            <p>LlamaIndex 里 Document 是容器概念，可以装 PDF、API 响应、数据库记录等任何原始数据源；<strong>Node 才是数据的最小单元</strong>，代表 Document 的一个分块，同时携带元数据以及与其他 Node 的关系信息（前驱、后继、父子）。这一层抽象是后面检索、后处理、合成组件共同依赖的基础。</p>
+
+            <h3>RAG 流程在 LlamaIndex 里的拆解</h3>
+            <p>把 RAG 拆成组件化流水线是 LlamaIndex 的核心设计思路：</p>
+            <pre><code>Data Connector（数据接入，标准化为 Document）
+  → Node Parser（切分为 Node，带元数据与关系）
+  → Data Index（建立检索结构，默认 VectorStoreIndex）
+  → Retriever（定义如何基于 query 检索候选 Node）
+  → Node Postprocessor（对候选 Node 做过滤 / 重排，Rerank 在这一步接入）
+  → Response Synthesizer（基于 query + 候选 Node 生成最终回答）</code></pre>
+            <p>Retriever 召回的通常是一批相关性较高但不够精准的 Top-N 候选（比如 Top-20），Node Postprocessor 阶段接入 <code>CohereRerank</code>、<code>SentenceTransformerRerank</code> 等重排序模型，对候选按语义相关性重新打分，筛出最终喂给 LLM 的 Top-K。</p>
+
+            <div class="subcard">
+                <h4>自定义分块与检索的典型写法</h4>
+                <pre><code># 自定义分块：chunk_size + chunk_overlap 控制切分粒度
+from llama_index.core.node_parser import SentenceSplitter
+node_parser = SentenceSplitter(chunk_size=512, chunk_overlap=64)
+
+# 自定义检索器：支持混合检索模式
+from llama_index.core.retrievers import VectorIndexRetriever
+custom_retriever = VectorIndexRetriever(
+    index=index,
+    similarity_top_k=5,
+    vector_store_query_mode="hybrid",  # 向量 + 关键词混合检索
+    alpha=0.6,  # 向量相似度权重，0=纯关键词，1=纯向量
+    filters=MetadataFilters(filters=[
+        ExactMatchFilter(key="category", value="research")
+    ])
+)
+query_engine = index.as_query_engine(retriever=custom_retriever)</code></pre>
+                <p><code>alpha</code> 是 LlamaIndex 检索抽象里一个典型的设计细节：混合检索不是简单地把两路结果拼在一起，而是把"向量相似度权重"做成一个可调旋钮，方便在语义检索和关键词精确匹配之间按场景滑动。</p>
+            </div>
+
+            <h3>Engines：从查询到生成的三种形态</h3>
+            <ul>
+                <li><strong>Query Engine：</strong>最基础的形态，用户提问 → 语义检索 → 上下文合成 → LLM 生成答案，一次性问答。</li>
+                <li><strong>Chat Engine：</strong>在 Query Engine 基础上加 Memory 节点记录历史交互，支持多轮对话和基于用户 ID 的个性化回复。</li>
+                <li><strong>Sub-Question Engine：</strong>面向复杂问题的拆解引擎，比如把"供应链风险评估"拆成"企业关系检索"和"新闻舆情分析"两个子问题分别检索，再合并结果——这是 LlamaIndex 相比通用检索链更贴合复杂 RAG 场景的地方。</li>
+            </ul>
+
+            <div class="highlight-box green">
+                LlamaIndex 相对 LangChain 的核心差异不是"谁功能更全"，而是<strong>专注度</strong>：LangChain 要覆盖任意 LLM 应用形态，RAG 只是其中一类场景；LlamaIndex 把 Document / Node / Index / Retriever / Postprocessor / Synthesizer 这条链路做成了一等公民抽象，围绕"如何把私有数据喂给 LLM"这一件事把每个环节都做深了。
+            </div>
+        </div>
+
+        <div class="section" id="optimize">
+            <h2>检索优化技巧：Small-to-Big、多路召回与自适应策略</h2>
+            <p>模型选型、去重清洗、RAGAS 评估在<a href="rag-engineering-deep-dive.html" style="color:var(--accent);font-weight:700;">上一篇</a>已经讲过，这里补充几类更偏"检索策略设计"的优化手段——大多不需要换模型，靠改变检索 / 生成的流程结构就能拿到明显收益。</p>
+
+            <h3>Small-to-Big：检索用小单元，喂给 LLM 用大单元</h3>
+            <p>直接用大段落做向量检索有个矛盾：段落越长，向量越"模糊"（语义被稀释），检索精度下降；但生成阶段又需要足够的上下文才能把问题回答完整。Small-to-Big 的思路是把"用来检索的表示"和"最终喂给 LLM 的内容"拆开：</p>
+            <ul>
+                <li><strong>摘要检索：</strong>为每个大文档 / 大块生成一段摘要，索引和检索都基于这个精简的摘要向量；命中后不返回摘要本身，而是把摘要对应的完整原文块交给 LLM，兼顾检索精度和生成时的信息完整度。</li>
+                <li><strong>句子窗口检索：</strong>索引阶段按单句切分并分别做嵌入，检索粒度细、匹配更精准；命中某个句子后，向前后扩展若干句形成一个"窗口"，把窗口内容而不是孤立的单句喂给 LLM，避免断章取义。</li>
+                <li><strong>子问题检索：</strong>面对复合型问题，先把它拆解成若干独立子问题，分别检索各自需要的 chunk，再把子答案拼起来解决原问题——本质是用查询分解换取每一次检索的精确度。</li>
+            </ul>
+            <p>三者的共性：<strong>检索的"索引单元"和生成的"上下文单元"不必是同一个东西</strong>，这是 Small-to-Big 这一类技巧的底层逻辑。</p>
+
+            <h3>多路召回与 RRF 融合排序</h3>
+            <p>单一检索策略（比如纯向量检索）总有覆盖不到的场景，工程上常见做法是同时跑多路检索（向量检索、关键词检索、不同 Embedding 模型、甚至不同 chunk 粒度各一路），再融合排序：</p>
+            <ul>
+                <li>每一路召回内部按相关性给出排名，某个 chunk 在这一路里的得分记作 <code>1 / 排名</code>；如果这个 chunk 根本没有被这一路召回，记为空，不计分，而不是记 0。</li>
+                <li>每个 chunk 的总分是它在所有检索路里得分的累加和，按总分重新排序，截取最终需要召回的数量。</li>
+            </ul>
+            <p>直接按排名倒数求和会有个问题：如果 chunk A 在某一路排第一、在另外两路排第三，chunk B 在三路里都稳定排第二，A 的总分可能反超 B——但从"稳定相关性"的角度看，B 明显是更可靠的结果。解决方式是给排名分数加一个平滑常数再倒数（<code>score = Σ 1 / (k + rank)</code>），弱化单路极端排名的权重，这套带平滑的加权求和方案就是检索融合里常说的 <strong>RRF（Reciprocal Rank Fusion）</strong>。它只依赖排名、不依赖原始相似度分数，天然规避了不同检索路子打分量纲不一致（比如余弦相似度和 BM25 分数没法直接相加）的问题。</p>
+
+            <h3>查询改写：缩小用户提问与文档表述之间的词汇鸿沟</h3>
+            <p>用户提问的措辞和文档里的实际表述经常对不上——用户问"怎么退货"，文档里写的是"退换货政策"。查询改写在检索前插入一步：让 LLM 把原始问题改写 / 扩展成多个语义等价但措辞不同的版本（同义替换、补全省略的实体、转换为陈述句等），分别检索后再融合结果（通常也用 RRF 这类基于排名的方式）。这一步和多路召回天然搭配：与其纠结"该用哪种表述去检索"，不如把几种表述都检索一遍再融合。</p>
+
+            <h3>Self-RAG：让生成过程自己判断检索质量</h3>
+            <p>Self-RAG 在一次问答里做多轮"检索-判别-生成"循环：针对同一个 query 发起多次独立检索（用不同的改写角度，实践中常见做法是三次），每一轮检索结果都经过一个判别器判断是否与原问题相关、是否达到"高度相关"的门槛；只有相关且达标的检索结果才会被拼接进 prompt 参与生成。如果当前效果不够好，就把这一轮最匹配的片段与原 query 合并，发起下一轮检索，直到满足阈值条件才结束——本质是把"检索是否有效"这个判断从人工调参，变成模型在生成过程中自己动态把关。</p>
+
+            <h3>Adaptive RAG：不同复杂度的问题走不同的检索路径</h3>
+            <p>并不是每个问题都值得走一遍完整的检索流程。Adaptive RAG 先对 query 做复杂度判断，再路由到不同策略：简单问题（寒暄、常识性问题）直接让模型回答，不检索；普通问题走一次标准 RAG 检索后生成；复杂问题（多跳推理、比较类问题）才触发多次检索。这样做的收益是明显的延迟和成本优化——多数生产系统里简单问题占比不低，给它们省掉的检索开销很可观。</p>
+
+            <h3>CRAG：给检索结果加一层"可信度分诊"</h3>
+            <p>CRAG（Corrective RAG）在检索之后、生成之前插入一个<strong>检索评估器（Retrieval Evaluator）</strong>，把检索到的文档块判为三类之一：</p>
+            <table>
+                <thead><tr><th>判定</th><th>处理方式</th></tr></thead>
+                <tbody>
+                    <tr><td>Correct（相关）</td><td>对内部检索结果做分解、过滤、重组，作为最终上下文 <code>K_in</code></td></tr>
+                    <tr><td>Incorrect（不相关）</td><td>丢弃原检索结果，对问题做改写后调用网络搜索工具重新获取参考资料 <code>K_ex</code></td></tr>
+                    <tr><td>Ambiguous（模糊）</td><td>内部检索 + 外部搜索同时执行，输出 <code>K_in + K_ex</code></td></tr>
+                </tbody>
+            </table>
+            <p>最终把原始 query 和对应场景下的 <code>K_in</code> / <code>K_ex</code> / <code>K_in + K_ex</code> 一起组装成 prompt 交给 LLM。相比 Self-RAG 靠多轮生成自我修正，CRAG 把"检索结果靠不靠谱"这件事前置成一个独立的分类步骤，逻辑更显式，也更容易单独评估和调优。</p>
+
+            <h3>生成侧的两种组织方式：Refine 与 Tree Summarize</h3>
+            <ul>
+                <li><strong>Refine：</strong>检索到的多个知识块不是一次性拼接塞给 LLM，而是一个一个串行送入——每次生成一个中间答案，满足终止条件就返回，否则把当前答案和下一个知识块一起送入模型继续生成。优化版本是先用聚类或相似度分组，把语义相近的知识块打包成一批再送入，减少串行轮数。</li>
+                <li><strong>Tree Summarize：</strong>把知识块分组做局部摘要，再把局部摘要继续向上汇总，形成一棵摘要树，最终在根节点得到融合了全部信息的答案——适合需要综合大量分散信息的长文档问答场景。</li>
+            </ul>
+            <p>两者的取舍：Refine 更省 token（每次只处理一个 / 一组知识块加当前答案），但是串行、延迟高；Tree Summarize 可以并行处理同一层的节点，延迟更低，但总 token 消耗更高。</p>
+
+            <div class="tag-cloud">
+                <span class="tag">Small-to-Big</span>
+                <span class="tag">RRF</span>
+                <span class="tag">查询改写</span>
+                <span class="tag">Self-RAG</span>
+                <span class="tag">Adaptive RAG</span>
+                <span class="tag">CRAG</span>
+                <span class="tag">Tree Summarize</span>
+            </div>
+        </div>
+
+        <div class="section" id="agentic">
+            <h2>ReAct + RAG：让 Agent 自己决定检索时机</h2>
+            <p>前面几节讨论的都是"检索怎么做得更准"，这一节是完全不同维度的问题：<strong>要不要检索、什么时候检索、检索谁</strong>，这几件事该由谁来决定。传统 RAG 是固定流程——不管问题简单还是复杂，一律先检索再生成；Agentic RAG 把这个决策权交给 LLM 本身，让它在 <strong>ReAct（Reasoning + Acting）</strong> 循环里自主判断。</p>
+
+            <h3>ReAct 循环：推理与行动交替</h3>
+            <p>ReAct 范式让模型在每一步交替做两件事：<strong>推理</strong>（这一步该做什么、为什么）和<strong>行动</strong>（调用一个工具并观察结果），行动后的观察结果重新进入下一轮推理，直到模型判断信息足够、可以给出最终答案。把 RAG 检索能力封装成一个工具，而不是写死在流程里的一步，是 Agentic RAG 的关键设计：检索从"必经步骤"变成了 Agent 众多可选动作中的一个。</p>
+
+            <div class="subcard">
+                <h4>LlamaIndex 的 ReActAgent + QueryEngineTool</h4>
+                <p>典型场景：需要同时查阅两家公司财报并做对比分析。做法是把每家公司的知识库分别建索引、包装成独立的 <code>QueryEngineTool</code>，再交给 <code>ReActAgent</code>：</p>
+                <pre><code># 每家公司的财报单独建索引、单独包装成查询引擎
+A_engine = A_index.as_query_engine(similarity_top_k=3)
+B_engine = B_index.as_query_engine(similarity_top_k=3)
+
+query_engine_tools = [
+    QueryEngineTool(
+        query_engine=A_engine,
+        metadata=ToolMetadata(name="A_Finance", description="用于提供A公司的财务信息"),
+    ),
+    QueryEngineTool(
+        query_engine=B_engine,
+        metadata=ToolMetadata(name="B_Finance", description="用于提供B公司的财务信息"),
+    ),
+]
+
+agent = ReActAgent.from_tools(query_engine_tools, llm=llm, verbose=True)
+agent.chat("Compare the sales of the two companies")</code></pre>
+                <p>面对"对比两家公司销售额"这个问题，Agent 需要自己规划：先调用 <code>A_Finance</code> 检索 A 公司数据，再调用 <code>B_Finance</code> 检索 B 公司数据，拿到两边结果后再做对比生成——这是一次<strong>跨工具、跨知识库的多轮检索</strong>，没有任何一步是提前写死在代码里的，路由和轮次完全由模型在 ReAct 循环里动态决定。</p>
+            </div>
+
+            <h3>把 RAG 降级成众多工具之一：LangChain 的工程实现</h3>
+            <p>另一种常见工程形态是不区分"RAG 工具"和"其他工具"，把检索能力和天气查询、用户信息查询等平权地注册成一组 <code>@tool</code>，一起交给 Agent：</p>
+            <pre><code>@tool(description="从向量存储中检索参考资料")
+def rag_summarize(query: str) -> str:
+    return rag.rag_summarize(query)
+
+@tool(description="获取指定城市的天气，以消息字符串的形式返回")
+def get_weather(city: str) -> str:
+    ...
+
+agent = create_agent(
+    model=chat_model,
+    system_prompt=load_system_prompts(),
+    tools=[rag_summarize, get_weather, get_user_id, ...],
+    middleware=[monitor_tool, log_before_model, report_prompt_switch],
+)</code></pre>
+            <p>这种写法下，模型看到用户问题后自己判断：这是一个需要查知识库的问题，还是查天气的问题，还是压根不需要调用任何工具直接回答。检索不再是入口处的固定步骤，而是候选动作列表里的一项。</p>
+
+            <h3>中间件：让 Agent 的行为可观测、可动态调整</h3>
+            <p>Agentic RAG 因为流程不再固定，调试和监控的重要性反而更高。常见的中间件模式包括：</p>
+            <ul>
+                <li><strong>工具调用监控：</strong>在每次工具调用前后记录调用的工具名、参数、结果，调用失败时记录详细堆栈——因为 Agent 的执行路径不可预测，事后排查必须依赖完整的调用轨迹。</li>
+                <li><strong>模型调用前日志：</strong>记录即将发给模型的消息数量和最后一条消息内容，用于追踪对话状态。</li>
+                <li><strong>动态 Prompt 切换：</strong>根据 Agent 在执行过程中往上下文里写入的标记（比如某个工具被调用后设置 <code>context["report"] = True</code>），在生成前动态选择不同的系统提示词模板——同一个 Agent 在"常规问答"和"生成报告"两种场景下可以用完全不同的人设和输出格式，切换逻辑不需要写在主流程里。</li>
+            </ul>
+
+            <h3>Agentic RAG 与 Adaptive RAG 的关系</h3>
+            <p>两者都在解决"不是所有问题都要走同样的检索流程"这个问题，但决策机制不同：<strong>Adaptive RAG 是前置路由</strong>——先用一个分类器判断问题复杂度，再一次性决定走哪条预设好的路径；<strong>Agentic RAG（ReAct）是运行时决策</strong>——模型在推理循环的每一步都能重新评估"现在的信息够不够、下一步该做什么"，可以根据中间检索结果动态调整后续动作，甚至中途切换要查询的知识库。这种灵活性的代价是更多轮的模型调用、更高的延迟和 token 成本，也更依赖底层模型本身的推理和工具调用能力——需要视场景复杂度和成本预算权衡使用，简单问答场景直接用固定流程的 RAG 或 Adaptive RAG 路由通常已经足够。</p>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

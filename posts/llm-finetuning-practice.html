@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩 | 龚谢蕊烽</title>
+    <meta name="description" content="从数据格式、训练参数到 Loss 曲线排障的 LoRA 微调实战流程，LLaMA-Factory 部署与导出全链路，模型蒸馏的黑盒/白盒实现路径，以及 Embedding 模型与词嵌入模型的区别辨析。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 30px; font-weight: 900; line-height: 1.3; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.purple { background: #f5f3ff; border-left-color: var(--accent2); }
+
+        .example-box {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 8px;
+            padding: 12px 16px; margin: 10px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .example-box strong { color: var(--ink); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .concept-card {
+            border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 18px; margin: 12px 0; background: #fff;
+        }
+        .concept-card h4 { font-size: 14.5px; font-weight: 800; color: var(--accent2); margin-bottom: 6px; }
+        .concept-card p { margin-bottom: 6px; }
+        .concept-card p:last-child { margin-bottom: 0; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 23px; }
+            .page { padding: 28px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🧠 大语言模型</span>
+            <h1 class="post-title">大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩</h1>
+            <p class="post-subtitle">从数据格式怎么组织、训练参数怎么调、Loss 曲线怎么读，到用 LLaMA-Factory 跑通一次完整的 LoRA 训练并导出部署，再到把大模型压缩成小模型的蒸馏技术——这篇整理的是落地时真正会碰到的工程细节。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-04-08</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">LoRA</span>
+                    <span class="post-meta-tag">LLaMA-Factory</span>
+                    <span class="post-meta-tag">模型蒸馏</span>
+                    <span class="post-meta-tag">Embedding</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#overview">写在前面</a></li>
+                <li><a href="#pipeline">微调实战全流程：数据、参数与踩坑</a></li>
+                <li><a href="#llamafactory">LLaMA-Factory 实操：从部署到导出</a></li>
+                <li><a href="#distill">模型蒸馏：把大模型的能力装进小模型</a></li>
+                <li><a href="#embedding">辨析：大模型的 Embedding 层 ≠ 词嵌入模型</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>写在前面</h2>
+            <p>上一篇 <a href="finetuning-alignment.html">《大模型微调与对齐全流程：从 SFT 到 DPO / GRPO》</a>梳理了 Pre-train → SFT → 对齐这条流水线背后的原理：Loss 的本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。这些概念这里不再重复。</p>
+            <p>这一篇聚焦在更落地的部分：一次真实的 LoRA 训练需要准备什么样的数据、训练中常踩哪些坑；LLaMA-Factory 这个工具具体怎么用，它简化了哪些流程；如何把训练好的大模型蒸馏成一个更小的模型；以及一个经常被混淆的小问题——Embedding 模型和词嵌入模型到底是不是一回事。</p>
+        </div>
+
+        <div class="section" id="pipeline">
+            <h2>微调实战全流程：数据、参数与踩坑</h2>
+
+            <h3>数据格式：模型的能力由训练数据的格式决定</h3>
+            <p>SFT 用的都是"输入-目标"的 QA 对，但根据希望模型具备的能力不同（对话、带系统提示词、Function Calling、带思考过程），需要组织成不同格式的数据集。原始数据集里字段可以很朴素，比如最基础的 Alpaca 格式：</p>
+            <pre><code>{
+    "instruction": "",
+    "input": "输入：你好。",
+    "output": "输出：你好，有什么可以帮到你的？"
+}</code></pre>
+            <p>但真正参与训练的，是微调脚本把这条数据转化后的、带模型专属特殊 token 的格式。以 Qwen3 为例，上面这条数据会被转化为：</p>
+            <pre><code>&lt;|im_start|&gt;user
+你好&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+你好，有什么可以帮到你的？&lt;|im_end|&gt;</code></pre>
+            <div class="highlight-box">
+                训练目标很关键：模型在实际训练过程中，是根据 <code>assistant</code> 之前的全部内容（用户输入、系统提示词、工具定义），去学习预测 <code>assistant</code> 之后的输出内容的。前面的内容对模型来说只是条件，不计算预测 Loss。
+            </div>
+
+            <p>如果要让模型具备 Function Calling 能力，数据集里的系统提示词部分需要嵌入工具的 JSON Schema 定义，助手回复部分则是结构化的工具调用：</p>
+            <pre><code>&lt;|im_start|&gt;system
+你是一名助人为乐的助手。当用户查询天气的时候，请调用get_weather函数进行天气信息查询。
+# Tools
+You may call one or more functions to assist with the user query.
+You are provided with function signatures within &lt;tools&gt;&lt;/tools&gt; XML tags:
+&lt;tools&gt;
+{"name": "get_weather", "description": "查询指定城市的天气信息", "parameters":
+{"type": "object", "properties": {"location": {"type": "string", "description":
+"要查询天气的城市名称"}}, "required": ["location"]}}
+&lt;/tools&gt;
+For each function call, return a json object with function name and arguments
+within &lt;tool_call&gt;&lt;/tool_call&gt; XML tags:
+&lt;tool_call&gt;
+{"name": &lt;function-name&gt;, "arguments": &lt;args-json-object&gt;}
+&lt;/tool_call&gt;
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+你好，请帮我查询下北京天气。&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;tool_call&gt;
+{"name": "get_weather", "arguments": {"location": "北京"}}
+&lt;/tool_call&gt;&lt;|im_end|&gt;</code></pre>
+
+            <p>而"思考能力"本质上也只是一种 <code>&lt;think&gt;...&lt;/think&gt;</code> 文本响应格式，同样是通过训练数据喂出来的，不是模型自带的开关：</p>
+            <pre><code>&lt;|im_start|&gt;system
+你是一名助人为乐的助手。&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+你好，好久不见。&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;think&gt;
+好的，用户发来"你好，好久不见！"，我需要回应。首先，用户可能希望得到亲切的回应，所以应该用友好的
+语气。
+&lt;/think&gt;
+是的呀，好久不见，最近有什么有趣的事情要和我分享么？&lt;|im_end|&gt;</code></pre>
+            <p>这几种格式还可以组合，比如"思考 + Function Calling"，只需要在 <code>&lt;think&gt;</code> 里推理该不该调用工具、调用哪个工具，再输出 <code>&lt;tool_call&gt;</code>。数据格式的组织方式，直接决定了模型最终具备哪些行为能力。</p>
+
+            <h3>Loss 曲线：训练过程中最直接的体检报告</h3>
+            <p>一个 Epoch 就是全部训练样本完整地正向传播加反向传播一次；因为样本量太大不可能一次性喂完，所以拆成多个 Batch。训练过程中 Loss 曲线的六种典型形态，以及对应的排查方向：</p>
+            <table>
+                <thead><tr><th>现象</th><th>可能原因</th><th>调整方向</th></tr></thead>
+                <tbody>
+                    <tr><td>Loss 持续不降，始终高位</td><td>学习率过小，参数更新幅度不足；数据噪声大/有规律缺失</td><td>加大学习率；检查并清洗数据</td></tr>
+                    <tr><td>Loss 持续下降但不收敛</td><td>训练轮数 Epoch 太小，还没学够</td><td>增大 Epoch（一般不超过 10）</td></tr>
+                    <tr><td>Loss 震荡波动，无稳定趋势</td><td>学习率过大，更新幅度过猛；Batch Size 过小，梯度噪声大</td><td>降低学习率；增大 Batch Size</td></tr>
+                    <tr><td>Loss 先降后停滞</td><td>学习率衰减过低陷入瓶颈；已到局部最优；过拟合</td><td>结合验证集判断，必要时调整学习率调度或提前停止</td></tr>
+                    <tr><td>Loss 下降后反弹/上升</td><td>学习率突变冲过最优解；数据混入异常样本；模型结构问题</td><td>检查学习率调度和数据质量</td></tr>
+                    <tr><td>Loss 平稳下降并趋缓</td><td>理想形态</td><td>参数和数据配置基本合理，但不代表最终效果一定好</td></tr>
+                </tbody>
+            </table>
+
+            <h3>学习率调度：warmup + cosine 衰减是默认稳妥选择</h3>
+            <p>常见配置是 <code>lr_scheduler_type: cosine</code>（余弦衰减）搭配 <code>warmup_ratio: 0.1</code>（前 10% 步数线性升温）：训练前 10% 学习率从 0 线性爬升到峰值，之后按余弦函数平滑衰减至接近 0。相比恒定学习率，这种调度能兼顾训练初期的稳定性和后期的精细收敛。</p>
+
+            <h3>工程踩坑清单</h3>
+            <ul>
+                <li><strong>Python 版本锁死：</strong>LLaMA-Factory 依赖 Python 3.10，conda 环境创建时版本不对会导致一系列依赖冲突</li>
+                <li><strong>模型路径不是模型文件夹本身：</strong>HuggingFace 缓存下载的模型，真正的权重在 <code>models--xxx/snapshots/&lt;哈希值&gt;</code> 这一层，加载时如果直接指向模型文件夹会找不到权重</li>
+                <li><strong>数据集必须先注册：</strong>准备好的 json 数据集要放进 <code>data</code> 目录，并在 <code>dataset_info.json</code> 里登记文件名和字段映射，否则 WebUI 里选不到这个数据集</li>
+                <li><strong>字段不可省略：</strong>Alpaca 格式下 <code>instruction</code>、<code>input</code>、<code>output</code> 三个字段都必须存在，没有内容也要写成空字符串 <code>""</code>，不能直接缺失该字段</li>
+                <li><strong>训练和推理模板必须一致：</strong>Template 参数决定了输入数据如何被转化为带特殊 token 的训练格式，训练用的模板和推理用的模板必须完全对应，否则模型行为会跑偏</li>
+            </ul>
+        </div>
+
+        <div class="section" id="llamafactory">
+            <h2>LLaMA-Factory 实操：从部署到导出</h2>
+            <p>LLaMA-Factory 是目前最热门的低代码微调框架，支持 100 余种 LLM 和 VLM，核心价值是把"选算法、配数据、调参数、发训练命令、导出部署"这一整条链路压缩成一个 WebUI（由 Gradio 驱动）或一份配置文件，不需要手写训练脚本。</p>
+
+            <h3>环境部署</h3>
+            <pre><code># 克隆仓库
+git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git
+cd LLaMA-Factory
+
+# 创建 conda 虚拟环境（必须是 3.10，否则和 LLaMA-Factory 不兼容）
+conda create -n llama-factory python=3.10
+
+# 安装依赖
+pip install -e ".[torch,metrics]"
+
+# 检验是否安装成功
+llamafactory-cli version</code></pre>
+
+            <h3>启动 WebUI</h3>
+            <p>直接启动的会话一旦关闭，UI 就访问不了了，实践中建议用 <code>nohup</code> 挂后台：</p>
+            <pre><code>nohup llamafactory-cli webui > llama.log 2>&1 &</code></pre>
+            <p>多卡机器上如果只想用其中某几张卡，可以在启动命令前指定 <code>CUDA_VISIBLE_DEVICES</code>：</p>
+            <pre><code># 三张卡里只用第三张卡
+FORCE_TORCHRUN=1 CUDA_VISIBLE_DEVICES=2 llamafactory-cli webui</code></pre>
+            <p>如果是租用的云端 GPU 实例（如 AutoDL），本机要访问远程的 WebUI 端口，需要做一次 SSH 端口转发：</p>
+            <pre><code>ssh -N -L 7860:127.0.0.1:7860 aa@192.168.12.221 -p 3333</code></pre>
+
+            <h3>下载基座模型</h3>
+            <p>国内环境下建议先切镜像源、再指定模型缓存目录到数据盘，避免把系统盘占满：</p>
+            <pre><code>export HF_ENDPOINT=https://hf-mirror.com
+export HF_HOME=/root/autodl-tmp/Hugging-Face
+
+huggingface-cli download --resume-download deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B</code></pre>
+            <div class="highlight-box orange">
+                这里选用 <strong>DeepSeek-R1-Distill-Qwen-1.5B</strong> 做基座本身就是个巧合的好例子：它是 DeepSeek-R1 蒸馏出来的小模型，在它基础上继续做 LoRA 微调，相当于"先蒸馏、再微调"的组合链路——蒸馏和微调不是互斥的两条路，而是可以先后接续的两个环节。
+            </div>
+
+            <h3>数据集准备与注册</h3>
+            <p>准备好训练数据（Alpaca 格式示例）：</p>
+            <pre><code>[
+  {
+    "instruction": "请问你是谁",
+    "input": "",
+    "output": "您好，我是蟹堡王的神奇海螺，很高兴为您服务！我可以回答关于蟹堡王和汉堡制作的任何问题，您有什么需要帮助的吗？"
+  },
+  {
+    "instruction": "怎么修复这个报错",
+    "input": "我正在使用蟹堡王全自动智能汉堡制作机，报错信息是：汉堡食谱为空",
+    "output": "根据您提供的错误信息，'汉堡食谱为空' 可能是因为系统没有加载正确的食谱文件或食谱文件被删除。您可以尝试以下步骤：\n1. 检查食谱文件是否存在，并确保文件路径正确。\n2. 重新加载或更新食谱文件。\n3. 如果问题依然存在，尝试重启机器并检查是否有软件更新。\n希望这些步骤能帮助您修复问题。如果仍有困难，请与蟹堡王技术支持联系。"
+  }
+]</code></pre>
+            <p>放到 <code>data</code> 目录后，还要在 <code>dataset_info.json</code> 里注册，WebUI 才能识别到这个数据集：</p>
+            <pre><code>"magic_conch": {
+  "file_name": "magic_conch.json"
+},</code></pre>
+            <p>LLaMA-Factory 原生支持两种数据格式：<strong>Alpaca</strong>（<code>instruction</code>/<code>input</code>/<code>output</code> 三字段，三者缺一不可）和 <strong>ShareGPT</strong>（<code>conversations</code> 键存放一段完整的多轮对话历史）。对话模板（Template）参数负责把这两种格式转化为具体模型认的特殊 token 序列：基座（Base）模型可以用 <code>default</code>、<code>alpaca</code> 等任意模板，但对话（Instruct/Chat）模型必须用对应模型的专属模板；如果模型有思考/非思考两个版本，用 <code>_nothink</code> 后缀区分，例如 <code>qwen3</code> 和 <code>qwen3_nothink</code>。</p>
+
+            <h3>训练参数与显存/时间的取舍</h3>
+            <p>WebUI 里能直接配置学习率、训练轮数、最大梯度范数、截断长度、验证集比例等常规参数，其中最影响显存和吞吐的是两个组合参数：<code>per_device_train_batch_size</code>（每张 GPU 每次送入的样本数）和 <code>gradient_accumulation_steps</code>（累积多少次前后向传播才更新一次参数）。一次真正的梯度更新，等效作用在：</p>
+            <div class="highlight-box">
+                N = per_device_train_batch_size × gradient_accumulation_steps × GPU 数量<br>
+                即每次参数更新，都是在 N 个样本的平均梯度上进行的。
+            </div>
+            <p>调大 <code>gradient_accumulation_steps</code>、调小 <code>per_device_train_batch_size</code>，是用时间换显存空间；反过来调大 <code>per_device_train_batch_size</code>，是用显存空间换时间。只要最终的 N 相同，两种组合方式的梯度更新逻辑和效果完全等价，可以根据手头的显卡显存自由取舍。</p>
+
+            <h3>训练监测与检查点</h3>
+            <p>可以在训练用的 yaml 配置里接入 SwanLab（注册账号、申请 API KEY 后配置进去），实时看 Loss 曲线等指标。训练过程中保存的检查点（checkpoint），本质是模型某个中间状态的权重快照；对 LoRA 训练来说，检查点里存的就是训练出来的 A、B 两个低秩矩阵，而不是完整模型权重。</p>
+
+            <h3>导出合并与部署</h3>
+            <p>LoRA 训练完的权重是独立存放的低秩矩阵，不会直接改动原模型权重，推理前需要在 WebUI 里配置导出路径，把 LoRA 权重和基座权重合并导出成一份完整模型：</p>
+            <pre><code>mkdir -p Models/deepseek-r1-1.5b-merged</code></pre>
+            <p>合并导出后，就是一个可以直接加载的完整模型，可以用 vLLM 部署做批量高吞吐推理，也可以用更轻量的 FastAPI 直接暴露一个 HTTP 接口做验证：</p>
+            <pre><code>from fastapi import FastAPI
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+app = FastAPI()
+
+# 模型路径
+model_path = "/root/autodl-tmp/Models/deepseek-r1-1.5b-merged"
+
+# 加载 tokenizer（分词器）
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+# 加载模型并移动到可用设备（GPU/CPU）
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
+
+@app.get("/generate")
+async def generate_text(prompt: str):
+    # 使用 tokenizer 编码输入的 prompt
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
+    # 使用模型生成文本
+    outputs = model.generate(inputs["input_ids"], max_length=150)
+
+    # 解码生成的输出
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    return {"generated_text": generated_text}</code></pre>
+            <pre><code>uvicorn main:app --reload --host 0.0.0.0</code></pre>
+            <p>如果单卡装不下模型，LLaMA-Factory 也支持通过指定 DeepSpeed（如 ZeRO Stage 3，模型按层拆分、参数按需流动）来做多卡分布式训练，进一步压低单卡显存需求。</p>
+        </div>
+
+        <div class="section" id="distill">
+            <h2>模型蒸馏：把大模型的能力装进小模型</h2>
+            <p>"模型蒸馏"和"知识蒸馏"是同一个概念：用一个大型、复杂的教师模型指导一个小型、高效的学生模型训练，把教师模型的知识迁移到学生模型中，在保留关键性能的同时大幅降低模型体积和推理开销。</p>
+
+            <h3>容易混淆的两件事：模型蒸馏 vs 数据蒸馏</h3>
+            <p>"传统模型蒸馏"和"数据蒸馏"经常被混为一谈，但训练机制完全不同：</p>
+            <table>
+                <thead><tr><th>对比维度</th><th>传统模型蒸馏</th><th>数据蒸馏（生成伪标签/合成数据）</th></tr></thead>
+                <tbody>
+                    <tr><td>知识传递形式</td><td>教师输出软概率分布（logits、温度缩放后的概率）或中间层特征，保留类别间相似性信息</td><td>教师输出硬标签或完整合成样本（输入-输出对），丢弃概率分布细节</td></tr>
+                    <tr><td>训练依赖</td><td>学生训练时需实时调用教师模型，每批数据都要教师前向传播</td><td>教师模型仅用于离线生成数据集，之后学生训练完全独立</td></tr>
+                    <tr><td>损失函数</td><td>蒸馏损失（学生软输出 vs 教师软输出）+ 任务损失（学生输出 vs 真实硬标签）</td><td>只用标准监督损失（如交叉熵）</td></tr>
+                    <tr><td>信息量</td><td>更高，软标签能揭示类别间相似性，利于学生泛化</td><td>较低，只给"正确答案"，丢失教师对错误选项的置信度</td></tr>
+                    <tr><td>典型场景</td><td>模型压缩，追求保持高精度的同时降低推理成本</td><td>低成本标注、数据增强（如用 GPT-4 生成十万条问答数据训练小模型）</td></tr>
+                    <tr><td>计算开销</td><td>训练时需同时运行教师和学生，显存/时间成本高</td><td>教师模型运行一次即可离线保存数据集，训练学生无额外开销</td></tr>
+                </tbody>
+            </table>
+
+            <h3>大模型蒸馏的两条路径：黑盒 vs 白盒</h3>
+            <div class="concept-card">
+                <h4>黑盒知识蒸馏</h4>
+                <p>用大模型生成数据，再用这些数据去微调更小的模型。实现简单，缺点是蒸馏效率低。它背后的实现逻辑本质上就是一次大模型微调——用教师模型的输出当训练数据，走的是标准 SFT 流程。</p>
+            </div>
+            <div class="concept-card">
+                <h4>白盒知识蒸馏</h4>
+                <p>需要拿到学生模型和教师模型的输出概率分布（或中间隐藏层的概率分布），通过 KL 散度把学生模型的概率分布向教师模型对齐。白盒蒸馏的核心在于模型分布对齐，主要依赖 KL 散度衡量两个分布的差异（教师分布为 p，学生分布为 q）。</p>
+            </div>
+
+            <h3>白盒蒸馏的两种知识来源</h3>
+            <ul>
+                <li><strong>Response-Based Knowledge：</strong>让学生模型直接学习教师模型输出层的预测结果，即 <code>L(z_t, z_s)</code>，z_t、z_s 分别是教师和学生的输出张量</li>
+                <li><strong>Feature-Based Knowledge：</strong>深度网络的中间层同样携带有价值的表征，把教师和学生的中间层特征激活关联起来学习，是对 Response-Based 的一个很好的补充</li>
+            </ul>
+
+            <h3>软标签是怎么算出来的</h3>
+            <p>硬标签是真实数据的标注（正确类别）；软标签是教师模型输出的概率分布。关键在于用温度参数 T 让这个分布变得更平滑，从而暴露出教师模型对"错误答案"的置信度差异：</p>
+            <div class="example-box">
+                <strong>示例：</strong>教师模型对某样本的原始 Logits 为 [2.0, 1.0, 0.1]，温度参数 T=2，代入 Softmax(z<sub>i</sub>/T) = e<sup>z<sub>i</sub>/T</sup> / Σe<sup>z<sub>j</sub>/T</sup>，算出的软标签约为 <strong>[0.65, 0.25, 0.10]</strong>。相比直接做 T=1 的 Softmax，温度越高分布越平滑，类别间的相对置信度差异会被放大暴露出来，这正是学生模型要学习的"隐含知识"。
+            </div>
+
+            <h3>损失函数与训练流程</h3>
+            <p>白盒蒸馏中，学生模型同时优化两个损失：蒸馏损失（KL 散度，衡量学生输出与教师"软标签"的接近程度）和监督损失（交叉熵，衡量学生输出与"硬标签"真实答案的吻合程度），两者加权求和：</p>
+            <div class="highlight-box purple">
+                总损失 = α × 蒸馏损失 + (1 − α) × 监督损失，α 是权重系数，调节"模仿教师"与"贴近真实答案"之间的平衡。
+            </div>
+            <p>训练流程上，教师模型和学生模型接收<strong>相同的输入</strong>；根据教师产生的软标签和真实硬标签计算出联合损失后，只对学生模型做反向传播更新参数，教师模型全程冻结。学生模型通过反复执行"前向推理 → 计算损失 → 反向传播 → 更新参数"，逐渐逼近教师模型的水平。</p>
+        </div>
+
+        <div class="section" id="embedding">
+            <h2>辨析：大模型的 Embedding 层 ≠ 词嵌入模型</h2>
+            <p>这两者经常被混为一谈，因为都叫"embedding"、都是把文本变成向量。但它们的训练目标、训练方式完全不同，混淆会直接导致 RAG 检索效果差。</p>
+
+            <div class="concept-card">
+                <h4>大模型的 Embedding 层（嵌入层）</h4>
+                <p>它是大模型这台庞大机器的"原料入口"：输入一句话，先把每个 token 转换成向量，再送进后面几十层网络去处理。这个嵌入层只是大模型的第一步，它的向量是<strong>随着整个模型联合训练出来的</strong>，最终目标是配合后面的生成任务把话说对、把问题答好，而不是为了让"语义相近的文本向量彼此靠近"这件事本身做优化。单独拿这层向量去算余弦相似度，效果通常并不可靠。</p>
+            </div>
+            <div class="concept-card">
+                <h4>专用词嵌入 / 文本嵌入模型</h4>
+                <p>这是一类<strong>独立训练</strong>、专门为相似度检索、聚类等任务服务的模型。早期以 Word2Vec、GloVe 为代表，通过"猜词游戏"式的自监督任务（根据上下文预测被遮住的词），学到静态的词向量，语义相近的词向量距离更近；现在主流的句子/文档级 Embedding 模型（如 BGE、text-embedding-ada-002）在此基础上引入了 Transformer 架构和<strong>对比学习</strong>——让相似文本对的向量主动拉近、不相似文本对的向量主动推远，训练目标从一开始就是为检索、聚类服务的。</p>
+            </div>
+
+            <table>
+                <thead><tr><th>维度</th><th>大模型 Embedding 层</th><th>专用词/文本嵌入模型</th></tr></thead>
+                <tbody>
+                    <tr><td>训练方式</td><td>与整个大模型联合训练</td><td>独立训练，通常用对比学习</td></tr>
+                    <tr><td>优化目标</td><td>服务于后续生成/预测任务</td><td>让语义相近文本的向量距离更近</td></tr>
+                    <tr><td>能否独立使用</td><td>可以取出向量，但检索效果通常不理想</td><td>本身就是完整模型，输入文本直接输出可用于相似度计算的向量</td></tr>
+                    <tr><td>典型代表</td><td>Qwen、LLaMA 等大模型内部的嵌入矩阵</td><td>Word2Vec、GloVe（词级）；BGE、text-embedding-ada-002（句子/文档级）</td></tr>
+                </tbody>
+            </table>
+            <div class="highlight-box">
+                一句话记住区别：大模型的 Embedding 层是"顺便产生"的中间表示，专用嵌入模型是"专门训练来做相似度"的独立模型。搭 RAG 检索管线时，应该用后者，而不是从某个大模型里截一段嵌入层出来凑合用。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>

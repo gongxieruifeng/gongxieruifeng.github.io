@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深度学习模型架构精讲：从经典网络到 MoE 与多模态 | 龚谢蕊烽</title>
+    <meta name="description" content="从神经网络的前向/反向传播讲起，梳理卷积、循环架构的先验假设与瓶颈，进入 Transformer 的编解码注意力机制，再展开 MoE 的稀疏路由与 ViT 的图像 Token 化。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; height: 56px;
+        }
+        .nav-logo {
+            font-weight: 800; font-size: 1.05rem; color: var(--ink);
+            text-decoration: none; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent);
+            padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 30px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink);
+            margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        .formula-box {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 18px 22px; margin: 14px 0; text-align: center; overflow-x: auto;
+        }
+        .formula-box .formula {
+            font-family: Georgia, "Times New Roman", serif; font-size: 16px; color: var(--ink);
+        }
+        .formula-box .var-def {
+            font-size: 12.5px; color: var(--muted); margin-top: 10px; text-align: left;
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; line-height: 1.8;
+        }
+        .formula-box .var-def code { background: var(--panel); }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px;
+            font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+        tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+        tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 23px; }
+            .page { padding: 28px 16px 60px; }
+            .formula-box .formula { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">⚡ 深度学习</span>
+            <h1 class="post-title">深度学习模型架构精讲：从经典网络到 MoE 与多模态</h1>
+            <p class="post-subtitle">深度学习模型的演进，很大程度上是关于"给网络内置多少先验假设"和"计算怎么分配"这两个问题的取舍——卷积假设空间局部性，循环假设时间依赖性，Transformer 则用注意力把这些假设换成了可学习的机制。这篇笔记按这条主线，从前向/反向传播讲到 Transformer 的编解码结构，再展开 MoE 的稀疏路由和 ViT 的图像 Token 化。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-03-31</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">Transformer</span>
+                    <span class="post-meta-tag">MoE</span>
+                    <span class="post-meta-tag">多模态</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="toc">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#roadmap">为什么按机制脉络讲，而不是逐个模型介绍</a></li>
+                <li><a href="#ml-vs-dl">从特征工程到端到端学习：机器学习与深度学习的分野</a></li>
+                <li><a href="#nn-basics">神经网络怎么学习：前向传播、反向传播与向量化</a></li>
+                <li><a href="#cnn-rnn">卷积与循环：两种"先验假设"架构及其瓶颈</a></li>
+                <li><a href="#transformer">Transformer：用自注意力取代结构先验</a></li>
+                <li><a href="#moe">MoE：把"更大的网络"换成"更聪明的路由"</a></li>
+                <li><a href="#vit">多模态：以 ViT 为起点看图像如何进入 Transformer</a></li>
+                <li><a href="#summary">小结：三条贯穿全文的主线</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="roadmap">
+            <h2>为什么按机制脉络讲，而不是逐个模型介绍</h2>
+            <p>深度学习模型的演进，很大程度上是关于"给网络内置多少先验假设"和"计算量怎么分配"这两个问题的反复取舍。卷积网络把空间局部性和权重共享写进了结构里，循环网络把时间上的先后依赖写进了结构里，而 Transformer 选择用一种更通用、完全依赖数据本身学出来的机制——注意力——去替代这些手工设计的先验。再往后，MoE 要解决的是"模型容量和推理开销不能同时增长"的矛盾，多模态对齐要解决的则是"不同模态的数据怎么进入同一个 Transformer 骨架"。</p>
+            <p>这篇笔记按这条主线组织：从神经网络最基础的前向/反向传播出发，过一遍卷积与循环各自的假设和局限，再进入 Transformer 的编解码结构，最后分别展开 MoE 的稀疏路由和 ViT 的图像 Token 化。</p>
+        </div>
+
+        <div class="section" id="ml-vs-dl">
+            <h2>从特征工程到端到端学习：机器学习与深度学习的分野</h2>
+            <p>机器学习和深度学习同属人工智能体系，深度学习是机器学习的一个子集，但两者在特征提取方式、数据需求、模型复杂度上的差异，决定了它们适用的场景完全不同。</p>
+            <h3>特征提取方式</h3>
+            <p>机器学习依赖人工特征工程，需要开发者基于领域知识设计特征——比如用 SVM 做图像分类时，先手工提取 HOG 特征，再交给分类器。深度学习通过多层神经网络端到端地自动学习特征，比如 CNN 会自动从底层的边缘、纹理逐层抽象到高层的语义特征，减少了人工干预的环节。</p>
+            <h3>数据与训练效率</h3>
+            <p>机器学习在小数据集（千级样本）上表现优异，训练速度快，可解释性强；深度学习对数据量要求更高（十万到百万级样本），需要 GPU/TPU 加速，训练耗时更长，但在图像、文本、语音这类大规模非结构化数据上效果显著。</p>
+            <h3>模型结构与计算资源</h3>
+            <p>机器学习模型结构较浅（逻辑回归、随机森林），CPU 上就能快速训练；深度学习模型更深（CNN、Transformer），参数量可以达到数十亿级，往往需要分布式训练。后面几节要讲的 CNN、RNN、Transformer、MoE，本质上都是在"模型该多深、参数该怎么分配"这个问题上给出的不同答案。</p>
+        </div>
+
+        <div class="section" id="nn-basics">
+            <h2>神经网络怎么学习：前向传播、反向传播与向量化</h2>
+            <p>一个最基础的神经网络由输入层、若干全连接的隐藏层、输出层组成。训练过程分两个方向：<strong>前向传播</strong>按层计算激活值，把输入一步步映射到输出；<strong>反向传播</strong>则反过来，从输出侧的损失出发，按链式法则逐层计算损失对每个参数的梯度，再用梯度更新参数。前向传播决定了模型"能算出什么"，反向传播决定了模型"该怎么调"。</p>
+            <h3>为什么要向量化</h3>
+            <p>前向/反向传播里大量的计算本质上是矩阵和向量运算。如果用 Python 的 for 循环逐样本、逐维度地算，会非常慢；向量化就是把这些运算表达成矩阵乘法、逐元素运算（如 numpy 里的 <code>numpy.dot()</code>、<code>numpy.exp()</code> 等），交给底层高度优化的线性代数库去执行。以逻辑回归为例，同样是对 m 个样本计算预测值和梯度，写成向量化的矩阵运算之后，计算效率相比逐样本循环有数量级的提升——这也是深度学习框架普遍以张量运算为核心接口的原因。再配合 numpy 的广播机制（Broadcasting），可以在不显式复制数据的前提下完成不同形状张量之间的运算。</p>
+            <div class="highlight-box">
+                前向传播算值、反向传播算梯度、向量化决定这两步能不能跑得动——这三件事构成了几乎所有神经网络（不管是 CNN、RNN 还是 Transformer）训练循环的共同底座。
+            </div>
+        </div>
+
+        <div class="section" id="cnn-rnn">
+            <h2>卷积与循环：两种"先验假设"架构及其瓶颈</h2>
+            <p>在 Transformer 之前，处理网格结构数据（图像）和序列结构数据（文本、时间序列）的主流方案分别是卷积神经网络（CNN）和循环神经网络（RNN），两者的共同点是：都把关于数据结构的先验假设直接写进了网络结构里。</p>
+            <h3>CNN：空间局部性与权重共享</h3>
+            <p>卷积操作用一个远小于输入尺寸的卷积核在输入上滑动，对局部区域做加权求和，这个核在整张图上参数共享。这个设计对应两个先验假设：一是图像里有意义的模式（边缘、纹理）通常是局部的，不需要看全图就能识别；二是同一种模式可能出现在图像的任何位置，所以同一个卷积核可以复用。这让 CNN 用远少于全连接网络的参数量就能处理图像，但代价是单层卷积的感受野有限，要建立跨越图像大范围区域的依赖关系，必须靠堆叠更多层或增大卷积核来扩大感受野。</p>
+            <h3>RNN：时间上的顺序依赖</h3>
+            <p>RNN 按时间步逐个处理序列输入，每一步都维护一个隐藏状态，把之前所有步的信息压缩携带到当前步，这对应的先验假设是：序列中靠后的元素依赖于前面的元素，且这种依赖需要按顺序建立。问题在于这种计算方式天然是串行的——算第 t 步必须先算完第 t-1 步，没法在时间维度上并行；同时随着序列变长，梯度在反复的链式相乘中容易消失或爆炸，使得 RNN 难以稳定地捕捉长距离依赖。</p>
+            <div class="highlight-box orange">
+                CNN 和 RNN 的局限指向同一个方向——用固定的结构先验（局部连接、顺序依赖）换取参数效率，但先验一旦不够灵活，就必须堆更多层或忍受训练不稳定。Transformer 的思路是反过来：不预设"哪些位置更重要"，而是用注意力权重让模型自己从数据里学出任意两个位置之间该有多强的依赖，同时把这种计算展开成矩阵乘法，天然支持并行。
+            </div>
+        </div>
+
+        <div class="section" id="transformer">
+            <h2>Transformer：用自注意力取代结构先验</h2>
+            <p>Transformer 的编码器-解码器结构里，每个 Encoder block 包含一个 Multi-Head Attention，每个 Decoder block 包含两个 Multi-Head Attention；每个 Multi-Head Attention 之上都接一个 Add &amp; Norm 层——Add 是残差连接，用来缓解网络退化，Norm 是 Layer Normalization，对每一层的激活值做归一化。下面按"输入怎么变成向量"→"Encoder 里的自注意力"→"Decoder 里两种不同的注意力"，分三步展开。</p>
+
+            <h3>Embedding：从离散 Token 到连续向量</h3>
+            <p>输入句子的每个词先要变成一个向量表示 X，这个 X 由两部分逐元素相加得到：词本身的 Embedding（Token Embedding）和词所在位置的 Embedding（Positional Encoding）。</p>
+
+            <div class="subcard">
+                <h4>查表映射（Token Embedding）</h4>
+                <p>假设词表大小为 10，每个词用 4 维向量表示（d_model=4），模型维护一个可训练的嵌入矩阵 W，形状为 [10, 4]，每一行对应一个词的向量，例如：</p>
+                <table>
+                    <thead><tr><th>词 ID</th><th>嵌入向量</th></tr></thead>
+                    <tbody>
+                        <tr><td>0</td><td>[0.1, 0.2, 0.3, 0.4]</td></tr>
+                        <tr><td>1</td><td>[0.5, 0.6, 0.7, 0.8]</td></tr>
+                        <tr><td>2</td><td>[0.9, 0.1, 0.2, 0.3]</td></tr>
+                        <tr><td>3</td><td>[0.4, 0.5, 0.6, 0.7]</td></tr>
+                    </tbody>
+                </table>
+                <p>输入句子"我 爱 猫"分词后得到 token id 序列 [2, 5, 3]（假设"我"对应 id=2、"爱"对应 id=5、"猫"对应 id=3），查表映射就是直接取出嵌入矩阵里对应的三行，拼成形状为 [3, 4] 的词嵌入矩阵 X：</p>
+                <pre><code>输入: "我 爱 猫" → token id: [2, 5, 3]
+
+X = [
+  [0.9, 0.1, 0.2, 0.3],   # 我 (id=2)
+  [0.5, 0.6, 0.7, 0.8],   # 爱 (id=5)
+  [0.4, 0.5, 0.6, 0.7]    # 猫 (id=3)
+]</code></pre>
+            </div>
+
+            <div class="subcard">
+                <h4>位置编码（Positional Encoding）</h4>
+                <p>Transformer 本身不含任何顺序信息，所以需要为每个位置单独生成一个位置向量（可以用固定的正弦/余弦函数生成，也可以用可学习的位置嵌入）。位置编码矩阵 P 和词嵌入矩阵 X 形状相同，逐元素相加得到最终输入：</p>
+                <pre><code>位置0: [0.01, 0.02, 0.03, 0.04]
+位置1: [0.05, 0.06, 0.07, 0.08]
+位置2: [0.09, 0.10, 0.11, 0.12]
+
+X + P（逐元素相加）:
+位置0 "我": [0.91, 0.12, 0.23, 0.34]
+位置1 "爱": [0.55, 0.66, 0.77, 0.88]
+位置2 "猫": [0.49, 0.60, 0.71, 0.82]</code></pre>
+                <p>相加得到的最终向量，才会被送入后面的注意力层。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula">X = TokenEmbedding(id) + PositionEncoding(pos)</div>
+                <div class="var-def">
+                    <code>TokenEmbedding(id)</code>：嵌入矩阵中第 id 行，把离散的 token id 转换为连续向量（等价于先做 one-hot 再过一次线性层）<br>
+                    <code>PositionEncoding(pos)</code>：位置 pos 对应的位置向量，形状与词嵌入相同，用于让模型感知词的先后顺序<br>
+                    两者逐元素相加，得到该位置最终的输入向量
+                </div>
+            </div>
+
+            <h3>Self-Attention 与 Multi-Head Attention（Encoder）</h3>
+            <p>Multi-Head Attention 由多个并行的 Self-Attention 组成。Encoder block 只包含一个 Multi-Head Attention，对输入序列做自注意力，让序列里的每个位置都能直接看到其他所有位置的信息，不再受限于 CNN 的感受野或 RNN 的串行依赖。</p>
+            <p>每个 Multi-Head Attention 后面接一个 Add &amp; Norm：Add 把该层的输入通过残差连接叠加到输出上，缓解层数加深带来的网络退化问题；Norm 是 Layer Normalization，对每一层的激活值做归一化，稳定训练。</p>
+
+            <h3>Decoder 的两种注意力：Masked Self-Attention 与 Cross-Attention</h3>
+            <p>Decoder block 包含两个 Multi-Head Attention，分工不同。</p>
+            <div class="subcard">
+                <h4>第一个：Masked Self-Attention</h4>
+                <p>对解码器自身已经生成的序列做自注意力，但加了 Mask，保证预测第 i 个位置时看不到第 i 个位置之后的信息，维持自回归生成的因果性。</p>
+            </div>
+            <div class="subcard">
+                <h4>第二个：Cross-Attention</h4>
+                <p>这一层的 Query 来自上一个 Decoder block 的输出 Z（如果是第一个 Decoder block，则来自 Decoder 的输入矩阵），而 Key 和 Value 不再来自 Decoder 自身，而是由 Encoder 的输出矩阵 C 线性变换得到。也就是说，Decoder 当前的表示去"查询"Encoder 编码出的整个输入序列，从中提取相关信息——这正是 Cross-Attention 名字的由来。由于 Encoder 的输出对 Decoder 的每一步都是完全可见的，这一层不需要像第一个 Multi-Head Attention 那样加 Mask，这样 Decoder 在生成每一个词时，都能利用到 Encoder 对整个输入序列编码后的全部信息。</p>
+            </div>
+        </div>
+
+        <div class="section" id="moe">
+            <h2>MoE：把"更大的网络"换成"更聪明的路由"</h2>
+            <h3>Dense 网络的问题</h3>
+            <p>常规（Dense）大模型里，前馈网络（FFN）的参数是完整、稠密的——为了提升 FFN 的表达能力，两个投影矩阵的维度会做得很大，这直接推高了计算量和存储开销；更麻烦的是，哪怕只是想做一次小的微调，也需要调整整个 FFN 的参数，训练所需的时间和空间成本都很高。</p>
+            <h3>MoE 的核心机制：专家、路由、稀疏激活</h3>
+            <p>MoE（Mixture of Experts）的核心思路是分而治之——把一个巨大的 FFN 层拆分成多个更小的 FFN 网络，也就是"专家"（Experts），让每个专家只专精于输入内容的某一部分。是否激活某个专家，由一个线性的路由层（Router）决定：路由层根据输入计算出与各个专家的匹配程度，只挑选匹配度高的一部分专家参与这一次的前向计算，其余专家不参与。反向传播时，损失也只会更新这次实际参与计算的专家参数——计算量因此得到控制，训练和推理效率都随之提升。这也是"Mixture"的含义：最终的输出并不是某一个专家单独给出的，而是被路由选中的若干专家的输出按其匹配权重组合（混合）而成。</p>
+            <h3>MoE 与 Dense 的权衡</h3>
+            <table>
+                <thead><tr><th>维度</th><th>对比结论</th></tr></thead>
+                <tbody>
+                    <tr><td>同参数量下的效果</td><td>Dense 模型通常比 MoE 模型更好（回答质量更高），但 MoE 不会差太多</td></tr>
+                    <tr><td>响应速度</td><td>MoE 比 Dense 快很多——每次前向只激活一部分专家，而不是整个网络</td></tr>
+                </tbody>
+            </table>
+            <h3>DeepSeek-MoE 的改进：共享专家</h3>
+            <p>DeepSeek 在标准 MoE 架构的基础上引入了"共享专家"（Shared Expert）的概念：共享专家专门处理各个任务里都会用到的通用知识，不需要经过路由层的选择，每一次推理都会被激活参与计算。这相当于把 MoE 拆成两部分——一部分专家负责通过路由动态选择、处理特定领域的知识；另一部分共享专家始终在线，负责兜底通用能力，两者共同构成最终输出。</p>
+        </div>
+
+        <div class="section" id="vit">
+            <h2>多模态：以 ViT 为起点看图像如何进入 Transformer</h2>
+            <p>多模态模型要解决的第一个问题是"不同模态的数据怎么统一成 Transformer 能处理的 Token 序列"。ViT（Vision Transformer）给出的答案很直接：把图像切成小块，让每一块图像 patch 扮演 NLP 任务里一个 Token 的角色，之后的结构——Patch Embedding 之后的 Transformer Encoder、位置编码——都和文本 Transformer 完全一致。</p>
+
+            <h3>Patch Embedding：图像如何变成"Token"</h3>
+            <p>以训练图像尺寸 224×224、patch 大小 16×16 为例，图像会被切成 14×14（共 196 个）patch。每个 patch 的原始形状是 (16, 16, 3)（RGB 三通道），先展平成长度为 768 的一维向量（16×16×3=768），再通过一个所有 patch 共享的线性层，把 768 维映射到 Transformer 的隐藏维度（Hidden Size）1024——这一步之后，每个图像 patch 就变成了一个和文本 Token 同样形式的向量，可以直接送进 Transformer Encoder。</p>
+            <div class="formula-box">
+                <div class="formula">Patch (16×16×3) → Flatten → 768 维向量 → Linear(768→1024) → Patch Embedding</div>
+                <div class="var-def">
+                    16×16×3 = 768：每个 patch 展平后的向量长度<br>
+                    Linear(768→1024)：所有 patch 共享同一个线性层，把展平向量映射到 Transformer 的 Hidden Size 1024<br>
+                    映射后的每个 patch 向量，在形式上等价于 NLP 任务里的一个 Token Embedding
+                </div>
+            </div>
+
+            <h3>分类头设计：CLS Token 还是全局平均池化</h3>
+            <p>Encoder 处理完 patch 序列之后，要提取一个全局特征来做分类，ViT 给出两种方式：一种是额外加一个可学习的 [CLS] token，用最后一层 Encoder 里这个 token 的输出作为全局表示；另一种不额外加 token，直接对最后一层所有 patch token 的向量做全局平均池化（GAP）提取全局信息。</p>
+            <p>ViT 的分类模型和回归模型，核心结构（Patch Embedding、Transformer Encoder、位置编码）完全相同，差异只在输出层和损失函数：</p>
+            <table>
+                <thead><tr><th></th><th>分类</th><th>回归</th></tr></thead>
+                <tbody>
+                    <tr><td>输出层</td><td>[CLS] token 输出 → 线性层 → 类别数 → Softmax</td><td>[CLS] token 或所有 patch token 池化特征 → 线性层 → 连续值空间，无 Softmax</td></tr>
+                    <tr><td>损失函数</td><td>交叉熵</td><td>MSE 或 L1</td></tr>
+                </tbody>
+            </table>
+
+            <h3>位置编码：1-D 与 2-D</h3>
+            <p>以一个简化的 3×3 patch 网格为例，ViT 的位置编码有两种做法：<strong>1-D</strong> 编码为每个图像 token 生成一个独立的可学习向量（9 个位置对应 9 个可学习向量），每个向量的维度等于完整的隐藏维度（1024）；<strong>2-D</strong> 编码把位置拆成行、列两部分，分别生成 3 个代表行、3 个代表列的向量，每个向量的维度是隐藏维度的一半（512），再把对应的行向量和列向量拼接起来，得到和 1-D 编码同样长度（1024）的位置向量。</p>
+
+            <h3>Hybrid ViT：卷积先验 + 注意力的折中</h3>
+            <p>ViT 混合模型（Hybrid）在 ViT 的基础上重新引入了传统卷积网络（CNN）的结构，相当于在"完全靠注意力学习空间关系"和"用卷积内置空间局部性先验"之间找一个折中方案。</p>
+            <p>实验结果显示：在模型规模较小时，Hybrid 混合模型的表现优于纯 ViT；但随着模型规模增大（任务复杂度提高），纯 ViT 的性能反超 Hybrid。这个结果和前面 CNN 一节的结论相呼应——结构先验（卷积）在数据或参数量不足时能帮网络更快学到有效模式，但当模型足够大、数据足够多时，不带先验、完全靠注意力从数据里学习的架构反而能达到更高的上限。</p>
+        </div>
+
+        <div class="section" id="summary">
+            <h2>小结：三条贯穿全文的主线</h2>
+            <p>把前面几节放在一起看，深度学习架构的演进大致沿着三条主线展开：</p>
+            <ol>
+                <li><strong>结构先验 vs 数据驱动的灵活性：</strong>CNN 靠卷积核内置空间局部性，RNN 靠递归结构内置时间顺序，而 Transformer 用注意力权重把"哪些位置该互相关注"变成了可学习的东西——ViT 在小模型下不如 Hybrid、大模型下反超的结果，正是这条主线的一个具体例证。</li>
+                <li><strong>稠密计算 vs 条件计算：</strong>Dense 网络里每一层的全部参数对每一个输入都要参与计算；MoE 把 FFN 拆成多个专家，用路由层做条件计算，只激活匹配的一部分，在扩大模型总容量的同时把单次推理的计算量控制住。</li>
+                <li><strong>单一模态 Token 化 vs 跨模态统一 Token 化：</strong>文本靠查表得到 Token Embedding，图像靠 Patch 展平加线性投影得到"图像 Token"——只要能把一种模态的数据变成和文本 Token 同样形状的向量序列，就可以复用同一套 Transformer Encoder/Decoder 结构，这也是当前多模态模型普遍采用的接入方式。</li>
+            </ol>
+            <div class="highlight-box">
+                三条主线的共同指向是同一件事——把人工设计的、针对特定数据结构的先验，逐步替换成可以从数据里学习、且能被工程化（并行、稀疏激活、统一接口）放大的机制。
+            </div>
+        </div>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </div>
+</body>
+</html>
