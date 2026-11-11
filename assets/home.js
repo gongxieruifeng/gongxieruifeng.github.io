@@ -52,7 +52,8 @@
     const navLinks = document.getElementById('navLinks');
     const tabs = Array.from(document.querySelectorAll('.resume-tab'));
 
-    function selectTrack(track, focus = false) {
+    function selectTrack(track, focus = false, motion = true) {
+        const changed = currentTrack !== track;
         currentTrack = track;
         for (const tab of tabs) {
             const selected = tab.dataset.tab === track;
@@ -64,6 +65,8 @@
             panel.classList.toggle('active', selected);
             if (selected && focus) tab.focus();
         }
+        if (changed && motion) window.SiteMotion?.enter(document.getElementById(`panel-${track}`));
+        window.SiteMotion?.refresh();
     }
 
     function switchLanguage(lang) {
@@ -97,7 +100,7 @@
         langButton.setAttribute('aria-label', langLabel);
         langButton.title = langLabel;
         updateMenuLabel();
-        selectTrack(currentTrack);
+        selectTrack(currentTrack, false, false);
         try { localStorage.setItem('site-language', currentLang); } catch (_) { /* Preferences are optional. */ }
         document.dispatchEvent(new CustomEvent('site:content-updated', { bubbles: true, detail: { language: currentLang } }));
     }
@@ -113,7 +116,10 @@
         updateMenuLabel();
         const use = navToggle.querySelector('use');
         if (use) use.setAttribute('href', `assets/icons.svg#${open ? 'close' : 'menu'}`);
-        if (open) navLinks.querySelector('a').focus();
+        if (open) {
+            navLinks.querySelector('a').focus();
+            window.SiteMotion?.enter(navLinks);
+        }
         else if (restoreFocus) navToggle.focus();
     }
 
@@ -128,7 +134,10 @@
             selectTrack(tabs[next].dataset.tab, true);
         });
     }
-    langButton.addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+    langButton.addEventListener('click', () => {
+        switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
+        window.SiteMotion?.enter(document.querySelector('main'));
+    });
     navToggle.addEventListener('click', () => setMenu(navToggle.getAttribute('aria-expanded') !== 'true'));
     navLinks.addEventListener('click', event => { if (event.target.closest('a')) setMenu(false); });
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && navLinks.classList.contains('open')) setMenu(false, true); });

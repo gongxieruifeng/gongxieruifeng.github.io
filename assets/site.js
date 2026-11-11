@@ -47,9 +47,18 @@
     previous?.focus();
     if (!copied) throw new Error('Copy unavailable');
   }
-  function feedback(button, message, original) {
+  const feedbackStates = new WeakMap();
+  function feedback(button, message, original, success = true) {
+    let state = feedbackStates.get(button);
+    if (!state) { state = { original, timer: null }; feedbackStates.set(button, state); }
+    clearTimeout(state.timer);
     button.textContent = message;
-    window.setTimeout(() => { button.innerHTML = original; }, 1800);
+    button.classList.toggle('ui-feedback-success', success);
+    state.timer = window.setTimeout(() => {
+      button.innerHTML = state.original;
+      button.classList.remove('ui-feedback-success');
+      state.timer = null;
+    }, 1800);
   }
   function readingTools() {
     if (!['article','project'].includes(document.body.dataset.page)) return;
@@ -80,7 +89,7 @@
     share.addEventListener('click', async () => {
       const original = share.innerHTML;
       try { await copyText(window.location.href); feedback(share, '链接已复制', original); }
-      catch { feedback(share, '请从地址栏复制', original); }
+      catch { feedback(share, '请从地址栏复制', original, false); }
     });
     actions.append(share); hero.append(actions);
 
@@ -91,7 +100,7 @@
       button.addEventListener('click', async () => {
         const original = button.innerHTML;
         try { await copyText(source); feedback(button,'已复制',original); }
-        catch { feedback(button,'请手动选择复制',original); }
+        catch { feedback(button,'请手动选择复制',original,false); }
       });
       pre.insertBefore(button,pre.firstChild);
     });
@@ -106,7 +115,7 @@
     const update=() => { scheduled=false; const max=document.documentElement.scrollHeight-window.innerHeight; bar.style.transform='scaleX('+(max>0?Math.min(1,Math.max(0,window.scrollY/max)):1)+')'; };
     const schedule=() => { if (!scheduled) { scheduled=true; requestAnimationFrame(update); } };
     window.addEventListener('scroll',schedule,{passive:true}); window.addEventListener('resize',schedule); update();
-    if (toc && 'IntersectionObserver' in window) {
+    if (toc && typeof window.IntersectionObserver === 'function') {
       const links=[...toc.querySelectorAll('a[href^="#"]')];
       const targets=links.map(link => { try { return document.getElementById(decodeURIComponent(link.hash.slice(1))); } catch { return null; } }).filter(Boolean);
       const observer=new IntersectionObserver(entries => {

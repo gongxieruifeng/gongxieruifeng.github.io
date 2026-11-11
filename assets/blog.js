@@ -370,7 +370,7 @@
         return card;
     }
 
-    function render(historyMode, syncSearch = true) {
+    function render(historyMode, syncSearch = true, motion = false) {
         const results = matchingPosts();
         if (syncSearch) elements.search.value = state.query;
         elements.clear.hidden = !elements.search.value;
@@ -390,12 +390,14 @@
         clearTimeout(announcementTimer);
         announcementTimer = setTimeout(() => { elements.summary.textContent = summary; }, 120);
         if (historyMode) writeLocation(historyMode);
+        document.dispatchEvent(new CustomEvent('site:motion-refresh'));
+        if (motion) window.SiteMotion?.enter(document.querySelector('.library-results'));
     }
 
-    function update(category, query, historyMode, syncSearch = true) {
+    function update(category, query, historyMode, syncSearch = true, motion = false) {
         state.category = categoryMap.has(category) ? category : 'all';
         state.query = normalizeQuery(query);
-        render(historyMode, syncSearch);
+        render(historyMode, syncSearch, motion);
     }
 
     categories.forEach(category => {
@@ -408,7 +410,7 @@
         count.className = 'category-count';
         count.setAttribute('aria-hidden', 'true');
         button.appendChild(count);
-        button.addEventListener('click', () => update(category.id, state.query, 'push'));
+        button.addEventListener('click', () => update(category.id, state.query, 'push', true, true));
         elements.categories.appendChild(button);
     });
 
@@ -425,15 +427,15 @@
     elements.search.addEventListener('keydown', event => {
         if (!event.isComposing && event.keyCode !== 229 && event.key === 'Escape' && elements.search.value) {
             event.preventDefault();
-            update(state.category, '', 'replace');
+            update(state.category, '', 'replace', true, true);
         }
     });
     elements.clear.addEventListener('click', () => {
-        update(state.category, '', 'replace');
+        update(state.category, '', 'replace', true, true);
         elements.search.focus();
     });
     elements.reset.addEventListener('click', () => {
-        update('all', '', 'push');
+        update('all', '', 'push', true, true);
         elements.search.focus();
     });
     window.addEventListener('popstate', () => { readLocation(); render(); });
@@ -441,8 +443,8 @@
     window.BlogLibrary = Object.freeze({
         getState: () => ({ category: state.category, query: state.query, total: posts.length, resultCount: matchingPosts().length }),
         getPosts: () => posts.map(post => ({ ...post, tags: post.tags.slice() })),
-        filter: (category, query = state.query) => update(category, query, 'push'),
-        reset: () => update('all', '', 'push')
+        filter: (category, query = state.query) => update(category, query, 'push', true, true),
+        reset: () => update('all', '', 'push', true, true)
     });
     readLocation();
     render();

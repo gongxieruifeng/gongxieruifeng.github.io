@@ -1,0 +1,233 @@
+/* Short, optional motion. Content remains visible without the companion script. */
+:root {
+  --motion-fast: 150ms;
+  --motion-ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* Native navigation preserves normal links and browser history. */
+@view-transition { navigation: auto; }
+.home-page > .navbar,
+.blog-page > .blog-navbar,
+body:is([data-page="article"], [data-page="project"]) > .navbar {
+  view-transition-name: site-navigation;
+}
+.home-page > main,
+.blog-page > main,
+body:is([data-page="article"], [data-page="project"]) > .page {
+  view-transition-name: page-content;
+}
+::view-transition { pointer-events: none; }
+::view-transition-group(root),
+::view-transition-group(site-navigation),
+::view-transition-group(page-content) { animation: none; }
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(site-navigation),
+::view-transition-new(site-navigation) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(page-content) {
+  animation: motion-page-out 110ms ease-out both;
+  mix-blend-mode: normal;
+}
+::view-transition-new(page-content) {
+  animation: motion-page-in 220ms var(--motion-ease) both;
+  mix-blend-mode: normal;
+}
+@keyframes motion-page-out { to { opacity: 0; } }
+@keyframes motion-page-in { from { opacity: .94; } to { opacity: 1; } }
+
+/* Known controls use translate, leaving icon and diagram transforms independent. */
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+:is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+    .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+    .ui-code-copy, .ui-back-top, .project-image-close,
+    .project-image-tools button, .project-image-tools a):not(:disabled) {
+  transform: none;
+  transition: translate var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) ease, color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+:is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+    .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+    .ui-code-copy, .ui-back-top, .project-image-close,
+    .project-image-tools button, .project-image-tools a):not(:disabled):focus-visible {
+  border-color: #91ad9a;
+}
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+:is(.ui-btn, .btn-link, .home-btn-secondary, .lang-toggle, .nav-mobile-toggle,
+    .clear-search, .project-image-close, .project-image-tools button,
+    .project-image-tools a):not(:disabled):focus-visible {
+  background-color: var(--accent-soft, #edf3ee);
+}
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+:is(.ui-btn-primary, .home-btn-primary, .contact-btn.primary, .reset-filters):not(:disabled):focus-visible {
+  background-color: #154b3d;
+  color: #fff;
+}
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+.ui-code-copy:focus-visible { background-color: #345441; }
+.home-page .resume-tab:focus-visible { color: var(--accent, #1b6550); }
+.blog-page .category-tag:not(.active):focus-visible {
+  background-color: var(--surface, #fff);
+  color: var(--accent, #1b6550);
+}
+body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+:is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+    .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+    .ui-code-copy, .ui-back-top, .project-image-close,
+    .project-image-tools button, .project-image-tools a):not(:disabled).ui-click-feedback {
+  box-shadow: 0 0 0 3px rgb(27 101 80 / 12%);
+}
+body:is([data-page="article"], [data-page="project"])
+button:is(.ui-btn, .ui-code-copy).ui-feedback-success:not(:disabled) {
+  border-color: #6b9a7d;
+  box-shadow: 0 0 0 3px rgb(27 101 80 / 10%);
+}
+
+/* Focus communicates the same destination as a pointer hover. */
+.home-page .nav-links a::after { transform-origin: left; }
+.home-page .nav-links a:focus-visible {
+  color: var(--accent, #1b6550);
+}
+.home-page .nav-links a:focus-visible::after { transform: scaleX(1); }
+.blog-nav-links a:focus-visible,
+body:is([data-page="article"], [data-page="project"]) .nav-back:focus-visible {
+  color: var(--accent, #1b6550);
+  background-color: var(--accent-soft, #edf3ee);
+}
+.home-page :is(.home-text-link, .project-link):focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.home-page .contact-btn:not(.primary):focus-visible {
+  background-color: rgb(255 255 255 / 55%);
+}
+.home-page .focus-bottom:focus-visible { background-color: rgb(255 255 255 / 9%); }
+.home-page .project-card:focus-within,
+.blog-page .post-card:focus-visible {
+  border-color: #91ad9a;
+  box-shadow: 0 8px 24px rgb(23 42 38 / 6%);
+}
+.home-page .project-card,
+.blog-page .post-card {
+  transition: translate 180ms var(--motion-ease), border-color var(--motion-fast) ease,
+    box-shadow 180ms ease;
+}
+.blog-page .post-card:is(:hover, :focus-visible) { transform: none; }
+.blog-page .post-card:focus-visible .post-title { color: var(--accent, #1b6550); }
+.blog-page .post-card:is(:hover, :focus-visible) .post-card-footer .ui-icon {
+  transform: none;
+}
+body :is(a, button) .ui-icon:has(use:is([href$="#arrow-right"],
+    [href$="#arrow-up-right"], [href$="#arrow-left"], [href$="#arrow-up"])) {
+  transition: translate var(--motion-fast) var(--motion-ease);
+}
+
+/* Reading cues do not move text, tables, or the contents of technical figures. */
+body:is([data-page="article"], [data-page="project"]) .toc a {
+  border-radius: 4px;
+  transition: background-color var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+body:is([data-page="article"], [data-page="project"])
+.toc a:is(:hover, :focus-visible) { background-color: #edf3ee; }
+body:is([data-page="article"], [data-page="project"])
+.toc a:is(.is-active, [aria-current="location"]) {
+  background-color: #e5eee6;
+  color: var(--accent, #1b6550);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+body:is([data-page="article"], [data-page="project"])
+:is(pre, .ui-table-scroll, .table-scroll) {
+  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+body:is([data-page="article"], [data-page="project"])
+:is(pre, .ui-table-scroll, .table-scroll):focus-within {
+  border-color: #7eac90;
+  box-shadow: 0 0 0 3px rgb(27 101 80 / 10%);
+}
+.figure-open { transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease; }
+.figure-open:focus-visible {
+  border-color: var(--accent, #1b6550);
+  box-shadow: 0 0 0 3px rgb(27 101 80 / 10%);
+}
+/* Legacy diagram nodes are explanatory, so their hover should not lift the layout. */
+body[data-page="project"] :is(.arch-node, .stage-card, .op-card, .agent-card):hover {
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+  :is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+      .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+      .ui-code-copy, .ui-back-top, .project-image-close,
+      .project-image-tools button, .project-image-tools a):not(:disabled):is(:hover, :focus-visible) {
+    transform: none;
+    translate: 0 -1px;
+  }
+  .home-page .nav-links a:hover::after { transform: scaleX(1); }
+  .home-page .project-card:is(:hover, :focus-within),
+  .blog-page .post-card:is(:hover, :focus-visible) { translate: 0 -2px; }
+  body :is(a, button):is(:hover, :focus-visible)
+  .ui-icon:has(use[href$="#arrow-right"]) { translate: 3px 0; }
+  body :is(a, button):is(:hover, :focus-visible)
+  .ui-icon:has(use[href$="#arrow-up-right"]) { translate: 2px -2px; }
+  body .nav-back:is(:hover, :focus-visible)
+  .ui-icon:has(use[href$="#arrow-left"]) { translate: -2px 0; }
+  body .ui-back-top:is(:hover, :focus-visible) .ui-icon { translate: 0 -2px; }
+  body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+  :is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+      .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+      .ui-code-copy, .ui-back-top, .project-image-close,
+      .project-image-tools button, .project-image-tools a):not(:disabled):active {
+    transform: none;
+    translate: 0 1px;
+  }
+  .blog-page .post-card:active { translate: 0 0; }
+  .project-image-dialog[open] {
+    animation: motion-dialog-in 160ms var(--motion-ease);
+  }
+  .project-image-dialog[open]::backdrop {
+    animation: motion-backdrop-in 160ms ease;
+  }
+}
+@keyframes motion-dialog-in {
+  from { opacity: .94; translate: 0 6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes motion-backdrop-in { from { opacity: .9; } to { opacity: 1; } }
+
+/* Keep feedback, focus rings, and instant navigation when motion is inappropriate. */
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse), print {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+  body:is(.home-page, .blog-page, [data-page="article"], [data-page="project"])
+  :is(.home-btn, .ui-btn, .btn-link, .lang-toggle, .nav-mobile-toggle,
+      .resume-tab, .category-tag, .reset-filters, .clear-search, .contact-btn,
+      .ui-code-copy, .ui-back-top, .project-image-close,
+      .project-image-tools button, .project-image-tools a):not(:disabled):is(:hover, :focus-visible, :active),
+  .home-page .project-card,
+  .blog-page .post-card,
+  body :is(a, button) .ui-icon {
+    transform: none;
+    translate: none;
+    transition-duration: 0s;
+  }
+  .project-image-dialog[open], .project-image-dialog[open]::backdrop { animation: none; }
+}
+@media (prefers-reduced-motion: reduce), print {
+  .home-page > .navbar,
+  .blog-page > .blog-navbar,
+  body:is([data-page="article"], [data-page="project"]) > .navbar,
+  .home-page > main,
+  .blog-page > main,
+  body:is([data-page="article"], [data-page="project"]) > .page {
+    view-transition-name: none;
+  }
+}
