@@ -15,7 +15,7 @@
     <a class="skip-link" href="#main-content" data-home-i18n="skip">跳转到主要内容</a>
     <nav class="navbar" id="navbar" aria-label="主导航">
         <div class="nav-inner">
-            <a href="#home" class="nav-logo" aria-label="龚谢蕊烽 · 首页"><span class="nav-logo-mark" aria-hidden="true">龚</span><span id="nav-name">龚谢蕊烽</span></a>
+            <a href="#home" class="nav-logo" aria-label="龚谢蕊烽 · 首页"><span id="nav-name">龚谢蕊烽</span></a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home" data-i18n="nav_home" class="is-active" aria-current="location">首页</a></li>
                 <li><a href="#about" data-i18n="nav_about">关于</a></li>
@@ -51,7 +51,7 @@
                     </div>
                 </header>
                 <aside class="focus-card" aria-labelledby="focus-title">
-                    <div class="focus-top"><span class="focus-label" data-home-i18n="focusEyebrow">RESEARCH & ENGINEERING</span><span class="focus-monogram" aria-hidden="true">RG</span></div>
+                    <div class="focus-top"><span class="focus-label" data-home-i18n="focusEyebrow">RESEARCH & ENGINEERING</span></div>
                     <h2 id="focus-title" data-home-i18n="focusTitle">从模型推理<br>到可落地的系统。</h2>
                     <div class="focus-areas">
                         <div class="focus-area"><span class="focus-number" aria-hidden="true">01</span><div><h3 data-home-i18n="focusAgent">可控 Agent</h3><p data-home-i18n="focusAgentDesc">编排 · 检索增强 · 可审计执行</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#layers"></use></svg></div>
@@ -150,7 +150,7 @@
                 <div class="projects-grid" id="projects-grid"><div class="project-card">
                         <span class="project-badge internship">实习</span>
                         <div class="project-head">
-                            <div class="project-name"><span class="project-symbol"><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#layers"></use></svg></span>CompileLight</div>
+                            <div class="project-name"><span class="project-emoji" aria-hidden="true">⚡</span>CompileLight</div>
                             <div class="project-role">KN Group · 实习</div>
                         </div>
                         <p class="project-desc">
@@ -174,7 +174,7 @@
                     <div class="project-card">
                         <span class="project-badge research">科研</span>
                         <div class="project-head">
-                            <div class="project-name"><span class="project-symbol"><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#location"></use></svg></span>GeoME</div>
+                            <div class="project-name"><span class="project-emoji" aria-hidden="true">🌍</span>GeoME</div>
                             <div class="project-status-tags">
                                 <span class="status-tag submitting">在投</span>
                                 <span class="project-role">项目负责人 · 一作</span>
@@ -198,9 +198,9 @@
                     <div class="project-card">
                         <span class="project-badge research">科研</span>
                         <div class="project-head">
-                            <div class="project-name"><span class="project-symbol"><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#cpu"></use></svg></span>GeoGR²</div>
+                            <div class="project-name"><span class="project-emoji" aria-hidden="true">🗺️</span>GeoGR²</div>
                             <div class="project-status-tags">
-                                <span class="status-tag submitting">在投</span>
+                                <span class="status-tag accepted">EMNLP 已录用</span>
                                 <span class="project-role">项目负责人</span>
                             </div>
                         </div>
@@ -222,9 +222,9 @@
                     <div class="project-card">
                         <span class="project-badge research-purple">科研</span>
                         <div class="project-head">
-                            <div class="project-name"><span class="project-symbol"><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#clock"></use></svg></span>FGFormer</div>
+                            <div class="project-name"><span class="project-emoji" aria-hidden="true">⏱️</span>FGFormer</div>
                             <div class="project-status-tags">
-                                <span class="status-tag researching">在研</span>
+                                <span class="status-tag submitting">在投</span>
                                 <span class="project-role">项目负责人</span>
                             </div>
                         </div>
@@ -276,7 +276,8 @@
                                 <strong> <i>GeoME</i> —— 多阶段辩论与特征规避的视觉地理溯因推理框架</strong>
                             </div>
                             <div class="entry-meta-row">
-                                <span class="entry-role">项目负责人 · 一作在投</span>
+                                <span class="entry-role">项目负责人 · 一作</span>
+                                <span class="publication-status submitting">在投</span>
                             </div>
                         </div>
                         <p class="summary">项目描述：针对大规模视觉语言模型（LVLMs）在地理定位中的<strong>"先验主导"</strong>幻觉问题，设计零训练多轮溯因推理框架，以候选假设的对抗验证与动态特征规避抑制误导性视觉先验。</p>
@@ -295,6 +296,7 @@
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
+                                <span class="publication-status accepted">EMNLP 已录用</span>
                             </div>
                         </div>
                         <p class="summary">项目描述：针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调、基于图结构协同推理的自主推理框架，通过真实观测数据 Grounding 与邻域协同推理提升预测一致性。</p>
@@ -361,6 +363,7 @@
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
+                                <span class="publication-status submitting">在投</span>
                             </div>
                         </div>
                         <p class="summary">项目描述：针对时空 Transformer 主要依赖内容相似度、难以区分<strong>外观相似但运动趋势相反</strong>序列的问题，提出 FGFormer；基于傅里叶移位定理将<strong>相位信息</strong>显式注入时间注意力，并结合帧间差分表征增强动态模式建模。</p>
@@ -379,6 +382,7 @@
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
+                                <span class="publication-status accepted">EMNLP 已录用</span>
                             </div>
                         </div>
                         <p class="summary">项目描述：针对 LLM 在 GDP、温度、降水等地理空间预测中的空间孤立与区域分布偏差，设计无需微调、基于图结构协同推理的自主推理框架，通过真实观测数据 Grounding 与邻域协同推理提升预测一致性。</p>
