@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM 推理性能指标详解：TTFT、TPOT 与 ITL | 龚谢蕊烽</title>
-    <meta name="description" content="拆解大模型推理服务中最核心的三个延迟指标——TTFT、TPOT、ITL 的定义、计算公式与工程优化方向。">
+    <title>LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS | 龚谢蕊烽</title>
+    <meta name="description" content="从 TTFT、TPOT、ITL 到 QPS、TPS、RPM、TPM 和并发数，统一大模型推理服务的测量口径，并用 Little's Law 与 SLO 压测解释容量和体验的取舍。">
     <style>
         :root {
             --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
@@ -109,6 +109,9 @@
             font-size: 0.9em; color: var(--accent);
         }
 
+        .table-scroll { overflow-x: auto; margin: 12px 0 16px; }
+        .table-scroll table { min-width: 540px; margin: 0; }
+
         table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
         th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
         th:first-child { border-radius: 6px 0 0 0; }
@@ -143,112 +146,147 @@
     <div class="page">
         <div class="post-hero">
             <span class="post-category-badge">🧠 大语言模型</span>
-            <h1 class="post-title">LLM 推理性能指标详解：TTFT、TPOT 与 ITL</h1>
-            <p class="post-subtitle">大模型推理服务的性能评估离不开三个核心延迟指标——它们分别刻画"响应快不快""生成快不快""生成稳不稳"，是做推理系统选型和优化时必须拆解清楚的基本功。</p>
+            <h1 class="post-title">LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS</h1>
+            <p class="post-subtitle">延迟决定交互体验，Token 吞吐反映处理能力，并发数描述系统中的在途请求。把它们放到同一套输入输出长度、统计边界和服务目标下，才能判断推理系统的瓶颈与可用容量。</p>
             <div class="post-meta">
-                <span class="post-meta-date">📅 2026-09-24</span>
+                <span class="post-meta-date">📅 首次发布 2026-09-24 · 更新 2026-11-11</span>
                 <div class="post-meta-tags">
                     <span class="post-meta-tag">LLM推理</span>
                     <span class="post-meta-tag">性能优化</span>
+                    <span class="post-meta-tag">并发压测</span>
                     <span class="post-meta-tag">vLLM</span>
                 </div>
             </div>
         </div>
 
-        <div class="section">
-            <h2>为什么是这三个指标</h2>
-            <p>评估一个 LLM 推理系统，不能只看"总耗时"这一个笼统数字。用户对延迟的感知在生成的不同阶段是不一样的：第一个字出得快不快、后续吐字流不流畅、吐字节奏稳不稳定，背后对应的是完全不同的系统瓶颈。<strong>TTFT、TPOT、ITL</strong> 正是把"总耗时"拆解到这三个维度上的标准指标，分别对应 Prefill（预填充）和 Decode（解码）两个阶段的不同计算特征。</p>
-        </div>
-
-        <div class="section">
-            <h2>TTFT（Time To First Token）</h2>
-            <p><strong>定义：</strong>从请求发出到收到第一个输出 Token 的时间，核心影响因素是 Prompt 预填充（Prefill）阶段的计算效率。</p>
-            <div class="formula-box">
-                <div class="formula">TTFT = N<sub>prompt</sub> / θ<sub>prefill</sub> + T<sub>fixed</sub></div>
-                <div class="var-def">
-                    <code>N_prompt</code>：输入 Prompt 的 Token 数量<br>
-                    <code>θ_prefill</code>：Prefill 速度（Token/s），依赖硬件并行计算能力（如 GPU 的 FLOPs）<br>
-                    <code>T_fixed</code>：固定开销，包括网络延迟、框架初始化等
-                </div>
+        <section class="section" id="request-lifecycle">
+            <h2>先统一请求生命周期和测量时钟</h2>
+            <p>LLM 请求通常经历网络传输、准入或排队、Prefill（预填充）、Decode（解码）与流式传输。长输入主要增加 Prefill 的计算量，长输出会占用更多解码步数；在高负载下，排队和调度也会成为主要延迟来源。只看请求总耗时或 QPS，很难判断这些成本来自哪里。</p>
+            <p>以下以客户端接收输出 Token 的时钟为例：<code>t₀</code> 是请求发出时间，<code>t₁</code> 是第一个输出 Token 到达时间，<code>tₙ</code> 是最后一个输出 Token 到达时间，<code>N</code> 是输出 Token 数。服务端也可以记录同类指标，但应明确起止点，并与客户端时钟分别报告。</p>
+            <div class="highlight-box">
+                Token 数以模型的分词口径计，不等于字数。流式接口的一次数据块可能含多个 Token，首个控制消息也可能没有文本；直接把数据块间隔当作逐 Token 延迟，会改变指标含义。
             </div>
-            <p><strong>示例：</strong>Prompt 100 Token，Prefill 速度 500 Token/s，固定开销 10ms：TTFT = 100/500 + 0.01 = <strong>0.21 秒</strong>。</p>
+            <p><a href="#ttft">TTFT</a> · <a href="#tpot">TPOT</a> · <a href="#itl">ITL</a> · <a href="#throughput">吞吐与限流</a> · <a href="#concurrency">并发与容量</a> · <a href="#load-testing">SLO压测</a></p>
+        </section>
+
+        <section class="section" id="ttft">
+            <h2>TTFT：第一个输出 Token 多久到达</h2>
+            <p><strong>TTFT（Time To First Token）</strong>是从请求发出到收到第一个输出 Token 的时间，刻画用户等待系统开始回答的体验。</p>
+            <div class="formula-box">
+                <div class="formula">TTFT = t₁ − t₀</div>
+                <div class="var-def">客户端口径通常包含网络、排队、Prefill、首 Token 采样与发送。服务端若从开始执行计时，会排除其中一部分，比较时必须使用相同边界。</div>
+            </div>
+            <p>输入长度是重要因素，但不能把 TTFT 全部归因于 Prefill。相同 Prompt 在排队、缓存命中、批处理策略和硬件配置不同时，首 Token 延迟可能明显不同。</p>
             <h3>优化方向</h3>
             <ul>
-                <li>提高硬件并行度（如使用 A100/H100 GPU）</li>
-                <li>优化 Prompt 编码，压缩冗余 Token</li>
-                <li>使用更高效的推理框架（如 vLLM 的 PagedAttention）</li>
+                <li>用请求追踪区分网络、队列与模型执行时间，先定位占比最大的部分。</li>
+                <li>压缩无用输入，评估前缀缓存、Prefill 调度和推理后端的收益，同时记录缓存命中条件。</li>
+                <li>调整准入和批处理策略，结合硬件并行能力评估；不能仅凭单请求测试判断高负载体验。</li>
             </ul>
-        </div>
+        </section>
 
-        <div class="section">
-            <h2>TPOT（Time Per Output Token）</h2>
-            <p><strong>定义：</strong>解码阶段平均每个输出 Token 的生成时间，核心影响因素是自回归生成的计算量和内存带宽。</p>
+        <section class="section" id="tpot">
+            <h2>TPOT：首 Token 之后的平均生成时间</h2>
+            <p><strong>TPOT（Time Per Output Token）</strong>描述首 Token 之后，每个输出 Token 的平均耗时。若端到端延迟取到最后一个输出 Token，则：</p>
             <div class="formula-box">
-                <div class="formula">TPOT = (E2E − TTFT) / (N<sub>output</sub> − 1)</div>
-                <div class="var-def">
-                    <code>E2E</code>：端到端总延迟&nbsp;&nbsp;<code>TTFT</code>：首 Token 延迟&nbsp;&nbsp;<code>N_output</code>：输出 Token 总数<br>
-                    通常为常量，除非受内存带宽限制波动
-                </div>
+                <div class="formula">TPOT = (tₙ − t₁) / (N − 1) = (E2E − TTFT) / (N − 1)</div>
+                <div class="var-def"><code>E2E = tₙ − t₀</code>，且 <code>N ≥ 2</code>。输出仅有一个 Token 时，TPOT 没有可用的后续间隔，不应强行记为零。</div>
             </div>
-            <p><strong>示例：</strong>生成 50 个 Token 共耗时 2.5 秒：TPOT = (2.5 − 0.2) / 49 ≈ <strong>0.047 秒</strong>。</p>
+            <p><strong>假设示例：</strong>首 Token 在0.2秒到达，第50个 Token 在2.65秒到达，则 TPOT = (2.65 − 0.2) / 49 = <strong>50ms</strong>。</p>
+            <p>TPOT 会随模型大小、上下文增长、内存带宽、KV Cache、批内竞争和调度变化，并非常量。对于较长输出，单请求平均解码速率约为 <code>1 / TPOT</code>；它与整个服务的聚合 Output TPS 是不同口径。</p>
             <h3>优化方向</h3>
             <ul>
-                <li>量化模型（如 FP16/INT8 降低计算量）</li>
-                <li>优化 KV Cache 内存访问（如 FlashAttention）</li>
-                <li>批处理（Batching）提升吞吐量，但可能增加单请求 TPOT</li>
+                <li>评估量化、KV Cache 管理、高效注意力实现与推理后端，并同时检查质量和硬件适配。</li>
+                <li>改善 CPU-GPU 同步及内存访问，区分解码计算与传输造成的等待。</li>
+                <li>用连续批处理提高资源利用率，但同步观察单请求 TPOT 和尾延迟，避免只汇报总吞吐。</li>
             </ul>
-        </div>
+        </section>
 
-        <div class="section">
-            <h2>ITL（Inter-Token Latency）</h2>
-            <p><strong>定义：</strong>连续两个输出 Token 之间的实际间隔时间，核心影响因素是解码阶段的串行依赖性和系统调度开销。理想情况下 <code>ITL ≈ TPOT</code>，但实际会因框架调度或资源竞争而偏高。</p>
+        <section class="section" id="itl">
+            <h2>ITL：相邻 Token 的实际间隔</h2>
+            <p><strong>ITL（Inter-Token Latency）</strong>是连续两个输出 Token 到达的时间差。它是一组间隔，而不是单个平均值，可以用分布观察流式输出是否出现停顿。</p>
             <div class="formula-box">
-                <div class="formula">ITL = Decode Phase Time / (m − 1)&nbsp;&nbsp;(m ≥ 2)</div>
-                <div class="var-def"><code>m</code>：解码阶段产出的 Token 数量</div>
+                <div class="formula">ITLᵢ = tᵢ − tᵢ₋₁，i = 2, …, N</div>
+                <div class="var-def">同一请求、同一时钟且有逐 Token 时间戳时，<code>TPOT = 平均(ITL₂, …, ITLₙ)</code>。若只能获得流式数据块时间戳，应标为块间延迟，不能声称测得了严格逐 Token ITL。</div>
             </div>
-            <p><strong>示例：</strong>若 TPOT 为 50ms，叠加 10ms 调度开销：ITL = 50 + 10 = <strong>60ms</strong>。</p>
-            <h3>优化方向</h3>
+            <p><strong>假设示例：</strong>三个相邻间隔分别是40ms、60ms和50ms，平均为50ms；平均值相同的另一段输出，仍可能包含很长的停顿。因此需要同时报告 ITL 的分位数或停顿比例。</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>指标</th><th>回答的问题</th><th>常见观察重点</th></tr></thead>
+                    <tbody>
+                        <tr><td>TTFT</td><td>多久开始回答</td><td>排队、Prefill、前缀缓存与传输</td></tr>
+                        <tr><td>TPOT</td><td>平均生成多快</td><td>解码计算、带宽、KV Cache与批处理竞争</td></tr>
+                        <tr><td>ITL分布</td><td>生成是否平稳</td><td>调度抖动、资源竞争、同步及流式传输</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="formula-box">
+                <div class="formula">E2E = TTFT + (N − 1) × TPOT</div>
+                <div class="var-def">此式沿用首个/最后一个输出 Token 的时间戳。若“请求完成”还包含流关闭、后处理等额外时间，应另计该开销，不能换用结束时钟后仍直接套用此式。</div>
+            </div>
+        </section>
+
+        <section class="section" id="throughput">
+            <h2>QPS、TPS与RPM/TPM：请求量、Token量和配额</h2>
+            <p>两个请求的输入输出长度可能相差几个数量级。例如在稳定负载下，假设每秒完成2个请求、每个平均生成2000个 Token，聚合输出量约为4000 Token/s。相同 QPS 下，短回答服务与长文本服务对解码资源的要求并不相同。</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>指标</th><th>定义 / 用途</th><th>报告时需明确</th></tr></thead>
+                    <tbody>
+                        <tr><td>QPS / RPS</td><td>单位时间的查询 / 请求数量</td><td>到达、准入、完成或成功请求分别计数；完成QPS = 窗口内完成数 / 窗口秒数。</td></tr>
+                        <tr><td>Input TPS</td><td>每秒处理的输入Token量</td><td>逻辑输入数与实际执行Prefill的Token数可能因缓存而不同。</td></tr>
+                        <tr><td>Output TPS</td><td>每秒产生的输出Token总量</td><td>是服务聚合吞吐；不等于单个用户看到的Token/s。</td></tr>
+                        <tr><td>RPM / TPM</td><td>每分钟请求数 / Token数，常用于API配额</td><td>TPM包含哪些Token、滑动窗口及预留计费规则以提供方说明为准。</td></tr>
+                        <tr><td>Concurrency</td><td>同一时刻系统中的请求或序列数</td><td>在途、排队、运行、框架序列数与准入上限是不同边界。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>云API的配额由模型、账户和服务策略决定，不能把某一档的限额当作长期通用配置。RPM/TPM限制也不是GPU容量：即使服务器有空闲算力，请求仍可能先触发配额；反过来，配额允许通过的流量也不保证满足延迟目标。</p>
+        </section>
+
+        <section class="section" id="concurrency">
+            <h2>“并发80”究竟约束了哪一层</h2>
+            <p>“支持80并发”必须附带统计位置和工作负载。它可能是客户端同时发起的在途请求数、网关允许进入的请求上限，也可能是推理调度器的序列限制；不能直接解释为80个请求都在同一时刻执行 Decode。</p>
             <ul>
-                <li>减少调度延迟（如使用 TensorRT-LLM 等专用推理后端）</li>
-                <li>避免 CPU-GPU 同步阻塞</li>
+                <li><strong>客户端或网关：</strong>在途数可能同时包含排队和运行请求。超过准入阈值后，是排队、拒绝还是返回429，取决于实际策略。</li>
+                <li><strong>推理框架：</strong><code>max_num_seqs</code>等参数约束调度中的序列数量，具体含义需按框架和版本核对；Prefill/Decode混合、Token预算及采样方式都会影响实际批次，配置值不等于恒定活跃用户数。</li>
+                <li><strong>显存与KV Cache：</strong>可容纳数量随输入长度、已生成长度、模型层数、KV精度和并行方式变化。不能只用GPU总显存除以一个固定“每请求显存”承诺容量。</li>
             </ul>
-        </div>
-
-        <div class="section">
-            <h2>三者的关系与系统性能</h2>
-            <table>
-                <thead><tr><th>指标</th><th>影响维度</th><th>说明</th></tr></thead>
-                <tbody>
-                    <tr><td>TTFT</td><td>用户体验</td><td>较短的 TTFT 让用户感知"响应迅速"</td></tr>
-                    <tr><td>TPOT</td><td>生成速度</td><td>直接影响 Token/s，尤其在长文本场景下</td></tr>
-                    <tr><td>ITL</td><td>稳定性</td><td>波动过大会导致生成过程"卡顿"</td></tr>
-                </tbody>
-            </table>
+            <h3>用Little's Law连接平均并发、吞吐与耗时</h3>
             <div class="formula-box">
-                <div class="formula">E2E Latency = TTFT + TPOT × N<sub>output</sub></div>
+                <div class="formula">L = λ × W</div>
+                <div class="var-def"><code>L</code>：同一系统边界内的平均在途数量；<code>λ</code>：稳定时间窗内的平均流入/流出率；<code>W</code>：请求在该边界内的平均停留时间。若L包含队列，W也必须包含排队时间。</div>
             </div>
-            <h3>综合示例</h3>
-            <table>
-                <thead><tr><th>指标</th><th>示例值</th><th>说明</th></tr></thead>
-                <tbody>
-                    <tr><td>TTFT</td><td>0.2 秒</td><td>首 Token 响应较快</td></tr>
-                    <tr><td>TPOT</td><td>0.05 秒</td><td>生成速度约 20 Token/s</td></tr>
-                    <tr><td>ITL</td><td>0.06 秒</td><td>存在约 10ms 的调度开销</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <p><strong>假设示例：</strong>系统稳定且平均在途数为80、平均停留时间为5秒，则 λ = 80 / 5 = <strong>16请求/秒</strong>；平均停留20秒时则为4请求/秒。这描述的是对应负载下的平均关系，不能把“并发上限80”直接换算成保证可达的16 QPS。</p>
+            <div class="highlight-box orange">
+                持续增压导致队列增长时，流入率可能大于完成率，短窗口内直接套用稳态关系会误导。成功QPS若排除了失败和取消请求，也不能直接代替覆盖全部请求的λ；数量、时间和流量必须使用同一统计边界。
+            </div>
+        </section>
 
-        <div class="section">
-            <h2>测量工具与方法</h2>
+        <section class="section" id="load-testing">
+            <h2>按工作负载与SLO确定可用容量</h2>
+            <p>并发拐点需要测量，但吞吐最大点不一定是业务可接受点。应该寻找<strong>质量、成功率和延迟约束同时满足时的最大稳定吞吐</strong>。</p>
+            <ol style="padding-left: 20px; font-size: 14.5px;">
+                <li style="margin-bottom: 8px;"><strong>固定并描述负载。</strong>记录模型/精度、硬件、输入输出Token分布、缓存命中、流式方式及采样设置；长上下文和长输出专项单独测试，不能只汇报平均长度。</li>
+                <li style="margin-bottom: 8px;"><strong>定义服务目标。</strong>按业务设定TTFT、TPOT、端到端延迟的分位数目标及成功率；若举例设置TTFT P95&lt;1.5s、TPOT P95&lt;50ms，这只是目标示例，不是所有业务通用的体验阈值。</li>
+                <li style="margin-bottom: 8px;"><strong>逐步增加压力。</strong>分别用固定在途并发和受控到达率模拟负载；先预热，再在稳定窗口记录准入/完成/成功QPS、Input/Output TPS、队列长度、超时及拒绝率。</li>
+                <li style="margin-bottom: 8px;"><strong>观察拐点和恢复。</strong>当吞吐不再增长、TTFT尾延迟陡升或队列持续堆积时，已接近瓶颈；结合SLO选择更早的可用点，并验证突发流量和降压后的恢复。</li>
+            </ol>
+            <p>评估准入控制、连续批处理、前缀缓存或后端优化时，保持对照负载一致。吞吐上涨若来自更多超时、截短输出或质量退化，需要单独披露这些变化。</p>
+        </section>
+
+        <section class="section" id="measurement">
+            <h2>测量工具与报告清单</h2>
             <ul>
-                <li><strong>框架内置工具：</strong>如 vLLM 的 metrics 接口、PyTorch Profiler</li>
-                <li><strong>自定义脚本：</strong>记录请求-响应时间戳，逐阶段计算延迟</li>
-                <li><strong>压测工具：</strong>用 locust 或 k6 模拟并发请求，统计指标分布</li>
+                <li><strong>服务指标：</strong>结合推理框架metrics、队列与Token计数器；指标名和定义以实际部署版本为准。</li>
+                <li><strong>请求追踪：</strong>记录发出、准入、开始计算、首Token、末Token和终止状态，区分客户端与服务端时钟；用PyTorch Profiler等工具定位执行瓶颈。</li>
+                <li><strong>压测：</strong>使用Locust、k6或支持流式LLM测量的工具；确保客户端没有成为发送或接收瓶颈，按预热和稳定窗口分别统计。</li>
+                <li><strong>汇总：</strong>同时给出工作负载、平均/峰值在途数、完成与成功QPS、聚合TPS、TTFT/TPOT分位数、ITL停顿及失败率；说明请求等权和Token间隔等权的聚合差异。</li>
             </ul>
             <div class="highlight-box">
-                这三个指标不是孤立的：优化 TTFT 主要是压缩 Prefill 的计算路径，优化 TPOT/ITL 主要是改善 Decode 阶段的内存带宽利用率和调度效率。评估一个推理系统时，把总延迟拆到这三个维度上，才能定位到真正的瓶颈在哪一层。
+                TTFT回答“什么时候开始”，TPOT与ITL回答“如何持续输出”，QPS/TPS回答“整体处理多少”，并发与队列说明“系统里积压多少”。只有把这些指标与Token长度、统计边界和SLO一起报告，“支持多少并发”才是可解释、可比较的结论。
             </div>
-        </div>
+        </section>
 
         <div class="back-home">
             <a href="../blog.html">← 返回笔记列表</a>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG 来源质量：权威性、问题匹配与证据治理 | 龚谢蕊烽</title>
+    <meta name="description" content="从来源可信、问题适用性和页面证据出发，拆解 RAG 的细粒度质量治理、索引召回排序诊断、可信供给与覆盖取舍，以及材料和端到端评估。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700; text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px; }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+        .post-title { font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+        .toc { background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px; }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+        .section { margin-bottom: 32px; scroll-margin-top: 76px; }
+        .section h2 { font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px; }
+        .section h2::before { content: ""; display: inline-block; flex-shrink: 0; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+        .section a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+        .highlight-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+        .subcard { background: #fff; border: 1px solid var(--hairline); border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+        code { font-family: "SF Mono", "Fira Code", "Consolas", monospace; background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent); overflow-wrap: anywhere; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace; line-height: 1.7; margin: 10px 0 14px; }
+        pre code { background: none; padding: 0; color: var(--code-text); overflow-wrap: normal; }
+        .table-wrap { width: 100%; overflow-x: auto; margin: 12px 0 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+        tr:nth-child(even) td { background: var(--panel); }
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+            .nav-inner { padding: 0 16px; }
+            th, td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <main class="page">
+        <header class="post-hero">
+            <span class="post-category-badge">🔧 工程实践</span>
+            <h1 class="post-title">RAG 来源质量：权威性、问题匹配与证据治理</h1>
+            <p class="post-subtitle">相关的材料也可能过时、缺少依据，或来自可信站点下的低质页面。让 RAG 回答更可靠，需要分别判断来源、问题适用性与具体事实，再把质量信号接入索引、召回、排序和生成。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-11-11</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">RAG</span>
+                    <span class="post-meta-tag">来源质量</span>
+                    <span class="post-meta-tag">证据治理</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="toc" aria-label="文章目录">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#dimensions">来源可信与问题适用性：先拆开判断</a></li>
+                <li><a href="#granularity">从站点到片段：质量判断的粒度</a></li>
+                <li><a href="#pipeline">最优信源缺失：沿检索链路定位</a></li>
+                <li><a href="#governance">事实抽取、规则判定与人工复核</a></li>
+                <li><a href="#supply">可信供给、信息增益与覆盖取舍</a></li>
+                <li><a href="#evaluation">用分层评估验证治理效果</a></li>
+            </ol>
+        </nav>
+
+        <section class="section" id="dimensions">
+            <h2>来源可信与问题适用性：先拆开判断</h2>
+            <p>来源质量包含不同问题：谁发布、对什么负责，材料是否适用于当前查询，以及某个具体说法能否被证据支持。把这些问题混成一个“权威分”，容易让站点背书覆盖页面缺陷，也容易把高可信但无关的材料推到前面。</p>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>判断维度</th><th>需要回答的问题</th><th>可核对的依据</th></tr></thead>
+                    <tbody>
+                        <tr><td>来源可信</td><td>发布者是谁？是否具备相关专业能力和责任主体？</td><td>实际发布者、机构归属、编辑审核、历史纠错和可追溯引用。</td></tr>
+                        <tr><td>问题适用性</td><td>材料能否回答这次查询？适用地区、版本和时间是否一致？</td><td>主题、实体、任务类型、地区、产品版本和有效日期。</td></tr>
+                        <tr><td>事实正确性</td><td>具体断言是否得到原始材料支持？引用是否准确？</td><td>正文证据、原始出处、交叉验证，以及新旧材料的冲突解释。</td></tr>
+                        <tr><td>信息供给价值</td><td>材料补充了哪些已有结果缺少的信息？</td><td>对核心问题的覆盖、独有细节和新增证据，而非重复转载数量。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>例如，产品保修条款通常优先核对相应地区和版本的官方支持文档；具体使用体验可能需要有上下文的用户记录。前者的来源身份不能自动证明它适用于所有地区，后者也不能仅因是 UGC 就被判为没有价值。</p>
+            <div class="highlight-box">来源信誉可以作为先验信号；最终能否支持回答，还要落到当前页面、具体断言和查询条件上。</div>
+        </section>
+
+        <section class="section" id="granularity">
+            <h2>从站点到片段：质量判断的粒度</h2>
+            <p>同一站点可能同时包含官方说明、转载、开放投稿、历史存档和社区讨论。仅按 host 标注会让性质不同的内容继承相同背书；更细粒度的判断则需要足够的样本和稳定的归并规则。</p>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>粒度</th><th>适合识别的内容</th><th>需要注意的边界</th></tr></thead>
+                    <tbody>
+                        <tr><td>站点 / host</td><td>机构身份、整体业务领域、发布责任。</td><td>站点可信不能证明其下每个页面可信。</td></tr>
+                        <tr><td>路径频道</td><td>同一发布机制或内容类型的栏目。</td><td>路径级频道不等同于 DNS 子域名；归并范围必须明确。</td></tr>
+                        <tr><td>页面 / URL</td><td>作者、正文、更新时间、转载关系、页面类型。</td><td>需要处理重定向、规范URL、模板变化与内容更新。</td></tr>
+                        <tr><td>片段 / 断言</td><td>能直接支撑回答的证据。</td><td>分块可能丢失标题、版本、否定条件和上下文。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="subcard">
+                <h4>一个虚构域名下的例子</h4>
+                <p><code>docs.example.org</code> 是 host，<code>docs.example.org/guide/</code> 和 <code>docs.example.org/community/</code> 是路径频道。官方手册与社区讨论可以服务不同问题，不能只看域名就给全部页面相同结论。页面切成片段后，还应保留原URL、章节、版本和时间信息。</p>
+            </div>
+            <p>证据记录应能回答“结论来自哪里”：至少保留页面标识、实际发布者、正文中的证据位置、时间与适用条件。正文无法支持的机构归属或责任主体，应保留为未知，不靠模型补齐。</p>
+            <p>内容载体和平台属性只能提供辅助信号。视频可能展示操作过程，也可能过时或剪辑误导；转写成文字后还会损失视觉步骤。订阅型 UGC 可能提供稀缺经验，但仍要核对作者、来源和事实。AI 生成与否同样不能替代正确性判断。</p>
+        </section>
+
+        <section class="section" id="pipeline">
+            <h2>最优信源缺失：沿检索链路定位</h2>
+            <p>最终回答没有引用合适信源，可能是材料没有进入索引，也可能被召回或排序环节挤掉。先找到材料消失的位置，再决定补供给、改召回还是调排序，能避免把所有问题归给排序分数。</p>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>环节</th><th>诊断问题</th><th>对应动作</th></tr></thead>
+                    <tbody>
+                        <tr><td>发现与索引</td><td>目标来源是否发现、抓取、解析并进入索引？版本是否有效？</td><td>核对链接发现、过滤、解析失败与更新策略，补足可用材料。</td></tr>
+                        <tr><td>召回</td><td>索引已有材料，当前查询是否找得到？是否被大量重复内容淹没？</td><td>核对改写、实体匹配、词法/向量召回，必要时增加可信源通道。</td></tr>
+                        <tr><td>排序与合并</td><td>材料已召回，为什么没进入最终候选？</td><td>检查相关性、来源信号、去重、通道配额、多样性与截断。</td></tr>
+                        <tr><td>生成与引用</td><td>候选里有证据，回答是否正确使用？</td><td>检查上下文裁剪、冲突处理、引用与断言的一致性。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>对一个代表性查询，可以依次检查目标URL是否存在于索引、进入了哪路召回、排序位置如何变化，以及最终证据片段是否被保留。各阶段保存候选与版本信息，才能区分真实缺失、分块丢失和排序压制。</p>
+            <p>独立的可信源召回通道有助于减少优质材料被普通内容淹没，但仍需在合并时检查问题匹配、去重和覆盖。来源身份不应成为无条件占据首位的理由；同一来源的多篇转载也不应被当作多份独立证据。</p>
+        </section>
+
+        <section class="section" id="governance">
+            <h2>事实抽取、规则判定与人工复核</h2>
+            <p>一种可审查的治理方式，是让模型先抽取结构化事实，再由程序核验证据、执行规则，并把不确定样本交给人工复核。这样可以分别定位“模型读错了什么”和“规则如何使用这些事实”。</p>
+            <pre><code>页面与文本准备
+  → 抽取发布者、来源关系、内容类型、时间和证据位置
+  → 程序核对证据是否存在、引用是否属于正文
+  → 规则判定；证据不足或冲突时保留未知
+  → 按站点 / 频道汇总候选与样本
+  → 人工复核、版本化配置
+  → 查询命中与端到端效果观测</code></pre>
+            <h3>事实和政策分开</h3>
+            <p>“这段正文由谁发布”“它是否转载”“适用哪个版本”属于事实抽取；“当前任务允许使用哪些来源”“如何影响排序”属于政策判断。抽取结果应关联证据片段与位置，政策应能独立调整和审计。网页里的命令式文字也应作为待分析内容，而非模型的系统指令。</p>
+            <h3>汇总保留例外</h3>
+            <p>频道级结论需要代表性样本，不能由一页异常直接推广到整站。汇总时保留覆盖范围、证据支持程度、混合内容与例外页面；对证据缺失、类型变化或发布机制不一致的部分，不强行做统一分类。</p>
+            <h3>复核与消费一起验证</h3>
+            <p>人工复核可结合高流量重点核查和分层抽样，但要分别记录抽样方式和统计单位。高频样本的精度不能直接推广到长尾。标签进入配置后，还要检查URL匹配、优先级、更新版本与实际消费结果；生成了标签文件并不能证明线上已生效。</p>
+            <div class="highlight-box green">可恢复的配置版本、可定位的证据、明确的未知状态和真实命中检查，共同构成可追溯的治理链路。</div>
+        </section>
+
+        <section class="section" id="supply">
+            <h2>可信供给、信息增益与覆盖取舍</h2>
+            <p>压低低质来源只是治理的一部分。还需要补充可以回答核心问题的材料，例如原始说明、专业机构记录，或具有可验证上下文的一手经验。补供给的目标是增加有用证据，而不是增加相似页面数量。</p>
+            <ul>
+                <li><strong>按任务寻找合适来源：</strong>事实条款优先核对原始文档，操作任务核对版本和步骤，主观体验保留作者与场景；不同任务的证据要求不同。</li>
+                <li><strong>看新增信息：</strong>检查新来源是否补上核心问题、地域细节或长尾知识，去除转载与重复片段后再评价供给价值。</li>
+                <li><strong>保留时效和冲突：</strong>新旧版本、地区差异和观点分歧需要解释，不能靠“更权威”的标签直接覆盖所有条件。</li>
+                <li><strong>在证据不足时控制结论范围：</strong>继续检索、说明证据缺口或缩小回答范围，避免把不足以支持事实的片段拼成确定答案。</li>
+            </ul>
+            <div class="highlight-box orange">质量与覆盖要一起观察：过滤后错误减少，但关键问题失去证据，也会损害体验。合理的取舍取决于任务风险、证据要求和新增供给能力，没有适用于所有查询的固定来源比例。</div>
+        </section>
+
+        <section class="section" id="evaluation">
+            <h2>用分层评估验证治理效果</h2>
+            <p>识别标签的质量、检索材料的质量与最终回答质量是不同结果。评估时沿链路分层，避免把标签准确率直接当作回答正确率，或把一次组合实验全部归因到单项治理。</p>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>层次</th><th>主要观察</th><th>必须写清的口径</th></tr></thead>
+                    <tbody>
+                        <tr><td>来源识别</td><td>分类准确性、低质识别精确率、漏识别与未知样本。</td><td>站点/频道/页面单位、抽样范围、标签协议和权重。</td></tr>
+                        <tr><td>材料与检索</td><td>材料正确性、核心证据覆盖、合适来源召回及最终保留。</td><td>固定查询集、材料预算、评判对象和过滤前后分母。</td></tr>
+                        <tr><td>端到端回答</td><td>事实正确性、可用性、引用支持程度及人工胜平负。</td><td>同一任务条件、盲评协议、样本量、置信区间与负例归因。</td></tr>
+                        <tr><td>线上体验</td><td>点击、停留、后续行为、延迟和关键问题退化。</td><td>实验分流、曝光定义、人群分层、统计不确定性和护栏。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>比较策略时应保持查询和可比条件一致，记录来源库、规则、模型及预算版本。定向抽查低质预测适合估计该类预测的精确率；估计总体准确性和覆盖，需要相应的抽样设计。若要判断某项策略的独立作用，进一步做消融或受控对照。</p>
+            <p>CTR 可以反映点击行为，却不能单独证明材料正确；GSB 是相对体验比较，也需要与绝对正确性和核心覆盖一起看。评估协议与上线判断可继续阅读 <a href="search-quality-evaluation.html">《搜索与推荐评估：CTR、GSB 与上线决策》</a>。</p>
+            <p>来源治理最终要解释三个结果：错误证据是否减少，关键问题是否仍有材料支持，以及回答是否在可接受成本和延迟下变得更可靠。这些结果由真实评估支持，不能只凭标签数量或方案设计推断。</p>
+        </section>
+
+        <div class="back-home">
+            <a href="rag-engineering-deep-dive.html">RAG 系统工程深化</a>
+            <a href="rag-retrieval-advanced.html">RAG 检索进阶</a>
+            <a href="../blog.html">← 返回博客</a>
+            <a href="../index.html">返回首页</a>
+        </div>
+    </main>
+</body>
+</html>

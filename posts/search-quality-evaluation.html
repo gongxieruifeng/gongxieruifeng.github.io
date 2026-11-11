@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索与推荐评估：CTR、GSB 与上线决策 | 龚谢蕊烽</title>
+    <meta name="description" content="整合搜索与推荐的线上点击率和离线GSB偏好评估：CTR统计口径、A/B偏差、三档与五档标注、净胜率、盲评和置信区间，以及联合质量、体验和成本护栏做上线决策。">
+    <style>
+        :root {
+            --accent: #2563eb; --accent-soft: #eaf1ff; --accent2: #7c3aed;
+            --rust: #d97757; --ink: #141414; --muted: #667085;
+            --hairline: #dbe2ea; --panel: #f7f9fc; --screen-bg: #eef2f7;
+            --success: #059669; --success-soft: #ecfdf5;
+            --code-bg: #1e293b; --code-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
+            color: var(--ink);
+            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
+            line-height: 1.7; min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .nav-inner { max-width: 860px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+        .nav-logo { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-logo-mark {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 900; box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+        }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.9rem; font-weight: 700;
+            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); padding: 6px 14px; border-radius: 10px;
+        }
+        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
+
+        .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .post-hero { margin-bottom: 36px; animation: fadeInUp 0.6s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .post-category-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+            background: #fff7ed; color: var(--rust); padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+        }
+        .post-title {
+            font-size: 28px; font-weight: 900; line-height: 1.32; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .post-subtitle { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+        .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .post-meta-date { font-size: 13px; color: var(--muted); font-weight: 600; }
+        .post-meta-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .post-meta-tag { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--panel); padding: 3px 10px; border-radius: 6px; }
+
+        .toc {
+            background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 20px; margin-bottom: 32px; font-size: 13.5px;
+        }
+        .toc-title { font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-weight: 600; }
+        .toc a:hover { color: var(--accent); }
+
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 19px; font-weight: 800; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 8px;
+        }
+        .section h2::before { content: ""; display: inline-block; width: 5px; height: 18px; background: var(--accent); border-radius: 2px; }
+        .section h3 { font-size: 15.5px; font-weight: 800; color: var(--ink); margin: 18px 0 8px; }
+        .section p { font-size: 14.5px; color: var(--ink); margin-bottom: 10px; }
+        .section strong { font-weight: 800; }
+        .section ul, .section ol { padding-left: 20px; margin-bottom: 10px; }
+        .section li { font-size: 14.5px; margin-bottom: 6px; }
+
+        .highlight-box {
+            background: var(--accent-soft); border-left: 4px solid var(--accent);
+            padding: 13px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px;
+        }
+        .highlight-box.orange { background: #fff7ed; border-left-color: var(--rust); }
+        .highlight-box.green { background: var(--success-soft); border-left-color: var(--success); }
+
+        .quote-box {
+            background: #fff; border: 1px solid var(--hairline); border-left: 3px solid var(--accent2);
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: var(--muted);
+        }
+        .quote-box strong { color: var(--ink); }
+
+        .subcard {
+            background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+            padding: 16px 18px; margin: 14px 0;
+        }
+        .subcard h4 { font-size: 14.5px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+
+        code {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            background: #eef2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: var(--accent);
+        }
+        pre {
+            background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: 8px;
+            overflow-x: auto; font-size: 12.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            line-height: 1.7; margin: 10px 0 14px;
+        }
+        pre code { background: none; padding: 0; color: var(--code-text); }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 13.5px; }
+        th { background: var(--accent); color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; }
+        th:first-child { border-radius: 6px 0 0 0; }
+        th:last-child { border-radius: 0 6px 0 0; }
+        td { padding: 9px 12px; border-bottom: 1px solid var(--hairline); }
+        tr:nth-child(even) td { background: var(--panel); }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .tag { font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+
+        .back-home { text-align: center; margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--hairline); }
+        .back-home a { color: var(--accent); font-weight: 700; text-decoration: none; font-size: 14px; margin: 0 8px; }
+        .back-home a:hover { text-decoration: underline; }
+
+        @media (max-width: 700px) {
+            .post-title { font-size: 21px; }
+            .page { padding: 28px 16px 60px; }
+        }
+
+        .table-scroll { overflow-x: auto; margin: 12px 0 16px; }
+        .table-scroll table { min-width: 560px; margin: 0; }
+        .section a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+        .post-meta-reading { font-size: 13px; color: var(--muted); }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
+            <a href="../blog.html" class="nav-back">← 返回博客</a>
+        </div>
+    </nav>
+
+    <main class="page">
+        <div class="post-hero">
+            <span class="post-category-badge">🔧 工程实践</span>
+            <h1 class="post-title">搜索与推荐评估：CTR、GSB 与上线决策</h1>
+            <p class="post-subtitle">点击率描述用户行为，GSB描述同一道问题上结果的相对优劣。把两者放进同一套评估流程，才能分清“更容易被点击”“回答更好”和“是否值得上线”。</p>
+            <div class="post-meta">
+                <span class="post-meta-date">📅 2026-11-11</span>
+                <span class="post-meta-reading">约 8 分钟</span>
+                <div class="post-meta-tags">
+                    <span class="post-meta-tag">CTR</span>
+                    <span class="post-meta-tag">GSB</span>
+                    <span class="post-meta-tag">A/B测试</span>
+                    <span class="post-meta-tag">评估方法</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="toc" aria-label="文章目录">
+            <div class="toc-title">目录</div>
+            <ol>
+                <li><a href="#metrics">先分清：行为、偏好与绝对质量</a></li>
+                <li><a href="#ctr">CTR怎么算：分母和提升幅度</a></li>
+                <li><a href="#ab-test">A/B测试：偏差与显著性</a></li>
+                <li><a href="#gsb">GSB三档与可选的五档标注</a></li>
+                <li><a href="#net-win">净胜率：保留分母与持平样本</a></li>
+                <li><a href="#protocol">一轮可复核的人工评估</a></li>
+                <li><a href="#decision">把评估结果转成上线决策</a></li>
+            </ol>
+        </nav>
+
+        <section class="section" id="metrics">
+            <h2>先分清：行为、偏好与绝对质量</h2>
+            <p>搜索、推荐和生成式问答都需要评价效果，但不同指标回答不同的问题。一次点击可能来自相关内容，也可能来自诱人的标题、靠前的位置或答案不完整；一次偏好胜出可能只是措辞更自然，核心事实仍然错误。</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>观察维度</th><th>典型指标</th><th>能支持的判断</th></tr></thead>
+                    <tbody>
+                        <tr><td>用户行为</td><td>CTR、转化率、停留或任务完成</td><td>用户在实际展示和交互条件下做了什么</td></tr>
+                        <tr><td>相对偏好</td><td>GSB、净胜率</td><td>同一问题上，实验结果相对基线好在哪、差在哪</td></tr>
+                        <tr><td>绝对质量</td><td>事实正确率、可用率、核心信息覆盖</td><td>即使两版都不好，也能判断是否达到任务要求</td></tr>
+                        <tr><td>服务代价</td><td>延迟、失败率、推理成本</td><td>体验收益是否伴随不可接受的服务退化</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>点击不直接证明满意度，GSB胜出也不等于事实正确。</strong>例如生成式搜索把答案直接展示给用户，任务完成后不再点击外链，CTR下降仍可能伴随体验提升。因此要先确定产品目标，再选择主指标和护栏。</p>
+        </section>
+
+        <section class="section" id="ctr">
+            <h2>CTR怎么算：分母和提升幅度</h2>
+            <p>CTR（Click-Through Rate，点击率）的基本公式是：</p>
+            <pre><code>CTR = 点击次数 / 曝光次数</code></pre>
+            <p>公式简单，事件口径更关键：曝光是服务端返回、实际进入可视区域，还是达到最短可见时长？点击是否去重？机器人流量、重复刷新与埋点缺失如何处理？这些规则要在实验前固定，两组一致。</p>
+            <p>搜索中还要区分<strong>结果粒度CTR</strong>与<strong>有点击Query占比</strong>：一条Query可以展示多个结果，前者以结果曝光为分母，后者以Query为分母，不能换用同一个名称进行比较。</p>
+            <div class="highlight-box">
+                <strong>假设示例：</strong>对照CTR为4.5%，实验CTR为4.8%。绝对变化是<strong>+0.3个百分点</strong>；相对变化是 <code>(4.8% − 4.5%) / 4.5% ≈ +6.67%</code>。这组数字只演示计算，不是某项实验的实际收益，也不能单凭均值认定显著。
+            </div>
+            <p>CTR预估模型学习用户、内容和上下文的点击概率，能支持排序；预测更准是否带来线上收益，还取决于候选供给、排序目标、曝光机制和业务约束。在CPC广告中，点击也要结合单价、预算、转化和无效流量判断价值。</p>
+        </section>
+
+        <section class="section" id="ab-test">
+            <h2>A/B测试：偏差与显著性</h2>
+            <p>实验需要比较同一业务范围下的策略。常见做法是按用户稳定随机分桶，避免同一用户频繁在两组间切换；具体随机单元应与产品和干扰关系匹配。实验周期要覆盖业务波动，并检查流量分配、埋点和两组样本构成是否异常。</p>
+            <ul>
+                <li><strong>位置偏差：</strong>靠前结果更容易被看见和点击。对比结果质量时，应观察相同展示位置的切片，或通过受控实验识别位置影响。</li>
+                <li><strong>曝光偏差：</strong>日志只包含被展示的候选，未曝光内容没有点击标签。直接从日志泛化到所有候选会受原策略选择影响，需要按任务考虑探索数据或偏差校正。</li>
+                <li><strong>流量构成变化：</strong>大盘均值会受人群、意图、品类和终端占比影响。切片有助于定位问题，但大量事后挑选切片也会增加误报。</li>
+                <li><strong>短期吸引力：</strong>标题改变可能提高CTR，却增加快速退出或投诉。应同时看转化、任务完成等后续信号，避免只追逐点击。</li>
+            </ul>
+            <p>统计显著性需要样本量、方差和置信区间等信息。若按用户随机化，同一用户的多次曝光通常相关，不能把所有曝光都当作独立样本；推断或重采样应尊重随机单元。实验前约定主指标、观测窗口和分析方式，避免反复查看到“显著”就提前停止。</p>
+            <p>统计显著也不保证业务意义：非常大的样本可以检出很小的差异。是否值得发布，还要看改善幅度、成本和负向风险。</p>
+        </section>
+
+        <section class="section" id="gsb">
+            <h2>GSB三档与可选的五档标注</h2>
+            <p>GSB（Good / Same / Bad）让评估人员在<strong>同一Query的基线与实验结果</strong>间做相对比较：G为实验更好，S为持平，B为实验更差。它比直接比较不同标注者的1—5分更容易校准，但仍需要明确的任务标准。</p>
+            <p>为区分实质改善与轻微变化，可以采用以下五档方案。<strong>S+、S−是可选标注设计，并非所有业务通用的标准</strong>；边界应由任务的核心信息、正确性和可用性要求决定。</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>档位</th><th>相对实验结果</th><th>示例与判断边界</th></tr></thead>
+                    <tbody>
+                        <tr><td>G</td><td>实质改善</td><td>纠正关键错误、补齐完成任务所需的信息</td></tr>
+                        <tr><td>S+</td><td>轻微改善</td><td>核心信息相同，表达或结构更符合要求</td></tr>
+                        <tr><td>S</td><td>持平</td><td>按当前评价标准，没有足够证据区分优劣</td></tr>
+                        <tr><td>S−</td><td>轻微退化</td><td>存在边缘遗漏或冗余，但核心任务仍可完成</td></tr>
+                        <tr><td>B</td><td>实质退化</td><td>关键事实错误、严重遗漏或无法完成任务</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>这里的“实质改善”是标注规则中的程度描述，不是统计显著性的结论。两版都错误也可能被评为S，所以还应独立记录绝对正确性、可用性和严重风险；不能因为相对持平就判定达标。</p>
+        </section>
+
+        <section class="section" id="net-win">
+            <h2>净胜率：保留分母与持平样本</h2>
+            <p>三档评估设有效评测单元总数为 <code>N = G + S + B</code>，一种常用的净胜率定义为：</p>
+            <pre><code>胜率 = G / N
+败率 = B / N
+净胜率 = (G − B) / N</code></pre>
+            <p>例如一组<strong>假设</strong>的100条结果中，30胜、50平、20负：胜率30%，败率20%，净胜率+10%（胜率与败率相差10个百分点）。若排除持平后计算 <code>G / (G + B) = 60%</code>，得到的是<strong>有胜负样本内的条件胜率</strong>，分母不同，不能与全样本胜率混用。</p>
+            <p>五档应先报告完整分布，再明确汇总方式；此时N为五档样本总数，包含G、S+、S、S−、B。若把G/S+视为胜、S−/B视为负，净胜率为 <code>[(G + S+) − (S− + B)] / N</code>；若只关心实质变化，可以事先把S+/S−归入S。不同映射对应不同问题，不能在看完结果后选择更好看的规则。</p>
+            <p>不论采用哪种口径，保留各档数量、有效分母、切片和置信区间。一次净胜率为正可能仍有较大不确定性；少量严重退化也可能被大量轻微改善掩盖，需单独分析。</p>
+        </section>
+
+        <section class="section" id="protocol">
+            <h2>一轮可复核的人工评估</h2>
+            <ol>
+                <li><strong>先写标准：</strong>明确任务、核心正确性与可用性要求，给出G/S/B或五档的边界例和严重错误定义。</li>
+                <li><strong>构建样本：</strong>代表性样本反映目标流量，困难/长尾/风险样本用于专项诊断。两类样本分开报告；定向挑出的bad case不能直接估计全量收益。</li>
+                <li><strong>生成配对：</strong>同一Query对应两版结果，保存模型和策略版本。除本次有意改变的变量外，尽量控制其他条件，并记录无法完全对齐的差异。</li>
+                <li><strong>盲评和随机左右：</strong>隐藏模型身份、随机交换左右展示；保留必要上下文，让评估人员按同一任务条件判断。</li>
+                <li><strong>校准与复核：</strong>用典型样本统一尺度，抽取重叠标注检查一致性，对分歧和严重错误复核。模型Judge可辅助筛查，但需核验其偏差，不能只留下容易判断的样本。</li>
+                <li><strong>统计与归因：</strong>报告档位、分母、切片与不确定性；对B/S−区分知识、检索、推理、指令遵循和表达问题，形成下一轮可验证的改进假设。</li>
+            </ol>
+            <p>净胜率可把每个有效Query记为 <code>+1 / 0 / −1</code> 后求均值，再以配对Query为单位bootstrap估计置信区间；重采样时必须把两版结果保留在同一配对中。若多个样本来自同一用户或问题簇，还应考虑簇内相关性。</p>
+            <p>样本规模由预期差异、变异程度、覆盖要求和资源决定，没有“100—500条即可上线”的通用阈值。挑战集可以持续补充，也应保留稳定的对照集与代表性评测，避免每轮换题后仍把数字当作同口径比较。</p>
+        </section>
+
+        <section class="section" id="decision">
+            <h2>把评估结果转成上线决策</h2>
+            <p>上线判断应基于预先定义的业务目标和护栏，综合离线相对偏好、绝对质量、线上行为与服务成本。下面的组合是排查思路，具体门槛需要业务另行约定。</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>观察到的组合</th><th>下一步判断</th></tr></thead>
+                    <tbody>
+                        <tr><td>CTR改善，GSB和绝对质量稳定</td><td>检查后续转化/任务完成与成本，再评估是否扩大实验</td></tr>
+                        <tr><td>CTR改善，但事实错误或严重B增加</td><td>暂缓放量，核对点击吸引力是否掩盖质量退化</td></tr>
+                        <tr><td>GSB改善，但CTR下降</td><td>排查展示、延迟、意图差异，也检查是否因答案已直接满足需求</td></tr>
+                        <tr><td>指标接近持平、区间较宽</td><td>判断证据是否足够，检查覆盖和实验设计，不强行归为成功或失败</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>可复核的结论应同时交代：<strong>基线与实验策略、样本和流量范围、统计口径、变化幅度、置信区间、严重退化与代价</strong>。CTR提供行为证据，GSB帮助解释差异，绝对质量和服务护栏决定这些收益是否可接受。</p>
+            <div class="highlight-box green">
+                延伸阅读：<a href="rag-engineering-deep-dive.html#eval">RAG系统的检索与生成评估</a>，以及<a href="compilelight-agent-evaluation.html">生产级Agent评估复盘</a>。两者展示具体链路的评价维度，可与本文的实验和人工评估方法结合使用。
+            </div>
+        </section>
+
+        <div class="back-home">
+            <a href="../blog.html">← 返回笔记列表</a>
+            <a href="../index.html">返回个人主页</a>
+        </div>
+    </main>
+</body>
+</html>
