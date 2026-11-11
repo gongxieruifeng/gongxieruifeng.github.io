@@ -3,588 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6f5f0">
     <title>学习笔记 | 龚谢蕊烽</title>
     <meta name="description" content="龚谢蕊烽的个人博客与学习笔记 - AI Agent、LLM Systems、深度学习、时空预测等技术笔记">
-    <style>
-        :root {
-            --accent: #2563eb;
-            --accent-soft: #eaf1ff;
-            --accent2: #7c3aed;
-            --rust: #d97757;
-            --ink: #141414;
-            --muted: #667085;
-            --hairline: #dbe2ea;
-            --panel: #f7f9fc;
-            --screen-bg: #eef2f7;
-            --success: #059669;
-            --success-soft: #ecfdf5;
-            --warning: #d97706;
-            --warning-soft: #fef3c7;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 46%, #eef2f7 100%);
-            color: var(--ink);
-            font-family: "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", Arial, sans-serif;
-            line-height: 1.7;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Nav */
-        .navbar {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--hairline);
-        }
-        .nav-inner {
-            max-width: 900px; margin: 0 auto; padding: 0 24px;
-            display: flex; align-items: center; justify-content: space-between; height: 56px;
-        }
-        .nav-logo {
-            font-weight: 800; font-size: 1.05rem; color: var(--ink);
-            text-decoration: none;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .nav-logo-mark {
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-            border-radius: 8px;
-            display: inline-flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 16px; font-weight: 900;
-            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
-        }
-        .nav-back {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: var(--muted); font-size: 0.9rem; font-weight: 700;
-            text-decoration: none; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            padding: 6px 14px; border-radius: 10px;
-        }
-        .nav-back:hover { color: var(--accent); background: var(--accent-soft); }
-
-        /* Page */
-        .page {
-            max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
-        }
-
-        /* Hero */
-        .blog-hero {
-            margin-bottom: 40px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .blog-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: 12px; font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-soft) 0%, #f3e8ff 100%);
-            color: var(--accent2);
-            padding: 5px 12px; border-radius: 999px;
-            margin-bottom: 14px;
-        }
-        .blog-title {
-            font-size: 36px; font-weight: 900; line-height: 1.25;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .blog-subtitle {
-            font-size: 16px; color: var(--muted); margin-bottom: 24px;
-            line-height: 1.6;
-        }
-        .blog-stats {
-            display: flex; flex-wrap: wrap; gap: 16px;
-            padding: 16px 20px; background: var(--panel);
-            border: 1px solid var(--hairline); border-radius: 12px;
-        }
-        .stat-item {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 14px; color: var(--muted); font-weight: 600;
-        }
-        .stat-value {
-            font-size: 18px; font-weight: 900; color: var(--accent);
-        }
-
-        /* Categories */
-        .categories {
-            display: flex; flex-wrap: wrap; gap: 10px;
-            margin-bottom: 32px;
-            animation: fadeInUp 0.6s ease-out 0.1s both;
-        }
-        .category-tag {
-            font-size: 13px; font-weight: 700;
-            padding: 7px 16px; border-radius: 999px;
-            border: 1px solid var(--hairline); background: #fff;
-            color: var(--muted); cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-        }
-        .category-tag:hover, .category-tag.active {
-            border-color: var(--accent); color: var(--accent);
-            background: var(--accent-soft);
-            transform: translateY(-1px);
-        }
-
-        /* Posts List */
-        .posts-list {
-            display: flex; flex-direction: column; gap: 16px;
-        }
-        .post-card {
-            background: #fff;
-            border: 1px solid var(--hairline);
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-            cursor: pointer;
-            animation: fadeInUp 0.6s ease-out both;
-        }
-        .post-card:nth-child(1) { animation-delay: 0.15s; }
-        .post-card:nth-child(2) { animation-delay: 0.2s; }
-        .post-card:nth-child(3) { animation-delay: 0.25s; }
-        .post-card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 8px 24px rgba(37,99,235,0.1);
-            transform: translateY(-2px);
-        }
-        .post-meta {
-            display: flex; align-items: center; gap: 12px;
-            margin-bottom: 10px; flex-wrap: wrap;
-        }
-        .post-category {
-            font-size: 11px; font-weight: 700;
-            padding: 3px 10px; border-radius: 999px;
-        }
-        .post-category.agent {
-            color: var(--accent); background: var(--accent-soft);
-        }
-        .post-category.llm {
-            color: var(--accent2); background: #f3e8ff;
-        }
-        .post-category.dl {
-            color: var(--success); background: var(--success-soft);
-        }
-        .post-category.engineering {
-            color: var(--warning); background: var(--warning-soft);
-        }
-        .post-date {
-            font-size: 13px; color: var(--muted); font-weight: 500;
-        }
-        .post-title {
-            font-size: 18px; font-weight: 800; color: var(--ink);
-            margin-bottom: 8px; line-height: 1.4;
-        }
-        .post-excerpt {
-            font-size: 14px; color: var(--muted); line-height: 1.6;
-            margin-bottom: 12px;
-        }
-        .post-tags {
-            display: flex; flex-wrap: wrap; gap: 6px;
-        }
-        .post-tag {
-            font-size: 11px; font-weight: 600;
-            color: var(--muted); background: var(--panel);
-            padding: 3px 10px; border-radius: 6px;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center; padding: 80px 24px;
-            background: #fff; border: 2px dashed var(--hairline);
-            border-radius: 12px;
-            animation: fadeInUp 0.6s ease-out 0.15s both;
-        }
-        .empty-icon {
-            font-size: 48px; margin-bottom: 16px;
-        }
-        .empty-title {
-            font-size: 20px; font-weight: 800; color: var(--ink);
-            margin-bottom: 8px;
-        }
-        .empty-desc {
-            font-size: 14px; color: var(--muted); max-width: 400px;
-            margin: 0 auto; line-height: 1.6;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center; padding: 40px 24px;
-            font-size: 13px; color: var(--muted);
-            border-top: 1px solid var(--hairline);
-            margin-top: 60px;
-        }
-        .footer a {
-            color: var(--accent); text-decoration: none; font-weight: 600;
-        }
-        .footer a:hover { text-decoration: underline; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .blog-title { font-size: 28px; }
-            .post-card { padding: 20px; }
-            .blog-stats { flex-direction: column; gap: 12px; }
-            .stat-item { justify-content: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/blog.css">
+    <script src="assets/site.js" defer></script>
+    <script src="assets/blog.js" defer></script>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-logo">
-                <span class="nav-logo-mark">龚</span>
-                龚谢蕊烽
+<body class="blog-page" data-page="blog">
+    <a class="blog-skip skip-link" href="#resultsHeading">跳至文章列表</a>
+    <header class="navbar blog-navbar">
+        <nav class="nav-inner" aria-label="主导航">
+            <a href="index.html" class="nav-logo" aria-label="龚谢蕊烽的个人主页">
+                <span class="nav-logo-mark" aria-hidden="true">GX</span>
+                <span class="nav-brand-copy"><strong>龚谢蕊烽</strong><span>Portfolio &amp; Notes</span></span>
             </a>
-            <a href="index.html" class="nav-back">← 返回首页</a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="page">
-        <!-- Hero -->
-        <div class="blog-hero">
-            <div class="blog-badge">📚 学习笔记</div>
-            <h1 class="blog-title">技术博客与学习笔记</h1>
-            <p class="blog-subtitle">
-                记录 AI Agent、大语言模型、深度学习、工程实践等方向的学习心得、论文笔记与技术思考。
-            </p>
-            <div class="blog-stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="postCount">0</span>
-                    <span>篇笔记</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">4</span>
-                    <span>个分类</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">持续更新</span>
-                </div>
+            <div class="blog-nav-links">
+                <a href="index.html#resume" class="nav-resume">在线简历</a>
+                <a href="index.html" class="nav-back"><span data-blog-icon="arrow-left" aria-hidden="true"></span>返回首页</a>
             </div>
-        </div>
+        </nav>
+    </header>
 
-        <!-- Categories -->
-        <div class="categories">
-            <button class="category-tag active" data-category="all">全部</button>
-            <button class="category-tag" data-category="agent">🤖 AI Agent</button>
-            <button class="category-tag" data-category="llm">🧠 大语言模型</button>
-            <button class="category-tag" data-category="dl">⚡ 深度学习</button>
-            <button class="category-tag" data-category="engineering">🔧 工程实践</button>
-        </div>
+    <main class="page blog-main" id="library">
+        <section class="blog-hero" aria-labelledby="blogTitle">
+            <div class="blog-hero-content">
+                <p class="blog-eyebrow"><span data-blog-icon="book-open" aria-hidden="true"></span>学习与思考 <span class="eyebrow-divider" aria-hidden="true"></span> FIELD NOTES</p>
+                <h1 class="blog-title" id="blogTitle">技术博客<span>与学习笔记</span></h1>
+                <p class="blog-subtitle">记录 AI Agent、大语言模型、深度学习、工程实践等方向的学习心得、论文笔记与技术思考。</p>
+            </div>
+            <aside class="blog-overview" aria-label="笔记概览">
+                <div class="overview-primary"><strong id="postCount">15</strong><span>篇笔记</span></div>
+                <div class="overview-detail"><span><strong id="categoryCount">4</strong> 个方向</span><span class="update-indicator">持续更新</span></div>
+            </aside>
+        </section>
 
-        <!-- Posts List -->
-        <div class="posts-list" id="postsList">
-            <!-- 笔记文章将在这里添加 -->
-            <!-- 
-            示例文章格式：
-            <a href="posts/your-post.html" class="post-card" style="text-decoration: none; color: inherit; display: block;">
-                <div class="post-meta">
-                    <span class="post-category agent">🤖 AI Agent</span>
-                    <span class="post-date">2026-08-18</span>
-                </div>
-                <h3 class="post-title">文章标题</h3>
-                <p class="post-excerpt">文章摘要描述...</p>
-                <div class="post-tags">
-                    <span class="post-tag">标签1</span>
-                    <span class="post-tag">标签2</span>
-                </div>
-            </a>
-            -->
-        </div>
+        <section class="library-controls" id="libraryControls" aria-label="查找笔记" hidden>
+            <label class="search-label" for="postSearch">找到你感兴趣的主题</label>
+            <div class="library-search">
+                <span class="search-icon" data-blog-icon="search" aria-hidden="true"></span>
+                <input id="postSearch" type="search" name="q" placeholder="搜索标题、摘要或标签，如 RAG、Agent、评估…" maxlength="200" autocomplete="off" aria-controls="postsList" aria-describedby="searchHint">
+                <button id="clearSearch" class="clear-search" type="button" aria-label="清空搜索" title="清空搜索" hidden><span data-blog-icon="close" aria-hidden="true"></span></button>
+            </div>
+            <p class="search-hint" id="searchHint">从一个关键词开始，也可以按方向筛选。</p>
+            <div class="categories" id="categories" role="group" aria-label="按主题筛选"></div>
+        </section>
 
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState">
-            <div class="empty-icon">📝</div>
-            <h3 class="empty-title">笔记建设中</h3>
-            <p class="empty-desc">
-                这里将陆续分享我的技术学习笔记，包括论文解读、工程实践、算法思考等内容，敬请期待。
-            </p>
-        </div>
-    </div>
+        <section class="library-results" aria-labelledby="resultsHeading">
+            <div class="results-header">
+                <div class="results-heading"><h2 id="resultsHeading" tabindex="-1">全部笔记</h2><span id="resultCount" class="result-count">15</span></div>
+                <p id="resultsSummary" class="results-summary" role="status" aria-live="polite" aria-atomic="true">共 15 篇笔记</p>
+            </div>
+            <div class="posts-list" id="postsList"></div>
+            <section class="empty-state" id="emptyState" aria-labelledby="emptyTitle" hidden>
+                <span class="empty-icon" data-blog-icon="search" aria-hidden="true"></span>
+                <h3 id="emptyTitle">暂时没有找到匹配的笔记</h3>
+                <p>试试更短的关键词，或清除当前筛选查看全部内容。</p>
+                <button id="resetFilters" class="reset-filters" type="button">重置筛选<span data-blog-icon="arrow-right" aria-hidden="true"></span></button>
+            </section>
+                <div class="blog-fallback" id="blogFallback"><p>选择一篇笔记，继续阅读。</p><ul>
+                    <li><a href="posts/search-quality-evaluation.html">搜索与推荐评估：CTR、GSB 与上线决策</a></li>
+                    <li><a href="posts/rag-source-authority.html">RAG 来源质量：权威性、问题匹配与证据治理</a></li>
+                    <li><a href="posts/llm-inference-metrics.html">LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS</a></li>
+                    <li><a href="posts/compilelight-agent-evaluation.html">生产级 Agent 系统怎么评估？CompileLight 实战复盘</a></li>
+                    <li><a href="posts/rag-engineering-deep-dive.html">RAG 系统工程深化：海量文档预处理、模型选型与评估体系</a></li>
+                    <li><a href="posts/finetuning-alignment.html">大模型微调与对齐全流程：从 SFT 到 DPO / GRPO</a></li>
+                    <li><a href="posts/llm-fundamentals-frontier.html">大模型基础、Prompt 工程与前沿技术全景</a></li>
+                    <li><a href="posts/backend-engineering-overview.html">后端工程全景：技术栈选型、中间件面试与容器化实践</a></li>
+                    <li><a href="posts/rag-retrieval-advanced.html">RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践</a></li>
+                    <li><a href="posts/reinforcement-learning-basics.html">强化学习基础：从价值函数到 PPO</a></li>
+                    <li><a href="posts/agent-frameworks-ecosystem.html">Agent 框架生态全景：从核心概念到多智能体编排与低代码平台</a></li>
+                    <li><a href="posts/langgraph-deep-agent.html">LangGraph 与 Deep Agent：LangChain 1.0 的新范式</a></li>
+                    <li><a href="posts/llm-finetuning-practice.html">大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩</a></li>
+                    <li><a href="posts/langchain-core-mechanics.html">LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性</a></li>
+                    <li><a href="posts/deep-learning-architectures.html">深度学习模型架构精讲：从经典网络到 MoE 与多模态</a></li>
+                </ul></div>
+        </section>
+    </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>© 2026 龚谢蕊烽 · <a href="index.html">返回个人主页</a></p>
+    <footer class="footer blog-footer">
+        <div class="blog-footer-inner"><p>© 2026 龚谢蕊烽</p><a href="index.html">返回个人主页<span data-blog-icon="arrow-up-right" aria-hidden="true"></span></a></div>
     </footer>
-
-    <script>
-        // 笔记数据
-        const posts = [
-            {
-                "title": "搜索与推荐评估：CTR、GSB 与上线决策",
-                "excerpt": "从点击行为与人工偏好到上线决策：统一CTR分母、三档/五档GSB、净胜率与盲评流程，结合随机化实验、置信区间和质量护栏解释收益。",
-                "date": "2026-11-11",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "CTR",
-                    "GSB",
-                    "A/B测试",
-                    "评估口径"
-                ],
-                "url": "posts/search-quality-evaluation.html"
-            },
-            {
-                "title": "RAG 来源质量：权威性、问题匹配与证据治理",
-                "excerpt": "区分来源可信度与问题适用性，从站点、频道到页面核验证据，沿索引、召回和排序定位最优信源缺失，兼顾可信供给与回答覆盖。",
-                "date": "2026-11-11",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "RAG",
-                    "来源质量",
-                    "权威性",
-                    "证据治理"
-                ],
-                "url": "posts/rag-source-authority.html"
-            },
-            {
-                "title": "LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS",
-                "excerpt": "把请求延迟、Token吞吐、频率配额与并发容量放在同一统计口径下：TTFT/TPOT/ITL、Input/Output TPS、Little’s Law与基于SLO的压测方法。",
-                "date": "2026-11-11",
-                "category": "llm",
-                "categoryLabel": "🧠 大语言模型",
-                "tags": [
-                    "LLM推理",
-                    "QPS",
-                    "TPS",
-                    "并发",
-                    "性能评估"
-                ],
-                "url": "posts/llm-inference-metrics.html"
-            },
-            {
-                "title": "生产级 Agent 系统怎么评估？CompileLight 实战复盘",
-                "excerpt": "以 CompileLight 项目为例，拆解 Agent 评估体系的核心方法论：成功率分级定义、回放评估保真度、路由决策质量、越权审计机制、评估集分层构造方法论。",
-                "date": "2026-09-24",
-                "category": "agent",
-                "categoryLabel": "🤖 AI Agent",
-                "tags": [
-                    "Agent评估",
-                    "CompileLight",
-                    "LLM-as-Judge",
-                    "评估方法论"
-                ],
-                "url": "posts/compilelight-agent-evaluation.html"
-            },
-            {
-                "title": "RAG 系统工程深化：海量文档预处理、模型选型与评估体系",
-                "excerpt": "从工程实践角度拆解 RAG 落地的三大难点：百万级文档的近似去重与分层清洗流水线、Embedding/Rerank 模型选型、基于 RAGAS 的检索-生成双层评估框架。",
-                "date": "2026-09-24",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "RAG",
-                    "MinHash",
-                    "向量检索",
-                    "RAGAS",
-                    "评估"
-                ],
-                "url": "posts/rag-engineering-deep-dive.html"
-            },
-            {
-                "title": "大模型微调与对齐全流程：从 SFT 到 DPO / GRPO",
-                "excerpt": "梳理 Base Model 到对齐模型的完整流水线：预训练与 SFT 的 Loss 本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。",
-                "date": "2026-09-24",
-                "category": "llm",
-                "categoryLabel": "🧠 大语言模型",
-                "tags": [
-                    "SFT",
-                    "DPO",
-                    "GRPO",
-                    "LoRA",
-                    "对齐"
-                ],
-                "url": "posts/finetuning-alignment.html"
-            },
-            {
-                "title": "大模型基础、Prompt 工程与前沿技术全景",
-                "excerpt": "从大模型训练范式与 Agent 能力缺口讲起，走到 Prompt 工程方法论与金融 NLP 实战案例，再到 Agent 工程化中的上下文管理、评测体系设计与幻觉治理——一份跨越认知层到工程层的技术全景。",
-                "date": "2026-09-23",
-                "category": "llm",
-                "categoryLabel": "🧠 大语言模型",
-                "tags": [
-                    "大模型基础",
-                    "Prompt工程",
-                    "Agent前沿",
-                    "LLM-as-Judge",
-                    "上下文管理"
-                ],
-                "url": "posts/llm-fundamentals-frontier.html"
-            },
-            {
-                "title": "后端工程全景：技术栈选型、中间件面试与容器化实践",
-                "excerpt": "把后端技术选型的判断逻辑、中间件面试高频考点和容器化/API框架实践整合成一条知识链路：从数据存储、缓存、向量检索怎么选，到消息队列可靠性、分布式事务落地，再到 Docker 与 FastAPI 的具体实践。",
-                "date": "2026-09-13",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "后端架构",
-                    "中间件",
-                    "分布式系统",
-                    "向量检索",
-                    "容器化"
-                ],
-                "url": "posts/backend-engineering-overview.html"
-            },
-            {
-                "title": "RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践",
-                "excerpt": "拆解 RAG 检索链路更底层的环节——HNSW 与 IVF-PQ 两种近似最近邻算法的工程权衡、LlamaIndex 框架的设计定位，以及 Self-RAG/CRAG 等检索优化与 ReAct 范式下的 Agentic RAG 实践。",
-                "date": "2026-09-05",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "ANN检索",
-                    "HNSW",
-                    "LlamaIndex",
-                    "Agentic RAG",
-                    "ReAct"
-                ],
-                "url": "posts/rag-retrieval-advanced.html"
-            },
-            {
-                "title": "强化学习基础：从价值函数到 PPO",
-                "excerpt": "从状态、动作、奖励等基本概念出发，梳理价值函数、贝尔曼方程与策略梯度的关系，再深入 PPO 的角色分工、KL 约束与裁剪目标函数，最后简述 GRPO、DPO 等对齐算法与 PPO 的核心差异。",
-                "date": "2026-08-02",
-                "category": "dl",
-                "categoryLabel": "⚡ 深度学习",
-                "tags": [
-                    "强化学习",
-                    "PPO",
-                    "策略梯度",
-                    "Actor-Critic",
-                    "RLHF"
-                ],
-                "url": "posts/reinforcement-learning-basics.html"
-            },
-            {
-                "title": "Agent 框架生态全景：从核心概念到多智能体编排与低代码平台",
-                "excerpt": "从「Agent = LLM + Memory + Tools + Planning + Action」出发，梳理 ReAct 等单智能体执行范式、AutoGen 与 CrewAI 两种多智能体编排范式的差异，再深入 MCP 协议与 Function Calling 的关系，最后落到 Dify 等低代码平台。",
-                "date": "2026-08-01",
-                "category": "agent",
-                "categoryLabel": "🤖 AI Agent",
-                "tags": [
-                    "AI Agent",
-                    "MCP",
-                    "多智能体",
-                    "AutoGen",
-                    "Dify"
-                ],
-                "url": "posts/agent-frameworks-ecosystem.html"
-            },
-            {
-                "title": "LangGraph 与 Deep Agent：LangChain 1.0 的新范式",
-                "excerpt": "从 StateGraph 的 State/Node/Edge 心智模型，到 Checkpoint 与人机协作机制，再到 Deep Agent 把规划、文件系统、子 Agent 委托打包成开箱即用的中间件——梳理 LangChain 1.0 生态从底层运行时到高层封装的完整脉络。",
-                "date": "2026-08-01",
-                "category": "agent",
-                "categoryLabel": "🤖 AI Agent",
-                "tags": [
-                    "LangGraph",
-                    "Deep Agent",
-                    "LangChain 1.0",
-                    "Agent工程"
-                ],
-                "url": "posts/langgraph-deep-agent.html"
-            },
-            {
-                "title": "大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩",
-                "excerpt": "从数据格式怎么组织、训练参数怎么调、Loss 曲线怎么读，到用 LLaMA-Factory 跑通一次完整的 LoRA 训练并导出部署，再到模型蒸馏技术，整理落地时真正会碰到的工程细节，并厘清 Embedding 模型与词嵌入模型的区别。",
-                "date": "2026-04-08",
-                "category": "llm",
-                "categoryLabel": "🧠 大语言模型",
-                "tags": [
-                    "LoRA",
-                    "LLaMA-Factory",
-                    "模型蒸馏",
-                    "Embedding",
-                    "微调实战"
-                ],
-                "url": "posts/llm-finetuning-practice.html"
-            },
-            {
-                "title": "LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性",
-                "excerpt": "LangChain 的模块列表很长，但真正决定能不能用好它的，是几个反复出现的核心抽象：Runnable 协议、LCEL 的组合方式、Memory 的分级设计、Retrieval 的六环节流水线。按机制而非 API 目录重新梳理了一遍。",
-                "date": "2026-04-07",
-                "category": "engineering",
-                "categoryLabel": "🔧 工程实践",
-                "tags": [
-                    "LangChain",
-                    "LCEL",
-                    "Memory",
-                    "Agent",
-                    "LangSmith"
-                ],
-                "url": "posts/langchain-core-mechanics.html"
-            },
-            {
-                "title": "深度学习模型架构精讲：从经典网络到 MoE 与多模态",
-                "excerpt": "深度学习模型的演进，很大程度上是「给网络内置多少先验假设」与「计算怎么分配」的取舍——卷积假设空间局部性，循环假设时间依赖性，Transformer 则用注意力把这些假设换成了可学习机制。从前向/反向传播讲到 MoE 稀疏路由与 ViT 图像 Token 化。",
-                "date": "2026-03-31",
-                "category": "dl",
-                "categoryLabel": "⚡ 深度学习",
-                "tags": [
-                    "Transformer",
-                    "MoE",
-                    "多模态",
-                    "注意力机制",
-                    "神经网络架构"
-                ],
-                "url": "posts/deep-learning-architectures.html"
-            }
-        ];
-
-        // 渲染笔记列表
-        function renderPosts(category = 'all') {
-            const postsList = document.getElementById('postsList');
-            const emptyState = document.getElementById('emptyState');
-            const postCount = document.getElementById('postCount');
-            
-            const filteredPosts = category === 'all' 
-                ? posts 
-                : posts.filter(p => p.category === category);
-            
-            postCount.textContent = posts.length;
-            
-            if (filteredPosts.length === 0) {
-                postsList.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            postsList.innerHTML = filteredPosts.map(post => `
-                <a href="${post.url}" class="post-card" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="post-meta">
-                        <span class="post-category ${post.category}">${post.categoryLabel}</span>
-                        <span class="post-date">${post.date}</span>
-                    </div>
-                    <h3 class="post-title">${post.title}</h3>
-                    <p class="post-excerpt">${post.excerpt}</p>
-                    <div class="post-tags">
-                        ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
-                    </div>
-                </a>
-            `).join('');
-        }
-
-        // 分类切换
-        document.querySelectorAll('.category-tag').forEach(tag => {
-            tag.addEventListener('click', () => {
-                document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
-                tag.classList.add('active');
-                renderPosts(tag.dataset.category);
-            });
-        });
-
-        // 初始化渲染
-        renderPosts();
-    </script>
 </body>
 </html>

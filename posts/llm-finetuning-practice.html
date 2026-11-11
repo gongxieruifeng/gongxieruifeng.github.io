@@ -134,8 +134,10 @@
             .page { padding: 28px 16px 60px; }
         }
     </style>
+    <link rel="stylesheet" href="../assets/site.css">
+    <script src="../assets/site.js" defer></script>
 </head>
-<body>
+<body data-page="article">
     <nav class="navbar">
         <div class="nav-inner">
             <a href="../index.html" class="nav-logo"><span class="nav-logo-mark">龚</span>龚谢蕊烽</a>
@@ -284,7 +286,8 @@ llamafactory-cli version</code></pre>
             <pre><code># 三张卡里只用第三张卡
 FORCE_TORCHRUN=1 CUDA_VISIBLE_DEVICES=2 llamafactory-cli webui</code></pre>
             <p>如果是租用的云端 GPU 实例（如 AutoDL），本机要访问远程的 WebUI 端口，需要做一次 SSH 端口转发：</p>
-            <pre><code>ssh -N -L 7860:127.0.0.1:7860 aa@192.168.12.221 -p 3333</code></pre>
+            <pre><code># user 和 example.com 是占位用户名与服务器地址，请替换为自己的配置
+ssh -N -L 7860:127.0.0.1:7860 user@example.com</code></pre>
 
             <h3>下载基座模型</h3>
             <p>国内环境下建议先切镜像源、再指定模型缓存目录到数据盘，避免把系统盘占满：</p>
