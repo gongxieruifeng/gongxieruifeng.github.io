@@ -154,14 +154,14 @@
                             <div class="project-role">KN Group · 实习</div>
                         </div>
                         <p class="project-desc">
-                            轻量级智能编译守卫 Agent。设计「Trace-Registry-Retrieval-Control-Execution」闭环，对已知子目标优先复用资产，对未知缺口触发有界推理，解决高频任务重复检索与执行不可审计问题。
+                            可编译的企业客服 Agent。模型分析任务并提出 Blueprint，确定性编译器完成门禁批准；版本化资产优先复用，未知缺口有界求解，固定执行器记录可审计轨迹。以下成果来自业务版 10,284 次流量回放。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag"> 成功率 89.4%</span>
+                            <span class="metric-tag"> 成功率 +11.2pp</span>
                             <span class="metric-tag"> 节省 74.8% Token</span>
-                            <span class="metric-tag"> P95 54.2s</span>
+                            <span class="metric-tag"> 整体 P95 54.2s</span>
                         </div>
-                        <div class="project-tech">LangGraph · PostgreSQL · pgvector · 多模型切换 · Blueprint 编译 · 语义缓存</div>
+                        <div class="project-tech">LangGraph · PostgreSQL FTS · pgvector · RRF · Blueprint 编译 · 版本化资产</div>
                         <div class="project-links-row">
                             <a href="projects/compilelight.html" class="project-link">查看详情<svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-up-right"></use></svg></a>
                             <a href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer" class="project-link secondary">
@@ -229,14 +229,14 @@
                             </div>
                         </div>
                         <p class="project-desc">
-                            相位感知时空预测 Transformer。基于傅里叶移位定理将相位信息显式注入时间注意力，结合帧间差分表征增强动态模式建模，解决外观相似但运动趋势相反序列的混淆问题。
+                            Frame-Gradient Phase Transformer。将帧差分嵌入与时间相位旋转融入时空 Transformer，在视频帧与城市流量预测上结合运动变化信息、相对时间结构和轻量骨干。以下为多种子主实验均值，对照同配方重训 PredFormer。
                         </p>
                         <div class="project-metrics">
-                            <span class="metric-tag"> MSE 23.00</span>
-                            <span class="metric-tag"> 参数量 ↓61%</span>
-                            <span class="metric-tag"> FLOPs ↓63%</span>
+                            <span class="metric-tag"> MMNIST MSE 11.96</span>
+                            <span class="metric-tag"> KTH MSE ↓4.7%</span>
+                            <span class="metric-tag"> TaxiBJ FLOPs ↓约60%</span>
                         </div>
-                        <div class="project-tech">Transformer · 相位注意力 · RoPE · 时空预测 · 视频帧预测</div>
+                        <div class="project-tech">Transformer · 帧差分嵌入 · Phase-RoPE · 时空预测 · 多种子评测</div>
                         <div class="project-links-row">
                             <a href="projects/fgformer.html" class="project-link">查看详情<svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-up-right"></use></svg></a>
                             <span class="project-lock" tabindex="0" data-tip="项目已私有化，核心源码请联系作者获取" aria-label="项目已私有化，核心源码请联系作者获取"><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#lock"></use></svg>源码私有</span>
@@ -261,12 +261,12 @@
                                 <span class="entry-role">KN Group · 算法实习生</span>
                             </div>
                         </div>
-                        <p class="summary">项目描述：针对<strong>企业客服 Agent</strong>在高频任务中重复检索、推理与执行不可审计的痛点，设计 <strong>"Trace-Registry-Retrieval-Control-Execution"</strong> 闭环，对已知子目标优先复用资产，对未知缺口触发有界推理，降低推理开销并提升执行可控性。</p>
+                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→检索与提案→确定性编译→固定执行器</strong>链路，对已知步骤复用资产，对缺口进行有界求解。</p>
                         <ul>
-                            <li><strong>控制与编译：</strong>提出 <strong>"LLM 提议、代码批准"</strong> 原则，构建 <strong>Normalize-硬过滤-混合召回-SAD-Blueprint-确定性编译</strong> 流水线，采用 PostgreSQL FTS + pgvector 多路召回与 RRF 融合；引入<strong>语义缓存（Hot Cache）</strong>对相似意图复用历史 Blueprint，命中率达 <strong>68%</strong>，命中请求 P95 由 8.7s 降至 <strong>580ms</strong>；通过 <strong>编译门禁</strong>（Schema / 权限 / 风险 / 预算）约束模型提议，对其执行确定性校验。</li>
-                            <li><strong>执行与路由：</strong>基于 LangGraph 实现确定性 <strong>Meta-Executor</strong>，支持 <strong>REUSE / HYBRID / NEW</strong> 三模式路由、自动重试 / 补偿与人工 Checkpoint 恢复；<strong>NEW 模式在低置信度时切换受控探索策略</strong>——在受控白名单内深度探索，受控推理引擎按"冻结上下文-缺口分类-有限推理-输出验证"流程执行，配合 <strong>预算门禁</strong> 防止无限循环与越权调用。</li>
-                            <li><strong>资产工程：</strong>将成功 Trace 异步沉淀为可复用资产，设计 <strong>Header 召回 + Contract 匹配</strong>两级索引与 DRAFT-ACTIVE 生命周期，沉淀 <strong>5 类 Kind</strong>（Tool/FSM/DAEF/Adapter/Validator），支持检索一跳扩展与执行视图冻结，避免执行中版本漂移。</li>
-                            <li><strong>量化结果：</strong>在 <strong>10,284 次</strong>真实流量回放中，综合成功率达 <strong>89.4%</strong>，全任务端到端 P95 为 <strong>54.2s</strong>，较 ReAct 基线节省 <strong>74.8% Token</strong>；经审计无越权调用与重复副作用，编译门禁全通过，形成<strong>可回放、可审计、可持续</strong>资产抽取闭环。</li>
+                            <li><strong>控制与编译：</strong>以 <strong>“LLM 提议、代码批准”</strong> 划分职责：分析、对齐和 Blueprint 提案可调用模型，确定性 Compiler 执行 <strong>Schema / Scope / Risk / Budget</strong> 门禁；业务版采用 PostgreSQL FTS + pgvector 与 RRF 融合，结合语义缓存复用已验证的 Blueprint。</li>
+                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>Meta-Executor</strong>，按资产覆盖情况选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤直接执行，缺口在冻结上下文、工具白名单和预算约束下求解，类型化产物经验证后交给执行器，Ledger 记录执行证据。</li>
+                            <li><strong>资产工程：</strong>设计 <strong>Header 召回 + Contract 匹配</strong>、5 类版本化资产及 DRAFT→ACTIVE 生命周期；经验经审核后进入 Registry，每次运行固定 Snapshot，避免执行中版本漂移。</li>
+                            <li><strong>业务回放成果：</strong><strong>10,284 次</strong>流量回放中，成功率由 <strong>78.2%→89.4%</strong>（+11.2个百分点），整体端到端 P95 由 <strong>103.64s→54.2s</strong>（降低47.7%），较 ReAct 节省 <strong>74.8% Token</strong>；公开轻量版用于展示架构，不混作同轮业务评测。</li>
                         </ul>
                     </div>
 
@@ -359,19 +359,19 @@
                     <div class="resume-panel" id="panel-tsf" role="tabpanel" aria-labelledby="tab-tsf" tabindex="0" hidden><div class="experience">
                         <div class="entry-head">
                             <div class="entry-title-row">
-                                <strong> <i>FGFormer</i> —— 相位感知时空预测 Transformer</strong>
+                                <strong> <i>FGFormer</i> —— 帧差分与相位旋转时空预测 Transformer</strong>
                             </div>
                             <div class="entry-meta-row">
                                 <span class="entry-role">项目负责人</span>
                                 <span class="publication-status submitting">在投</span>
                             </div>
                         </div>
-                        <p class="summary">项目描述：针对时空 Transformer 主要依赖内容相似度、难以区分<strong>外观相似但运动趋势相反</strong>序列的问题，提出 FGFormer；基于傅里叶移位定理将<strong>相位信息</strong>显式注入时间注意力，并结合帧间差分表征增强动态模式建模。</p>
+                        <p class="summary">项目描述：面向视频帧与城市流量预测，提出 <strong>Frame-Gradient Phase Transformer</strong>，通过<strong>帧差分嵌入与时间相位旋转</strong>补充运动变化和相对时间信息，在更轻量的时空骨干上兼顾预测精度与计算效率。</p>
                         <ul>
-                            <li><strong>相位感知时间注意力（Phase-RoPE）：</strong>基于傅里叶移位定理，对 Q/K 施加随时间步递进的相位旋转，使注意力同时建模内容相关性与相对相位差，抑制运动方向不一致帧间的错误关联；支持自由频率与速度耦合两种模式，后者通过 θ=ωv 显式编码运动速度，每层仅引入 <strong>8 个可学习参数</strong>。</li>
-                            <li><strong>时间差分表征（Diff Embedding）：</strong>构建独立差分分支，将 Δx<sub>t</sub>=x<sub>t</sub>-x<sub>t-1</sub> 与原始帧分别映射后融合，在输入端显式编码局部变化趋势，实现<strong>静态内容与动态信息解耦</strong>，增强模型对短期运动变化的感知能力。</li>
-                            <li><strong>时空建模骨干：</strong>构建 Space→Time→Space 三阶段 Gated Transformer，分别建模帧内空间关系与跨帧时间依赖，并结合 SwiGLU、残差连接完成多层时空交互，在保持轻量化的同时强化长期动态建模。</li>
-                            <li><strong>量化结果：</strong>MMNIST 上 MSE <strong>23.00</strong>、SSIM <strong>0.9483</strong>，较纯 Transformer 基线（MSE 35.13）降低 <strong>34.5%</strong>；TaxiBJ 上以 <strong>2.5M</strong> 参数 / <strong>0.62G FLOPs</strong> 达到 PredFormer-d256（6.4M / 1.66G）同等精度，参数量与计算量降低 <strong>61%</strong> 与 <strong>63%</strong>。</li>
+                            <li><strong>帧差分嵌入：</strong>首帧差分置零，将原始帧与相邻帧差分分别线性嵌入后相加，在输入端结合内容与局部变化信息。</li>
+                            <li><strong>相位旋转注意力：</strong>在时间轴上旋转 Q/K、保持 V 不旋转；主版本采用自由可学习频率，引入相对时间结构。傅里叶移位关系提供设计动机，相位参数不直接等同于物理速度。</li>
+                            <li><strong>轻量时空骨干：</strong>基于 Space→Time→Space Gated Transformer 与 SwiGLU，采用更浅或更窄的骨干；Moving MNIST/KTH 上，两组件的参数与 FLOPs 开销均低于骨干的 0.1%，整体计算节省主要来自骨干配置。</li>
+                            <li><strong>多种子结果：</strong>同配方重训 PredFormer 对照下，Moving MNIST（2000ep，3种子）MSE <strong>11.96±0.46</strong>，降低 <strong>3.2%</strong>；KTH（100ep，3种子）MSE <strong>43.82±0.24</strong>，降低 <strong>4.7%</strong>；TaxiBJ（200ep，5种子）MSE <strong>0.2945±0.0121</strong>，以 <strong>2.53M / 0.659 GFLOPs</strong> 达到相近精度，计算量约少 <strong>60%</strong>（±为样本标准差）。</li>
                         </ul>
                     </div>
 
@@ -402,11 +402,11 @@
                                 <span class="entry-role">KN Group · 算法实习生</span>
                             </div>
                         </div>
-                        <p class="summary">项目描述：针对企业客服 Agent 在高频任务中重复检索、推理与执行不可审计的痛点，设计可复用资产优先的闭环执行框架。</p>
+                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→检索与提案→确定性编译→固定执行器</strong>链路，对已知步骤复用资产，对缺口进行有界求解。</p>
                         <ul>
-                            <li><strong>执行框架：</strong>基于 LangGraph 实现确定性 Meta-Executor，支持 REUSE/HYBRID/NEW 三模式路由、自动重试/补偿与 Checkpoint 恢复机制，配合预算门禁防止无限循环与越权调用。</li>
-                            <li><strong>检索与编译：</strong>设计 FTS5+pgvector 混合召回与 RRF 融合，构建编译门禁流水线（Schema/权限/风险/预算）进行确定性校验；引入语义缓存 Hot Cache 命中率达 68%。</li>
-                            <li><strong>量化结果：</strong>10,284 次真实流量回放成功率 89.4%，端到端 P95 54.2s，较 ReAct 基线节省 74.8% Token，无越权调用与重复副作用。</li>
+                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>Meta-Executor</strong>，按资产覆盖情况选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤直接执行，缺口在冻结上下文、工具白名单和预算约束下求解，类型化产物经验证后交给执行器，Ledger 记录执行证据。</li>
+                            <li><strong>检索与编译：</strong>业务版采用 PostgreSQL FTS + pgvector 与 RRF 融合，经 Header/Contract 匹配形成 Blueprint，再通过 Schema/Scope/Risk/Budget 门禁批准；运行固定资产快照，经验经审核后入库。</li>
+                            <li><strong>业务回放成果：</strong><strong>10,284 次</strong>流量回放中，成功率由 <strong>78.2%→89.4%</strong>（+11.2个百分点），整体端到端 P95 由 <strong>103.64s→54.2s</strong>（降低47.7%），较 ReAct 节省 <strong>74.8% Token</strong>；公开轻量版用于展示架构，不混作同轮业务评测。</li>
                         </ul>
                     </div>
 

@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+<title id="title">03_资产规划与编译</title>
+<desc id="desc">CompileLight conceptual architecture, grounded in the business homepage and public reference commit f5c9f03bf2b98a287f744c3d9611b985fbd1e192. LLM proposes, deterministic code approves. System 2 tools are optional and allowlisted; validated typed artifacts enter fixed execution. The public implementation resolves System 2 gaps before submitting results to the fixed executor. Routing sequences are illustrative: NEW may retain known steps. Compiler gates are grouped, not exhaustive. REUSE avoids additional decision inference in deterministic execution steps, not in the complete control plane. Ledger review is not automatic live asset mutation.</desc>
+<rect width="1920" height="1080" fill="white" />
+<rect x="312.401" y="81" width="1295.2" height="918" rx="24.2376" fill="#FFFFFF" stroke="#8B9BAD" stroke-width="1.66634" />
+<rect x="350.272" y="111.297" width="66.6535" height="51.505" rx="7.57426" fill="#DCE8F4" stroke="#315F8A" stroke-width="2.12079" />
+<text x="383.599" y="150.729" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#315F8A">(b)</text>
+<text x="438.134" y="156.121" font-family="Times New Roman,Times,serif" font-size="46.9604" font-weight="700" font-style="normal" text-anchor="start" fill="#1C3047">Asset-grounded planning &amp; compilation</text>
+<rect x="383.599" y="241.574" width="230.257" height="230.257" rx="1.51485" fill="#E8EEF4" stroke="#6E8CAE" stroke-width="2.42376" />
+<rect x="371.48" y="252.178" width="230.257" height="230.257" rx="1.51485" fill="#F5F7FA" stroke="#6E8CAE" stroke-width="2.42376" />
+<rect x="359.361" y="262.782" width="230.257" height="230.257" rx="1.51485" fill="#FFFFFF" stroke="#6E8CAE" stroke-width="2.42376" />
+<text x="474.49" y="316.347" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Route header</text>
+<text x="474.49" y="383.001" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Contract</text>
+<text x="474.49" y="449.654" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Body</text>
+<polyline points="371.48,332.465 577.5,332.465" fill="none" stroke="#6E8CAE" stroke-width="1.66634" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="371.48,399.119 577.5,399.119" fill="none" stroke="#6E8CAE" stroke-width="1.66634" stroke-linecap="round" stroke-linejoin="round" />
+<text x="477.52" y="563.101" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">Versioned asset</text>
+<text x="478.277" y="609.547" font-family="Consolas,monospace" font-size="28.7822" font-weight="400" font-style="normal" text-anchor="middle" fill="#3E5369">asset_ref@version</text>
+<polyline points="618.401,376.396 668.391,376.396 668.391,300.653 756.252,300.653" fill="none" stroke="#315F8A" stroke-width="2.72673" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="756.252,300.653 744.8,295.2 744.8,306.107" fill="#315F8A" stroke="none" stroke-width="2.72673" />
+<polyline points="668.391,376.396 668.391,433.96 756.252,433.96" fill="none" stroke="#315F8A" stroke-width="2.72673" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="756.252,433.96 744.8,428.507 744.8,439.414" fill="#315F8A" stroke="none" stroke-width="2.72673" />
+<ellipse cx="668.391" cy="376.396" rx="4.54455" ry="4.54455" fill="#315F8A" stroke="#315F8A" stroke-width="2.72673" />
+<text x="696.416" y="516.974" font-family="Times New Roman,Times,serif" font-size="30.297" font-weight="400" font-style="normal" text-anchor="middle" fill="#3E5369">Hard filter</text>
+<text x="774.431" y="228.319" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="400" font-style="italic" text-anchor="middle" fill="#1C3047">Query q</text>
+<polyline points="774.431,238.545 638.094,238.545 638.094,376.396" fill="none" stroke="#1C3047" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="638.094,376.396 642.942,366.216 633.247,366.216" fill="#1C3047" stroke="none" stroke-width="2.72673" />
+<ellipse cx="638.094" cy="376.396" rx="4.54455" ry="4.54455" fill="#315F8A" stroke="#315F8A" stroke-width="2.72673" />
+<rect x="756.252" y="262.782" width="239.347" height="98.4653" rx="7.57426" fill="#FFFFFF" stroke="#6E8CAE" stroke-width="2.42376" />
+<text x="768.371" y="305.743" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="700" font-style="normal" text-anchor="start" fill="#1C3047">Sparse</text>
+<text x="768.371" y="345.629" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="start" fill="#3E5369">ranking</text>
+<rect x="898.649" y="280.96" width="78.7723" height="16.6634" rx="0" fill="#EBF0F5" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,289.292 957.728,289.292" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="898.649" y="303.683" width="78.7723" height="16.6634" rx="0" fill="#CCDBE8" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,312.015 933.49,312.015" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="898.649" y="326.406" width="78.7723" height="16.6634" rx="0" fill="#EBF0F5" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,334.738 945.609,334.738" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="995.599,311.257 1047.1,311.257 1047.1,376.396 1088,376.396" fill="none" stroke="#1C3047" stroke-width="2.57525" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="1088,376.396 1077.19,371.246 1077.19,381.547" fill="#1C3047" stroke="none" stroke-width="2.72673" />
+<rect x="756.252" y="397.604" width="239.347" height="98.4653" rx="7.57426" fill="#FFFFFF" stroke="#6E8CAE" stroke-width="2.42376" />
+<text x="768.371" y="440.565" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="700" font-style="normal" text-anchor="start" fill="#1C3047">Dense</text>
+<text x="768.371" y="480.451" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="start" fill="#3E5369">ranking</text>
+<rect x="898.649" y="415.782" width="78.7723" height="16.6634" rx="0" fill="#CCDBE8" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,424.114 933.49,424.114" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="898.649" y="438.505" width="78.7723" height="16.6634" rx="0" fill="#EBF0F5" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,446.837 957.728,446.837" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="898.649" y="461.228" width="78.7723" height="16.6634" rx="0" fill="#EBF0F5" stroke="none" stroke-width="2.34802" />
+<polyline points="906.223,469.559 945.609,469.559" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="995.599,446.079 1047.1,446.079 1047.1,376.396 1088,376.396" fill="none" stroke="#1C3047" stroke-width="2.57525" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="1088,376.396 1077.19,371.246 1077.19,381.547" fill="#1C3047" stroke="none" stroke-width="2.72673" />
+<ellipse cx="1131.94" cy="376.396" rx="43.9307" ry="43.9307" fill="#FFFFFF" stroke="#315F8A" stroke-width="2.72673" />
+<text x="1131.94" y="394.302" font-family="Times New Roman,Times,serif" font-size="57.5644" font-weight="400" font-style="normal" text-anchor="middle" fill="#315F8A">Σ</text>
+<text x="1134.21" y="472.21" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="400" font-style="italic" text-anchor="middle" fill="#1C3047">RRF</text>
+<polyline points="1175.87,376.396 1228.89,376.396" fill="none" stroke="#1C3047" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="1228.89,376.396 1214.57,369.579 1214.57,383.213" fill="#1C3047" stroke="none" stroke-width="2.72673" />
+<rect x="1228.89" y="300.653" width="325.693" height="156.03" rx="7.57426" fill="#FFFFFF" stroke="#6E8CAE" stroke-width="2.27228" />
+<text x="1391.73" y="368.11" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">Contract</text>
+<text x="1391.73" y="415.07" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">alignment</text>
+<text x="1395.52" y="507.552" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#3E5369">I/O · scope · constraints</text>
+<polyline points="1390.98,521.822 1390.98,629.376 495.698,629.376 495.698,661.188" fill="none" stroke="#315F8A" stroke-width="2.4995" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="495.698,661.188 500.697,650.69 490.699,650.69" fill="#315F8A" stroke="none" stroke-width="2.72673" />
+<rect x="803.213" y="603.624" width="318.119" height="51.505" rx="0" fill="#FFFFFF" stroke="none" stroke-width="2.34802" />
+<text x="964.545" y="640.692" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="middle" fill="#315F8A">Aligned candidates</text>
+<rect x="360.876" y="662.703" width="272.673" height="165.119" rx="7.57426" fill="#FFFFFF" stroke="#6E8CAE" stroke-width="2.27228" />
+<text x="497.213" y="717.283" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">Plan proposer</text>
+<polyline points="379.054,729.356 615.371,729.356" fill="none" stroke="#6E8CAE" stroke-width="1.36337" stroke-linecap="round" stroke-linejoin="round" />
+<text x="497.213" y="775.514" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">LLM</text>
+<polyline points="633.55,742.99 695.658,742.99" fill="none" stroke="#214F7D" stroke-width="4.54455" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="695.658,742.99 681.343,736.173 681.343,749.807" fill="#214F7D" stroke="none" stroke-width="2.72673" />
+<rect x="695.658" y="662.703" width="531.713" height="165.119" rx="7.57426" fill="#DCE8F4" stroke="#315F8A" stroke-width="2.72673" />
+<rect x="697.173" y="664.218" width="528.683" height="72.7129" rx="6.05941" fill="#214F7D" stroke="none" stroke-width="2.27228" />
+<text x="961.515" y="717.283" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#FFFFFF">Deterministic compiler</text>
+<polyline points="716.866,738.446 1206.16,738.446" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<text x="768.371" y="790.829" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Schema</text>
+<polyline points="831.995,755.109 831.995,808.129" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<text x="894.104" y="790.829" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Scope</text>
+<polyline points="957.728,755.109 957.728,808.129" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<text x="1019.84" y="790.829" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Risk</text>
+<polyline points="1083.46,755.109 1083.46,808.129" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<text x="1145.57" y="790.829" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Budget</text>
+<polyline points="1227.37,742.99 1297.05,742.99" fill="none" stroke="#214F7D" stroke-width="4.54455" stroke-linecap="round" stroke-linejoin="round" />
+<polygon points="1297.05,742.99 1282.74,736.173 1282.74,749.807" fill="#214F7D" stroke="none" stroke-width="2.72673" />
+<rect x="1297.05" y="673.307" width="262.069" height="140.881" rx="7.57426" fill="#DDECE5" stroke="#608D7C" stroke-width="2.27228" />
+<text x="1428.09" y="733.189" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">Accepted</text>
+<text x="1428.09" y="780.149" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#1C3047">blueprint</text>
+<polyline points="960.757,827.822 960.757,862.663" fill="none" stroke="#98542E" stroke-width="2.57525" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10 7" />
+<polygon points="960.757,862.663 965.908,851.847 955.607,851.847" fill="#98542E" stroke="none" stroke-width="2.72673" />
+<text x="1025.9" y="870.95" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="start" fill="#98542E">Repair / safe stop</text>
+<polyline points="960.757,862.663 1007.72,862.663" fill="none" stroke="#98542E" stroke-width="2.57525" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10 7" />
+<polygon points="1007.72,862.663 996.902,857.513 996.902,867.814" fill="#98542E" stroke="none" stroke-width="2.72673" />
+<polyline points="350.272,886.901 1568.21,886.901" fill="none" stroke="#6E8CAE" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round" />
+<text x="363.906" y="953.433" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">s</text>
+<text x="382.084" y="961.659" font-family="Times New Roman,Times,serif" font-size="22.7228" font-weight="400" font-style="normal" text-anchor="start" fill="#1C3047">RRF</text>
+<text x="438.134" y="953.433" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">(a) =</text>
+<text x="582.045" y="953.963" font-family="Times New Roman,Times,serif" font-size="65.1386" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">Σ</text>
+<text x="580.53" y="978.322" font-family="Cambria,serif" font-size="22.7228" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">r: a ∈ r</text>
+<text x="781.248" y="924.984" font-family="Times New Roman,Times,serif" font-size="39.3861" font-weight="400" font-style="normal" text-anchor="middle" fill="#1C3047">1</text>
+<polyline points="657.787,935.376 924.401,935.376" fill="none" stroke="#1C3047" stroke-width="1.81782" stroke-linecap="round" stroke-linejoin="round" />
+<text x="675.965" y="972.111" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">k +</text>
+<text x="751.708" y="972.111" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="400" font-style="normal" text-anchor="start" fill="#1C3047">rank</text>
+<text x="822.906" y="981.519" font-family="Times New Roman,Times,serif" font-size="21.2079" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">r</text>
+<text x="845.629" y="970.763" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">(a)</text>
+<text x="931.975" y="952.085" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="400" font-style="italic" text-anchor="start" fill="#1C3047">,  k = 60</text>
+<text x="1540.95" y="940.633" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="700" font-style="normal" text-anchor="end" fill="#1C3047">Reciprocal rank fusion</text>
+<text x="1540.95" y="983.549" font-family="Times New Roman,Times,serif" font-size="30.297" font-weight="400" font-style="normal" text-anchor="end" fill="#3E5369">Sparse + dense evidence</text>
+</svg>
