@@ -114,7 +114,7 @@
     let scheduled=false;
     const update=() => { scheduled=false; const max=document.documentElement.scrollHeight-window.innerHeight; bar.style.transform='scaleX('+(max>0?Math.min(1,Math.max(0,window.scrollY/max)):1)+')'; };
     const schedule=() => { if (!scheduled) { scheduled=true; requestAnimationFrame(update); } };
-    window.addEventListener('scroll',schedule,{passive:true}); window.addEventListener('resize',schedule); document.addEventListener('site:reading-preferences-updated',schedule); update();
+    window.addEventListener('scroll',schedule,{passive:true}); window.addEventListener('resize',schedule); document.addEventListener('site:reading-preferences-updated',schedule); document.addEventListener('site:explorer-layout-updated',schedule); update();
     if (toc && typeof window.IntersectionObserver === 'function') {
       const links=[...toc.querySelectorAll('a[href^="#"]')];
       const targets=links.map(link => { try { return document.getElementById(decodeURIComponent(link.hash.slice(1))); } catch { return null; } }).filter(Boolean);

@@ -1,0 +1,91 @@
+/* A progressively enhanced walkthrough beside the unchanged source architecture. */
+body[data-page="project"] .architecture-guide {
+  margin: 24px 0 28px; border: 1px solid #b8ccbc; border-radius: 14px;
+  background: #fff; color: #172a26; min-width: 0;
+}
+.architecture-guide *, .architecture-guide *::before, .architecture-guide *::after { box-sizing: border-box; }
+body .architecture-guide-toggle {
+  display: flex; align-items: center; gap: 14px; min-height: 88px; padding: 18px 20px;
+  border-radius: 14px; background: #edf3ee; cursor: pointer; list-style: none;
+}
+.architecture-guide-toggle::-webkit-details-marker { display: none; }
+body .architecture-guide-toggle:focus-visible { outline: 3px solid #37795e; outline-offset: 4px; }
+.architecture-guide-summary-icon { flex: 0 0 auto; font-size: 28px; font-weight: 600; color: #1b6550; }
+.architecture-guide-summary-copy { flex: 1; min-width: 0; }
+.architecture-guide-summary-copy strong { display: block; font-size: 17px; line-height: 1.55; }
+.architecture-guide-summary-copy > span { display: block; margin-top: 4px; color: #526259; font-size: 13px; line-height: 1.65; }
+.architecture-guide-summary-action { flex: 0 0 auto; color: #1b6550; font-size: 13px; font-weight: 650; }
+.architecture-guide[open] .architecture-guide-toggle { border-radius: 14px 14px 0 0; border-bottom: 1px solid #cbd9cd; }
+.architecture-guide-panel { padding: 20px; min-width: 0; }
+body .architecture-guide .architecture-guide-hint { margin: 0 0 16px; color: #526259; font-size: 13px; line-height: 1.75; }
+.architecture-guide-steps {
+  display: flex; align-items: stretch; gap: 8px; padding: 5px 3px 12px; max-width: 100%;
+  overflow-x: auto; scrollbar-width: thin; scrollbar-color: #8aa591 transparent;
+}
+body .architecture-guide-step {
+  flex: 1 0 108px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  min-width: 0; min-height: 68px; margin: 0; padding: 10px 12px; border: 1px solid #cbd9cd;
+  border-radius: 9px; background: #f6f8f2; color: #35493e; font: 600 13px/1.55 var(--font-sans, sans-serif);
+  text-align: left; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease;
+}
+.architecture-guide-step-number { color: #526259; font-size: 12px; font-variant-numeric: tabular-nums; }
+body .architecture-guide-step[data-completed="true"] { border-color: #91ad9a; background: #edf3ee; }
+body .architecture-guide-step[aria-current="step"] { border-color: #1b6550; background: #1b6550; color: #fff; }
+.architecture-guide-step[aria-current="step"] .architecture-guide-step-number { color: #fff; }
+body .architecture-guide-step:hover { border-color: #1b6550; }
+body .architecture-guide :is(.architecture-guide-step,.architecture-guide-button):focus-visible { outline: 3px solid #37795e; outline-offset: 3px; }
+.architecture-guide-graphic { margin: 10px 0 18px; padding: 0 12px 12px; border: 1px solid #dce2da; border-radius: 10px; background: #f6f8f2; }
+body .architecture-guide-flow { display: block; width: 100%; height: clamp(72px,9vw,100px); max-width: none; overflow: visible; }
+.architecture-guide-wire, .architecture-guide-flow-arrow { stroke: #5e7f68; stroke-width: 3; }
+.architecture-guide-wire.is-flowing { stroke: #1b6550; stroke-width: 4; }
+.architecture-guide-port { fill: #fff; stroke: #5e7f68; stroke-width: 2.5; }
+.architecture-guide-port-core { fill: #1b6550; }
+.architecture-guide-packet { fill: #1b6550; stroke: #fff; stroke-width: 3; transform-box: view-box; transform-origin: 0 0; }
+body .architecture-guide .architecture-guide-transfer-status { margin: 0; color: #35493e; font-size: 13px; line-height: 1.7; text-align: center; }
+.architecture-guide-current { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+body .architecture-guide .architecture-guide-current h3 { margin: 0; color: #172a26; font-size: 20px; line-height: 1.6; }
+.architecture-guide-count { flex: 0 0 auto; color: #1b6550; font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
+body .architecture-guide .architecture-guide-context { margin: 0 0 16px; color: #526259; font-size: 13px; line-height: 1.7; }
+.architecture-guide-stage { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr); gap: 12px; }
+.architecture-guide-data { min-width: 0; padding: 16px; border: 1px solid #d2ded2; border-radius: 10px; background: #f8f9f5; }
+.architecture-guide-operation { border-color: #91ad9a; background: #edf3ee; }
+.architecture-guide-data.is-flowing { border-color: #1b6550; box-shadow: inset 0 0 0 1px #1b6550; }
+.architecture-guide-data-label { display: block; margin-bottom: 10px; color: #1b6550; font-size: 13px; font-weight: 650; }
+body .architecture-guide .architecture-guide-value { margin: 0; color: #172a26; font-size: 15px; line-height: 1.85; overflow-wrap: anywhere; }
+body .architecture-guide ul.architecture-guide-value { padding-left: 18px; }
+body .architecture-guide .architecture-guide-value li { padding: 0; margin: 0 0 7px; color: #172a26; font-size: 15px; line-height: 1.85; }
+body .architecture-guide .architecture-guide-value li:last-child { margin-bottom: 0; }
+body .architecture-guide .architecture-guide-handoff { margin: 16px 0 8px; padding-left: 12px; border-left: 3px solid #1b6550; color: #35493e; font-size: 14px; line-height: 1.8; }
+body .architecture-guide .architecture-guide-note { margin: 0; color: #526259; font-size: 13px; line-height: 1.8; }
+.architecture-guide-controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+body .architecture-guide-button {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+  padding: 8px 13px; border: 1px solid #b9cdbe; border-radius: 8px; background: #fff;
+  color: #172a26; font: 600 13px/1.6 var(--font-sans, sans-serif); cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+body .architecture-guide-button:not(:disabled):hover { border-color: #1b6550; background: #edf3ee; }
+body .architecture-guide-button:disabled { color: #526259; background: #f1f4ee; border-color: #d2ded2; cursor: default; }
+body .architecture-guide-button[data-flow-action="play"] { margin-left: auto; border-color: #1b6550; }
+body .architecture-guide-button[data-flow-action="play"][aria-pressed="true"] { background: #1b6550; color: #fff; }
+.architecture-guide-announcement { position: absolute; width: 1px; height: 1px; margin: -1px !important; padding: 0; border: 0; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
+@media (max-width: 700px) {
+  body .architecture-guide-toggle { padding: 15px 14px; gap: 10px; }
+  .architecture-guide-summary-icon { font-size: 24px; }
+  .architecture-guide-summary-copy strong { font-size: 16px; }
+  .architecture-guide-summary-copy > span { font-size: 12px; }
+  .architecture-guide-summary-action { align-self: flex-start; margin-top: 2px; font-size: 12px; }
+  .architecture-guide-panel { padding: 16px 12px; }
+  .architecture-guide-stage { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .architecture-guide-data { padding: 14px; }
+  .architecture-guide-current { gap: 8px; }
+  body .architecture-guide .architecture-guide-current h3 { font-size: 18px; }
+  .architecture-guide-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  body .architecture-guide-button[data-flow-action="play"] { margin-left: 0; }
+  .architecture-guide-graphic { padding-inline: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .architecture-guide :is(.architecture-guide-step,.architecture-guide-button) { transition: none; }
+  .architecture-guide-packet { display: none !important; }
+}
+@media print { body .architecture-guide { display: none !important; } }

@@ -1,0 +1,65 @@
+/* Inline terms preserve the surrounding prose size, color and reading rhythm. */
+body button.term-help-trigger {
+  display: inline; position: relative; min-height: 0; min-width: 0;
+  padding: 0; margin: 0; border: 0; border-radius: 2px; background: transparent;
+  color: inherit; font: inherit; line-height: inherit; letter-spacing: inherit;
+  text-align: inherit; vertical-align: baseline; cursor: help;
+  text-decoration: underline dotted #44795f; text-underline-offset: .18em;
+  text-decoration-thickness: 1px;
+}
+body button.term-help-trigger:is(:hover, [aria-expanded="true"]) {
+  color: #175d48; background: #eaf2eb;
+}
+body button.term-help-trigger:focus-visible {
+  outline: 2px solid #37795e; outline-offset: 3px;
+}
+body .term-help-popover {
+  position: fixed; inset: auto; z-index: 240; width: min(376px, calc(100vw - 24px));
+  max-height: min(460px, calc(100vh - 24px));
+  max-height: min(460px, calc(100dvh - 24px));
+  margin: 0; padding: 20px; border: 1px solid #b9cdbd; border-radius: 14px;
+  background: #fff; color: #172a26; box-shadow: 0 16px 48px rgb(23 42 38 / 19%);
+  font: 15px/1.7 var(--font-sans, system-ui, sans-serif); overflow-y: auto;
+  overscroll-behavior: contain; overflow-wrap: anywhere;
+}
+body .term-help-popover[hidden] { display: none !important; }
+body .term-help-popover.term-help-fallback[data-open="true"] { display: block; }
+body .term-help-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+body .term-help-heading { flex: 1; min-width: 0; }
+body .term-help-kicker {
+  display: block; margin-bottom: 4px; color: #526259; font-size: 12px; font-weight: 600;
+}
+body .term-help-popover h2 {
+  margin: 0; padding: 0; border: 0; color: #172a26; font-size: 19px; line-height: 1.4;
+  letter-spacing: 0;
+}
+body .term-help-close {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 44px; height: 44px; padding: 8px; border: 1px solid #d0dbd0; border-radius: 9px;
+  background: #fff; color: #172a26; font: 600 13px/1.3 var(--font-sans, system-ui, sans-serif);
+  cursor: pointer;
+}
+body .term-help-close .ui-icon { width: 18px; height: 18px; }
+body .term-help-popover p { margin: 0; color: #2d4337; font-size: 15px; line-height: 1.7; }
+body .term-help-use {
+  margin-top: 14px; padding: 12px 14px; border-radius: 9px; background: #eef4ed;
+}
+body .term-help-use-label { display: block; margin-bottom: 4px; color: #175d48; font-size: 12px; font-weight: 700; }
+body .term-help-popover a.term-help-more {
+  display: inline-flex; align-items: center; min-height: 44px; gap: 8px; margin-top: 10px;
+  padding: 4px 0; color: #175d48; font-size: 14px; font-weight: 650; text-decoration: none;
+}
+body .term-help-more .ui-icon { width: 17px; height: 17px; }
+body :is(.term-help-close, .term-help-more):focus-visible { outline: 3px solid #37795e; outline-offset: 3px; }
+body .term-help-close:hover { border-color: #91ad9a; background: #eef4ed; }
+body .term-help-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 500px) {
+  body .term-help-popover { padding: 16px; border-radius: 12px; }
+}
+@media print {
+  body .term-help-popover { display: none !important; }
+  body button.term-help-trigger {
+    display: inline !important; color: inherit !important; background: transparent !important;
+    border: 0 !important; outline: 0 !important; text-decoration: none !important;
+  }
+}
