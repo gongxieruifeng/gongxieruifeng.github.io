@@ -320,6 +320,7 @@
     else finePointer.addListener(resetPointer);
     window.addEventListener('scroll', queueReading, { passive: true });
     window.addEventListener('resize', queueReading, { passive: true });
+    document.addEventListener('site:reading-preferences-updated', queueReading);
     window.addEventListener('hashchange', () => restoreHashTrack());
     document.addEventListener('site:track-updated', refreshResume);
     document.addEventListener('site:content-updated', () => {

@@ -1,0 +1,554 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "href": "index.html#home",
+      "title": "个人主页",
+      "title_en": "Profile",
+      "description": "个人概况与研究方向",
+      "description_en": "Profile and research interests",
+      "keywords": [
+        "龚谢蕊烽",
+        "Ruifeng Gong"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#about",
+      "title": "教育背景",
+      "title_en": "Education",
+      "description": "学校、学位与研究方向",
+      "description_en": "Education and research interests",
+      "keywords": [
+        "四川大学",
+        "SCU",
+        "四川农业大学"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#skills",
+      "title": "专业技能",
+      "title_en": "Technical skills",
+      "description": "Agent、模型训练与系统开发",
+      "description_en": "Agents, model training and systems",
+      "keywords": [
+        "LangGraph",
+        "RAG",
+        "PyTorch",
+        "LoRA"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#projects",
+      "title": "精选项目",
+      "title_en": "Selected projects",
+      "description": "按研究方向探索项目",
+      "description_en": "Explore projects by research area",
+      "keywords": [
+        "科研",
+        "实习",
+        "research"
+      ],
+      "type": "project"
+    },
+    {
+      "href": "index.html#resume",
+      "title": "在线简历",
+      "title_en": "Resume",
+      "description": "Agent 与时空预测两个方向",
+      "description_en": "Agent and spatio-temporal resume tracks",
+      "keywords": [
+        "CV",
+        "经历",
+        "experience"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#contact",
+      "title": "联系作者",
+      "title_en": "Contact",
+      "description": "邮箱与 GitHub",
+      "description_en": "Email and GitHub",
+      "keywords": [
+        "邮箱",
+        "email",
+        "联系方式"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-agent-compilelight",
+      "title": "CompileLight · Agent 方向",
+      "title_en": "CompileLight · Agent track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "Agent",
+        "LangGraph",
+        "Blueprint",
+        "编译",
+        "简历",
+        "resume",
+        "Agent 方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-agent-geome",
+      "title": "GeoME · Agent 方向",
+      "title_en": "GeoME · Agent track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "空间推理",
+        "多模态",
+        "geolocation",
+        "简历",
+        "resume",
+        "Agent 方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-agent-geogr2",
+      "title": "GeoGR² · Agent 方向",
+      "title_en": "GeoGR² · Agent track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "图推理",
+        "地理",
+        "EMNLP",
+        "graph",
+        "简历",
+        "resume",
+        "Agent 方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-agent-smart-qa",
+      "title": "党建智慧问答 · Agent 方向",
+      "title_en": "Smart Q&A · Agent track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "智慧问答",
+        "党建",
+        "TextCNN",
+        "YOLOv5",
+        "简历",
+        "resume",
+        "Agent 方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-agent-wellbeing",
+      "title": "心理健康预警 · Agent 方向",
+      "title_en": "Wellbeing · Agent track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "心理预警",
+        "语音",
+        "多模态",
+        "Att-BiLSTM",
+        "简历",
+        "resume",
+        "Agent 方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-tsf-fgformer",
+      "title": "FGFormer · 时空预测方向",
+      "title_en": "FGFormer · Forecasting track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "时空预测",
+        "Transformer",
+        "Phase-RoPE",
+        "简历",
+        "resume",
+        "时空预测方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-tsf-geogr2",
+      "title": "GeoGR² · 时空预测方向",
+      "title_en": "GeoGR² · Forecasting track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "图推理",
+        "地理",
+        "EMNLP",
+        "graph",
+        "简历",
+        "resume",
+        "时空预测方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-tsf-compilelight",
+      "title": "CompileLight · 时空预测方向",
+      "title_en": "CompileLight · Forecasting track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "Agent",
+        "LangGraph",
+        "Blueprint",
+        "编译",
+        "简历",
+        "resume",
+        "时空预测方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-tsf-smart-qa",
+      "title": "党建智慧问答 · 时空预测方向",
+      "title_en": "Smart Q&A · Forecasting track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "智慧问答",
+        "党建",
+        "TextCNN",
+        "YOLOv5",
+        "简历",
+        "resume",
+        "时空预测方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "index.html#resume-tsf-wellbeing",
+      "title": "心理健康预警 · 时空预测方向",
+      "title_en": "Wellbeing · Forecasting track",
+      "description": "定位这项经历的技术实践与成果",
+      "description_en": "Jump to the experience and results",
+      "keywords": [
+        "心理预警",
+        "语音",
+        "多模态",
+        "Att-BiLSTM",
+        "简历",
+        "resume",
+        "时空预测方向"
+      ],
+      "type": "resume"
+    },
+    {
+      "href": "projects/compilelight.html",
+      "title": "CompileLight",
+      "title_en": "CompileLight",
+      "description": "可编译的企业客服 Agent",
+      "description_en": "A compilable customer-service agent",
+      "keywords": [
+        "Agent",
+        "LangGraph",
+        "Blueprint",
+        "编译"
+      ],
+      "type": "project"
+    },
+    {
+      "href": "projects/geome.html",
+      "title": "GeoME",
+      "title_en": "GeoME",
+      "description": "视觉地理溯因与空间推理",
+      "description_en": "Visual geographic abductive reasoning",
+      "keywords": [
+        "空间推理",
+        "多模态",
+        "geolocation"
+      ],
+      "type": "project"
+    },
+    {
+      "href": "projects/geogr2.html",
+      "title": "GeoGR²",
+      "title_en": "GeoGR²",
+      "description": "图推理修正地理空间预测",
+      "description_en": "Graph refinement for geospatial prediction",
+      "keywords": [
+        "图推理",
+        "地理",
+        "EMNLP",
+        "graph"
+      ],
+      "type": "project"
+    },
+    {
+      "href": "projects/fgformer.html",
+      "title": "FGFormer",
+      "title_en": "FGFormer",
+      "description": "帧差分与相位注意力的时空预测",
+      "description_en": "Frame-gradient and phase-attention forecasting",
+      "keywords": [
+        "时空预测",
+        "Transformer",
+        "Phase-RoPE"
+      ],
+      "type": "project"
+    },
+    {
+      "href": "blog.html",
+      "title": "技术笔记目录",
+      "title_en": "Technical notes",
+      "description": "搜索与分类浏览全部笔记",
+      "description_en": "Browse all notes by topic",
+      "keywords": [
+        "博客",
+        "blog",
+        "学习笔记"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/search-quality-evaluation.html",
+      "title": "搜索与推荐评估：CTR、GSB 与上线决策",
+      "title_en": "搜索与推荐评估：CTR、GSB 与上线决策",
+      "description": "从点击行为与人工偏好到上线决策：统一CTR分母、三档/五档GSB、净胜率与盲评流程，结合随机化实验、置信区间和质量护栏解释收益。",
+      "description_en": "从点击行为与人工偏好到上线决策：统一CTR分母、三档/五档GSB、净胜率与盲评流程，结合随机化实验、置信区间和质量护栏解释收益。",
+      "keywords": [
+        "CTR",
+        "GSB",
+        "A/B测试",
+        "评估口径",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/rag-source-authority.html",
+      "title": "RAG 来源质量：权威性、问题匹配与证据治理",
+      "title_en": "RAG 来源质量：权威性、问题匹配与证据治理",
+      "description": "区分来源可信度与问题适用性，从站点、频道到页面核验证据，沿索引、召回和排序定位最优信源缺失，兼顾可信供给与回答覆盖。",
+      "description_en": "区分来源可信度与问题适用性，从站点、频道到页面核验证据，沿索引、召回和排序定位最优信源缺失，兼顾可信供给与回答覆盖。",
+      "keywords": [
+        "RAG",
+        "来源质量",
+        "权威性",
+        "证据治理",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/llm-inference-metrics.html",
+      "title": "LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS",
+      "title_en": "LLM 推理性能与并发指标：TTFT、TPOT、QPS 与 TPS",
+      "description": "把请求延迟、Token吞吐、频率配额与并发容量放在同一统计口径下：TTFT/TPOT/ITL、Input/Output TPS、Little’s Law与基于SLO的压测方法。",
+      "description_en": "把请求延迟、Token吞吐、频率配额与并发容量放在同一统计口径下：TTFT/TPOT/ITL、Input/Output TPS、Little’s Law与基于SLO的压测方法。",
+      "keywords": [
+        "LLM推理",
+        "QPS",
+        "TPS",
+        "并发",
+        "性能评估",
+        "🧠 大语言模型"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/compilelight-agent-evaluation.html",
+      "title": "生产级 Agent 系统怎么评估？CompileLight 实战复盘",
+      "title_en": "生产级 Agent 系统怎么评估？CompileLight 实战复盘",
+      "description": "以 CompileLight 项目为例，拆解 Agent 评估体系的核心方法论：成功率分级定义、回放评估保真度、路由决策质量、越权审计机制、评估集分层构造方法论。",
+      "description_en": "以 CompileLight 项目为例，拆解 Agent 评估体系的核心方法论：成功率分级定义、回放评估保真度、路由决策质量、越权审计机制、评估集分层构造方法论。",
+      "keywords": [
+        "Agent评估",
+        "CompileLight",
+        "LLM-as-Judge",
+        "评估方法论",
+        "🤖 AI Agent"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/rag-engineering-deep-dive.html",
+      "title": "RAG 系统工程深化：海量文档预处理、模型选型与评估体系",
+      "title_en": "RAG 系统工程深化：海量文档预处理、模型选型与评估体系",
+      "description": "从工程实践角度拆解 RAG 落地的三大难点：百万级文档的近似去重与分层清洗流水线、Embedding/Rerank 模型选型、基于 RAGAS 的检索-生成双层评估框架。",
+      "description_en": "从工程实践角度拆解 RAG 落地的三大难点：百万级文档的近似去重与分层清洗流水线、Embedding/Rerank 模型选型、基于 RAGAS 的检索-生成双层评估框架。",
+      "keywords": [
+        "RAG",
+        "MinHash",
+        "向量检索",
+        "RAGAS",
+        "评估",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/finetuning-alignment.html",
+      "title": "大模型微调与对齐全流程：从 SFT 到 DPO / GRPO",
+      "title_en": "大模型微调与对齐全流程：从 SFT 到 DPO / GRPO",
+      "description": "梳理 Base Model 到对齐模型的完整流水线：预训练与 SFT 的 Loss 本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。",
+      "description_en": "梳理 Base Model 到对齐模型的完整流水线：预训练与 SFT 的 Loss 本质差异、PEFT 与训练阶段的正交关系、DPO 的 LoRA 工程实践、GRPO 相比 PPO 的显存优化路径。",
+      "keywords": [
+        "SFT",
+        "DPO",
+        "GRPO",
+        "LoRA",
+        "对齐",
+        "🧠 大语言模型"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/llm-fundamentals-frontier.html",
+      "title": "大模型基础、Prompt 工程与前沿技术全景",
+      "title_en": "大模型基础、Prompt 工程与前沿技术全景",
+      "description": "从大模型训练范式与 Agent 能力缺口讲起，走到 Prompt 工程方法论与金融 NLP 实战案例，再到 Agent 工程化中的上下文管理、评测体系设计与幻觉治理——一份跨越认知层到工程层的技术全景。",
+      "description_en": "从大模型训练范式与 Agent 能力缺口讲起，走到 Prompt 工程方法论与金融 NLP 实战案例，再到 Agent 工程化中的上下文管理、评测体系设计与幻觉治理——一份跨越认知层到工程层的技术全景。",
+      "keywords": [
+        "大模型基础",
+        "Prompt工程",
+        "Agent前沿",
+        "LLM-as-Judge",
+        "上下文管理",
+        "🧠 大语言模型"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/backend-engineering-overview.html",
+      "title": "后端工程全景：技术栈选型、中间件面试与容器化实践",
+      "title_en": "后端工程全景：技术栈选型、中间件面试与容器化实践",
+      "description": "把后端技术选型的判断逻辑、中间件面试高频考点和容器化/API框架实践整合成一条知识链路：从数据存储、缓存、向量检索怎么选，到消息队列可靠性、分布式事务落地，再到 Docker 与 FastAPI 的具体实践。",
+      "description_en": "把后端技术选型的判断逻辑、中间件面试高频考点和容器化/API框架实践整合成一条知识链路：从数据存储、缓存、向量检索怎么选，到消息队列可靠性、分布式事务落地，再到 Docker 与 FastAPI 的具体实践。",
+      "keywords": [
+        "后端架构",
+        "中间件",
+        "分布式系统",
+        "向量检索",
+        "容器化",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/rag-retrieval-advanced.html",
+      "title": "RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践",
+      "title_en": "RAG 检索进阶：ANN 算法、LlamaIndex 与 Agentic RAG 实践",
+      "description": "拆解 RAG 检索链路更底层的环节——HNSW 与 IVF-PQ 两种近似最近邻算法的工程权衡、LlamaIndex 框架的设计定位，以及 Self-RAG/CRAG 等检索优化与 ReAct 范式下的 Agentic RAG 实践。",
+      "description_en": "拆解 RAG 检索链路更底层的环节——HNSW 与 IVF-PQ 两种近似最近邻算法的工程权衡、LlamaIndex 框架的设计定位，以及 Self-RAG/CRAG 等检索优化与 ReAct 范式下的 Agentic RAG 实践。",
+      "keywords": [
+        "ANN检索",
+        "HNSW",
+        "LlamaIndex",
+        "Agentic RAG",
+        "ReAct",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/reinforcement-learning-basics.html",
+      "title": "强化学习基础：从价值函数到 PPO",
+      "title_en": "强化学习基础：从价值函数到 PPO",
+      "description": "从状态、动作、奖励等基本概念出发，梳理价值函数、贝尔曼方程与策略梯度的关系，再深入 PPO 的角色分工、KL 约束与裁剪目标函数，最后简述 GRPO、DPO 等对齐算法与 PPO 的核心差异。",
+      "description_en": "从状态、动作、奖励等基本概念出发，梳理价值函数、贝尔曼方程与策略梯度的关系，再深入 PPO 的角色分工、KL 约束与裁剪目标函数，最后简述 GRPO、DPO 等对齐算法与 PPO 的核心差异。",
+      "keywords": [
+        "强化学习",
+        "PPO",
+        "策略梯度",
+        "Actor-Critic",
+        "RLHF",
+        "⚡ 深度学习"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/agent-frameworks-ecosystem.html",
+      "title": "Agent 框架生态全景：从核心概念到多智能体编排与低代码平台",
+      "title_en": "Agent 框架生态全景：从核心概念到多智能体编排与低代码平台",
+      "description": "从「Agent = LLM + Memory + Tools + Planning + Action」出发，梳理 ReAct 等单智能体执行范式、AutoGen 与 CrewAI 两种多智能体编排范式的差异，再深入 MCP 协议与 Function Calling 的关系，最后落到 Dify 等低代码平台。",
+      "description_en": "从「Agent = LLM + Memory + Tools + Planning + Action」出发，梳理 ReAct 等单智能体执行范式、AutoGen 与 CrewAI 两种多智能体编排范式的差异，再深入 MCP 协议与 Function Calling 的关系，最后落到 Dify 等低代码平台。",
+      "keywords": [
+        "AI Agent",
+        "MCP",
+        "多智能体",
+        "AutoGen",
+        "Dify",
+        "🤖 AI Agent"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/langgraph-deep-agent.html",
+      "title": "LangGraph 与 Deep Agent：LangChain 1.0 的新范式",
+      "title_en": "LangGraph 与 Deep Agent：LangChain 1.0 的新范式",
+      "description": "从 StateGraph 的 State/Node/Edge 心智模型，到 Checkpoint 与人机协作机制，再到 Deep Agent 把规划、文件系统、子 Agent 委托打包成开箱即用的中间件——梳理 LangChain 1.0 生态从底层运行时到高层封装的完整脉络。",
+      "description_en": "从 StateGraph 的 State/Node/Edge 心智模型，到 Checkpoint 与人机协作机制，再到 Deep Agent 把规划、文件系统、子 Agent 委托打包成开箱即用的中间件——梳理 LangChain 1.0 生态从底层运行时到高层封装的完整脉络。",
+      "keywords": [
+        "LangGraph",
+        "Deep Agent",
+        "LangChain 1.0",
+        "Agent工程",
+        "🤖 AI Agent"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/llm-finetuning-practice.html",
+      "title": "大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩",
+      "title_en": "大模型微调实战：LoRA 训练、LLaMA-Factory 与模型压缩",
+      "description": "从数据格式怎么组织、训练参数怎么调、Loss 曲线怎么读，到用 LLaMA-Factory 跑通一次完整的 LoRA 训练并导出部署，再到模型蒸馏技术，整理落地时真正会碰到的工程细节，并厘清 Embedding 模型与词嵌入模型的区别。",
+      "description_en": "从数据格式怎么组织、训练参数怎么调、Loss 曲线怎么读，到用 LLaMA-Factory 跑通一次完整的 LoRA 训练并导出部署，再到模型蒸馏技术，整理落地时真正会碰到的工程细节，并厘清 Embedding 模型与词嵌入模型的区别。",
+      "keywords": [
+        "LoRA",
+        "LLaMA-Factory",
+        "模型蒸馏",
+        "Embedding",
+        "微调实战",
+        "🧠 大语言模型"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/langchain-core-mechanics.html",
+      "title": "LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性",
+      "title_en": "LangChain 核心机制拆解：从 LCEL 到 Memory 与可观测性",
+      "description": "LangChain 的模块列表很长，但真正决定能不能用好它的，是几个反复出现的核心抽象：Runnable 协议、LCEL 的组合方式、Memory 的分级设计、Retrieval 的六环节流水线。按机制而非 API 目录重新梳理了一遍。",
+      "description_en": "LangChain 的模块列表很长，但真正决定能不能用好它的，是几个反复出现的核心抽象：Runnable 协议、LCEL 的组合方式、Memory 的分级设计、Retrieval 的六环节流水线。按机制而非 API 目录重新梳理了一遍。",
+      "keywords": [
+        "LangChain",
+        "LCEL",
+        "Memory",
+        "Agent",
+        "LangSmith",
+        "🔧 工程实践"
+      ],
+      "type": "post"
+    },
+    {
+      "href": "posts/deep-learning-architectures.html",
+      "title": "深度学习模型架构精讲：从经典网络到 MoE 与多模态",
+      "title_en": "深度学习模型架构精讲：从经典网络到 MoE 与多模态",
+      "description": "深度学习模型的演进，很大程度上是「给网络内置多少先验假设」与「计算怎么分配」的取舍——卷积假设空间局部性，循环假设时间依赖性，Transformer 则用注意力把这些假设换成了可学习机制。从前向/反向传播讲到 MoE 稀疏路由与 ViT 图像 Token 化。",
+      "description_en": "深度学习模型的演进，很大程度上是「给网络内置多少先验假设」与「计算怎么分配」的取舍——卷积假设空间局部性，循环假设时间依赖性，Transformer 则用注意力把这些假设换成了可学习机制。从前向/反向传播讲到 MoE 稀疏路由与 ViT 图像 Token 化。",
+      "keywords": [
+        "Transformer",
+        "MoE",
+        "多模态",
+        "注意力机制",
+        "神经网络架构",
+        "⚡ 深度学习"
+      ],
+      "type": "post"
+    }
+  ]
+}
