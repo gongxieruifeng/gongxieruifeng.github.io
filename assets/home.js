@@ -67,6 +67,7 @@
         }
         if (changed && motion) window.SiteMotion?.enter(document.getElementById(`panel-${track}`));
         window.SiteMotion?.refresh();
+        document.dispatchEvent(new CustomEvent('site:track-updated', { detail: { track } }));
     }
 
     function switchLanguage(lang) {

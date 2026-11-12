@@ -9,9 +9,11 @@
     <link rel="stylesheet" href="assets/site.css">
     <link rel="stylesheet" href="assets/home.css">
     <link rel="stylesheet" href="assets/motion.css">
+    <link rel="stylesheet" href="assets/profile-visuals.css">
     <script src="assets/motion.js" defer></script>
     <script src="assets/site.js" defer></script>
     <script src="assets/home.js" defer></script>
+    <script src="assets/profile-visuals.js" defer></script>
 </head>
 <body class="home-page">
     <a class="skip-link" href="#main-content" data-home-i18n="skip">跳转到主要内容</a>
@@ -54,11 +56,24 @@
                 </header>
                 <aside class="focus-card" aria-labelledby="focus-title">
                     <div class="focus-top"><span class="focus-label" data-home-i18n="focusEyebrow">RESEARCH & ENGINEERING</span></div>
+                    <div class="profile-visual" aria-hidden="true">
+                        <svg viewBox="0 0 400 160" fill="none" focusable="false">
+                            <circle class="profile-orbit-ring" cx="200" cy="80" r="52" stroke="currentColor" stroke-dasharray="3 9" />
+                            <circle class="profile-orbit-ring profile-orbit-ring-outer" cx="200" cy="80" r="69" stroke="currentColor" stroke-dasharray="1 13" />
+                            <path class="profile-orbit-path" data-orbit-topic="agent" d="M70 80C112 21 142 139 200 80" stroke="currentColor" />
+                            <path class="profile-orbit-path" data-orbit-topic="spatial" d="M200 80C239 12 270 21 325 42" stroke="currentColor" />
+                            <path class="profile-orbit-path" data-orbit-topic="temporal" d="M200 80C229 148 277 136 325 122" stroke="currentColor" />
+                            <g class="profile-orbit-core" stroke="currentColor" stroke-linecap="round"><circle cx="200" cy="80" r="20" /><path d="M188 80h24M200 68v24M191.5 71.5l17 17M191.5 88.5l17-17" /></g>
+                            <g class="profile-orbit-node" data-orbit-topic="agent"><circle cx="70" cy="80" r="11" stroke="currentColor" /><circle cx="70" cy="80" r="3" fill="currentColor" /></g>
+                            <g class="profile-orbit-node" data-orbit-topic="spatial"><circle cx="325" cy="42" r="11" stroke="currentColor" /><circle cx="325" cy="42" r="3" fill="currentColor" /></g>
+                            <g class="profile-orbit-node" data-orbit-topic="temporal"><circle cx="325" cy="122" r="11" stroke="currentColor" /><circle cx="325" cy="122" r="3" fill="currentColor" /></g>
+                        </svg>
+                    </div>
                     <h2 id="focus-title" data-home-i18n="focusTitle">从模型推理<br>到可落地的系统。</h2>
                     <div class="focus-areas">
-                        <div class="focus-area"><span class="focus-number" aria-hidden="true">01</span><div><h3 data-home-i18n="focusAgent">可控 Agent</h3><p data-home-i18n="focusAgentDesc">编排 · 检索增强 · 可审计执行</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#layers"></use></svg></div>
-                        <div class="focus-area"><span class="focus-number" aria-hidden="true">02</span><div><h3 data-home-i18n="focusSpatial">空间推理</h3><p data-home-i18n="focusSpatialDesc">多模态 · 图结构 · 证据链</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#location"></use></svg></div>
-                        <div class="focus-area"><span class="focus-number" aria-hidden="true">03</span><div><h3 data-home-i18n="focusTemporal">时空预测</h3><p data-home-i18n="focusTemporalDesc">Transformer · 相位注意力</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#clock"></use></svg></div>
+                        <a class="focus-area" href="#projects" data-focus-topic="agent"><span class="focus-number" aria-hidden="true">01</span><div><h3 data-home-i18n="focusAgent">可控 Agent</h3><p data-home-i18n="focusAgentDesc">编排 · 检索增强 · 可审计执行</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#layers"></use></svg></a>
+                        <a class="focus-area" href="#projects" data-focus-topic="spatial"><span class="focus-number" aria-hidden="true">02</span><div><h3 data-home-i18n="focusSpatial">空间推理</h3><p data-home-i18n="focusSpatialDesc">多模态 · 图结构 · 证据链</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#location"></use></svg></a>
+                        <a class="focus-area" href="#projects" data-focus-topic="temporal"><span class="focus-number" aria-hidden="true">03</span><div><h3 data-home-i18n="focusTemporal">时空预测</h3><p data-home-i18n="focusTemporalDesc">Transformer · 相位注意力</p></div><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#clock"></use></svg></a>
                     </div>
                     <a class="focus-bottom" href="#projects"><span data-home-i18n="focusExplore">探索研究与项目</span><svg class="ui-icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#arrow-right"></use></svg></a>
                 </aside>
