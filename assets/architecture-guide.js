@@ -4,17 +4,18 @@
   const models = {
     'compilelight.html': {
       name: 'CompileLight', section: 'architecture',
-      caption: '从用户请求到经批准的计划，再到执行证据。',
+      caption: '从版本化资产召回与编译批准，到有界缺口产物和固定父图执行。',
       source: 'projects/compilelight.html#architecture',
       steps: [
-        { title: '任务分析', input: '用户请求与当前任务上下文', process: ['识别任务意图与需要完成的步骤。', '明确输入、预期输出和约束，为后续召回与对齐准备任务描述。'], output: '任务描述、步骤需求与输入输出约束', handoff: '将任务描述交给资产检索。', note: '分析阶段可能调用模型；资产复用不等于整个请求零 Token。' },
-        { title: '资产检索', input: '任务描述与版本化资产的 Route Header', process: ['稀疏与稠密检索分别召回候选资产。', '通过 RRF 融合排名，优先找到已经验证的工具、状态机片段与工作流能力。'], output: '候选资产 Header 与对应资产版本', handoff: '将候选资产交给契约对齐，检验它们能否完成当前任务。', note: '业务版采用 PostgreSQL FTS / pgvector；这里展示两版共有的职责关系。' },
-        { title: '契约与提案', input: '候选资产的 Contract、任务约束与覆盖情况', process: ['核对资产输入输出能否对齐任务需求，识别仍未覆盖的缺口。', '模型提出 Blueprint，说明步骤依赖、复用能力与需要解析的部分。'], output: 'Blueprint 提案与输入输出绑定需求', handoff: '提案进入确定性 Compiler，不能直接进入执行器。', note: '模型负责提议，程序负责批准；Contract 对齐和 RRF 排名承担不同职责。' },
-        { title: '确定性编译', input: 'Blueprint 提案与可用资产快照', process: ['检查 Schema、Scope、Risk、Budget，以及依赖、资产绑定和 Validator 等约束。', '将通过校验的计划绑定为版本化 DAG；失败提案受限修复或安全停止。'], output: '已批准的计划、固定资产版本与执行约束', handoff: '批准后的计划交给固定 Meta-Executor 消费。', note: '执行开始时固定 Snapshot，运行中不热切换资产版本。' },
-        { title: '受控执行', input: '已批准计划、步骤数据与冻结上下文', process: ['REUSE 复用已覆盖能力；HYBRID 为未覆盖部分做有界解析；NEW 在工具和预算约束下完成新的规划或探索。', '校验后的类型化产物供 LangGraph 固定 Meta-Executor 消费；不合格产物不直接执行。'], output: '步骤结果、校验产物与执行消耗信息', handoff: '将执行结果与证据交给输出与运行账本。', note: '三种模式表达资产覆盖程度；未知任务仍受编译、验证与预算约束。' },
-        { title: '输出与沉淀', input: '执行结果与 Runtime Ledger 记录', process: ['输出结果，并保留本次执行与消耗证据。', '经验经过审阅和验证后，才进入后续资产版本；本次运行保持冻结快照。'], output: '用户结果、运行证据与待审核经验', handoff: '经审核的经验进入未来资产版本，供后续请求检索。', note: '经验沉淀用于后续运行，不会直接热改当前运行计划。' }
+        { title: '任务分析', input: '用户请求与当前任务上下文', process: ['识别任务意图，将目标整理为需要完成的子目标。', '明确输入、预期输出与任务约束，为检索已有能力准备任务描述。'], output: '子目标、步骤需求与输入输出约束', handoff: '以任务描述查询版本化资产的 Route Header。', note: '任务分析、契约对齐和规划可能调用模型；REUSE 不代表整个请求零 Token。' },
+        { title: '版本化资产召回', input: '任务描述与版本化资产的 Route Header', process: ['Route Header 用于召回，Contract 描述接口约束，Body 保存实现或结构；资产由 asset_ref@version 标识。', '硬过滤约束候选范围，稀疏与稠密检索分别排名，再用 RRF 融合；默认 k = 60。'], output: '融合排名后的候选资产与明确的版本引用', handoff: '候选进入 Contract 对齐，检验接口与任务需求能否匹配。', note: 'RRF 使用 Σ 1 / (k + rank) 融合排名，后续仍有修正与扩展；排名分数不能替代契约匹配。' },
+        { title: '契约对齐与提案', input: '候选资产的 Contract、任务约束与覆盖情况', process: ['对齐输入输出、作用域与约束，确定可复用步骤和仍未覆盖的缺口。', '模型提出 Blueprint，描述步骤依赖、资产引用与输入输出绑定需求。'], output: '带已有能力和缺口的 Blueprint 候选计划', handoff: '候选计划交给确定性 Compiler 批准。', note: '资产包括工具、FSM 片段、工作流骨架、Adapter 和 Validator；模型提案仍须通过代码检查。' },
+        { title: '编译批准与版本绑定', input: 'Blueprint 提案、资产注册视图与可用快照', process: ['代码检查 Schema、Scope、Risk、Budget，并核对依赖、绑定、覆盖、Validator 与副作用等约束。', '通过后形成绑定具体资产版本的 DAG；可修复问题受限修复，硬策略失败安全停止。'], output: '已批准 Blueprint、版本绑定与执行约束', handoff: '在冻结 Goal、Policy 与 Asset Snapshot 下解析必要缺口，再准备执行输入。', note: '确定性批准属于 Compiler；运行期间保持冻结快照，不热切换资产版本。' },
+        { title: '有界缺口解析', input: '已批准计划及冻结的 Goal、Policy、Asset Snapshot', process: ['已有能力优先复用，只对未覆盖的缺口调用有界 reasoner；允许动作和工具受白名单约束，LLM 与工具调用数分别受预算约束。', '公开参考实现由控制服务先完成 System 2 缺口解析，将结果校验为类型化产物；工具循环仅在需要时发生。'], output: '校验后的类型化缺口产物与预计算结果', handoff: '将已批准计划、冻结资产视图和缺口产物交给固定 Meta-Executor 消费。', note: '图中的缺口支路表达职责关系；固定公开提交先预解析再执行，不是图(c)的逐时序调用图。NEW 仍可包含已知步骤。' },
+        { title: '固定父图执行与账本', input: '已批准 Blueprint、步骤输入与校验后的缺口产物', process: ['LangGraph 固定父图调度已有 Tool / FSM 并消费预计算缺口产物；逐步校验输出、更新状态、持久化 Ledger，再调度后续就绪步骤。', '输出任务结果和执行证据；经验经审核与验证后才成为后续版本的资产。'], output: '经验证的任务结果、步骤证据与执行账本', handoff: '执行证据用于追溯；经审核的经验供未来请求复用。', note: '请求 Blueprint 是父图消费的状态数据，不为每个请求重新生成 LangGraph 拓扑；经验不热改当前运行快照。' }
       ]
     },
+
     'fgformer.html': {
       name: 'FGFormer', section: 'innovation',
       caption: '把历史帧转为变化表示，经时空注意力输出预测帧。',

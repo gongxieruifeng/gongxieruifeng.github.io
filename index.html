@@ -178,7 +178,7 @@
                             <div class="project-role">KN Group · 实习</div>
                         </div>
                         <p class="project-desc">
-                            可编译的企业客服 Agent。模型分析任务并提出 Blueprint，确定性编译器完成门禁批准；版本化资产优先复用，未知缺口有界求解，固定执行器记录可审计轨迹。以下成果来自业务版 10,284 次流量回放。
+                            资产驱动的企业客服 Agent。版本化能力经检索与契约对齐，由 LLM 提出 Blueprint、Compiler 批准；未知缺口有界求解为类型化产物，供固定 LangGraph 父图消费，Ledger 留存执行证据。成果来自业务版 10,284 次流量回放。
                         </p>
                         <div class="project-metrics">
                             <span class="metric-tag"> 成功率 +11.2pp</span>
@@ -285,11 +285,11 @@
                                 <span class="entry-role">KN Group · 算法实习生</span>
                             </div>
                         </div>
-                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→检索与提案→确定性编译→固定执行器</strong>链路，对已知步骤复用资产，对缺口进行有界求解。</p>
+                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→契约对齐与计划编译→固定父图执行</strong>链路；复用已知能力，将未知缺口的有界求解结果转为可校验的类型化产物。</p>
                         <ul>
-                            <li><strong>控制与编译：</strong>以 <strong>“LLM 提议、代码批准”</strong> 划分职责：分析、对齐和 Blueprint 提案可调用模型，确定性 Compiler 执行 <strong>Schema / Scope / Risk / Budget</strong> 门禁；业务版采用 PostgreSQL FTS + pgvector 与 RRF 融合，结合语义缓存复用已验证的 Blueprint。</li>
-                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>Meta-Executor</strong>，按资产覆盖情况选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤直接执行，缺口在冻结上下文、工具白名单和预算约束下求解，类型化产物经验证后交给执行器，Ledger 记录执行证据。</li>
-                            <li><strong>资产工程：</strong>设计 <strong>Header 召回 + Contract 匹配</strong>、5 类版本化资产及 DRAFT→ACTIVE 生命周期；经验经审核后进入 Registry，每次运行固定 Snapshot，避免执行中版本漂移。</li>
+                            <li><strong>控制与编译：</strong>以 <strong>“LLM 提议、代码批准”</strong> 划分职责：版本化资产经 PostgreSQL FTS + pgvector 双路召回与 RRF 排名融合，契约对齐后由模型提出 Blueprint，确定性 Compiler 检查 <strong>Schema / Scope / Risk / Budget</strong>，绑定资产版本与步骤输入输出。</li>
+                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>父图 / Meta-Executor</strong>，按资产覆盖选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤复用工具或状态机，缺口在冻结上下文、白名单及调用预算内解析，验证后的类型化产物供父图消费；逐步校验、更新状态并写入 Ledger。</li>
+                            <li><strong>资产工程：</strong>设计 <strong>Route Header / Contract / Body</strong> 分层资产，分别承载召回描述、接口约束与执行内容；统一 5 类资产版本及 DRAFT→ACTIVE 生命周期，经验经审核后进入 Registry，每次运行固定 Snapshot，避免版本漂移。</li>
                             <li><strong>业务回放成果：</strong><strong>10,284 次</strong>流量回放中，成功率由 <strong>78.2%→89.4%</strong>（+11.2个百分点），整体端到端 P95 由 <strong>103.64s→54.2s</strong>（降低47.7%），较 ReAct 节省 <strong>74.8% Token</strong>；公开轻量版用于展示架构，不混作同轮业务评测。</li>
                         </ul>
                     </div>
@@ -426,10 +426,10 @@
                                 <span class="entry-role">KN Group · 算法实习生</span>
                             </div>
                         </div>
-                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→检索与提案→确定性编译→固定执行器</strong>链路，对已知步骤复用资产，对缺口进行有界求解。</p>
+                        <p class="summary">项目描述：针对企业客服 Agent 高频任务重复推理与执行难以审计的问题，设计<strong>版本化资产→契约对齐与计划编译→固定父图执行</strong>链路；复用已知能力，将未知缺口的有界求解结果转为可校验的类型化产物。</p>
                         <ul>
-                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>Meta-Executor</strong>，按资产覆盖情况选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤直接执行，缺口在冻结上下文、工具白名单和预算约束下求解，类型化产物经验证后交给执行器，Ledger 记录执行证据。</li>
-                            <li><strong>检索与编译：</strong>业务版采用 PostgreSQL FTS + pgvector 与 RRF 融合，经 Header/Contract 匹配形成 Blueprint，再通过 Schema/Scope/Risk/Budget 门禁批准；运行固定资产快照，经验经审核后入库。</li>
+                            <li><strong>有界执行：</strong>基于 LangGraph 固定 <strong>父图 / Meta-Executor</strong>，按资产覆盖选择 <strong>REUSE / HYBRID / NEW</strong>；已知步骤复用工具或状态机，缺口在冻结上下文、白名单及调用预算内解析，验证后的类型化产物供父图消费；逐步校验、更新状态并写入 Ledger。</li>
+                            <li><strong>检索与编译：</strong>将资产拆为 <strong>Header / Contract / Body</strong>；业务版以 PostgreSQL FTS + pgvector 双路召回、RRF 融合与契约对齐支撑 Blueprint 提案，经 Schema/Scope/Risk/Budget 批准并绑定资产版本；运行固定 Snapshot，经验经审核后入库。</li>
                             <li><strong>业务回放成果：</strong><strong>10,284 次</strong>流量回放中，成功率由 <strong>78.2%→89.4%</strong>（+11.2个百分点），整体端到端 P95 由 <strong>103.64s→54.2s</strong>（降低47.7%），较 ReAct 节省 <strong>74.8% Token</strong>；公开轻量版用于展示架构，不混作同轮业务评测。</li>
                         </ul>
                     </div>

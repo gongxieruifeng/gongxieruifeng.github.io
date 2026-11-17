@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+<title id="title">03_有界执行</title>
+<desc id="desc">CompileLight conceptual architecture, grounded in the business homepage and public reference commit f5c9f03bf2b98a287f744c3d9611b985fbd1e192. LLM proposes, deterministic code approves. System 2 tools are optional and allowlisted; validated typed artifacts enter fixed execution. The public implementation resolves System 2 gaps before submitting results to the fixed executor. Routing sequences are illustrative: NEW may retain known steps. Compiler gates are grouped, not exhaustive. REUSE avoids additional decision inference in deterministic execution steps, not in the complete control plane. Ledger review is not automatic live asset mutation.</desc>
+<rect width="1920" height="1080" fill="white"/>
+<rect x="219.238" y="81" width="1481.52" height="918" rx="24.2376" fill="#FBF7F2" stroke="#C6AA96" stroke-width="2.04505" stroke-dasharray="10 7"/>
+<rect x="258.624" y="111.297" width="66.6535" height="51.505" rx="7.57426" fill="#FBF7F2" stroke="#995D3C" stroke-width="2.12079"/>
+<text x="291.95" y="150.729" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#995D3C">(c)</text>
+<text x="346.485" y="156.121" font-family="Times New Roman,Times,serif" font-size="46.9604" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">Fixed execution with bounded gap resolution</text>
+<text x="261.653" y="216.034" font-family="Times New Roman,Times,serif" font-size="39.3861" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">Fixed parent graph</text>
+<rect x="261.653" y="273.386" width="228.743" height="127.248" rx="7.57426" fill="#FFFFFF" stroke="#98AEC2" stroke-width="2.27228"/>
+<text x="376.025" y="347.235" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Dispatch</text>
+<rect x="544.931" y="273.386" width="251.465" height="127.248" rx="7.57426" fill="#FFFFFF" stroke="#98AEC2" stroke-width="2.27228"/>
+<text x="670.663" y="325.27" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Known step</text>
+<polyline points="563.109,340.04 778.218,340.04" fill="none" stroke="#98AEC2" stroke-width="1.36337" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="670.663" y="386.197" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="middle" fill="#23364A">Tool / FSM</text>
+<rect x="850.931" y="273.386" width="251.465" height="127.248" rx="7.57426" fill="#EDF4F1" stroke="#94B3A9" stroke-width="2.27228"/>
+<text x="976.663" y="323.755" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Step</text>
+<text x="976.663" y="370.715" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">validation</text>
+<rect x="1156.93" y="273.386" width="234.802" height="127.248" rx="7.57426" fill="#FFFFFF" stroke="#98AEC2" stroke-width="2.27228"/>
+<text x="1274.33" y="347.235" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Update state</text>
+<polyline points="490.396,337.01 544.931,337.01" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="544.931,337.01 530.615,330.193 530.615,343.827" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<polyline points="796.396,337.01 850.931,337.01" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="850.931,337.01 836.615,330.193 836.615,343.827" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<polyline points="1102.4,337.01 1156.93,337.01" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1156.93,337.01 1142.62,330.193 1142.62,343.827" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<polyline points="1273.57,273.386 1273.57,243.089 375.267,243.089 375.267,273.386" fill="none" stroke="#365F83" stroke-width="2.19653" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="375.267,273.386 379.812,263.54 370.723,263.54" fill="#365F83" stroke="none" stroke-width="2.72673"/>
+<rect x="757.01" y="217.337" width="204.505" height="45.4455" rx="0" fill="#FBF7F2" stroke="none" stroke-width="2.34802"/>
+<text x="859.262" y="248.512" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#365F83">Next step</text>
+<polyline points="1391.73,337.01 1447.78,337.01" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1447.78,337.01 1433.47,330.193 1433.47,343.827" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<rect x="1447.78" y="285.505" width="210.564" height="103.01" rx="4.54455" fill="#FFFFFF" stroke="#A8B6C4" stroke-width="2.42376"/>
+<text x="1553.06" y="349.174" font-family="Times New Roman,Times,serif" font-size="40.901" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Output</text>
+<text x="261.653" y="511.43" font-family="Times New Roman,Times,serif" font-size="39.3861" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">Bounded gap resolution</text>
+<polyline points="375.267,400.634 375.267,455.168 237.416,455.168 237.416,624.832 261.653,624.832" fill="none" stroke="#995D3C" stroke-width="2.72673" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="261.653,624.832 250.201,619.378 250.201,630.285" fill="#995D3C" stroke="none" stroke-width="2.72673"/>
+<rect x="349.515" y="420.327" width="78.7723" height="42.4158" rx="0" fill="#FBF7F2" stroke="none" stroke-width="2.34802"/>
+<text x="355.574" y="451.669" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="start" fill="#995D3C">gap</text>
+<rect x="261.653" y="541.515" width="224.198" height="166.634" rx="4.54455" fill="#FFFFFF" stroke="#C6AA96" stroke-width="2.57525"/>
+<text x="373.752" y="583.461" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Frozen context</text>
+<polyline points="275.287,596.05 472.218,596.05" fill="none" stroke="#C6AA96" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="373.752" y="632.103" font-family="Times New Roman,Times,serif" font-size="30.297" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">Goal</text>
+<text x="373.752" y="663.915" font-family="Times New Roman,Times,serif" font-size="30.297" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">Policy</text>
+<text x="373.752" y="695.727" font-family="Times New Roman,Times,serif" font-size="30.297" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">Asset snapshot</text>
+<polyline points="485.851,624.832 534.327,624.832" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="534.327,624.832 520.011,618.015 520.011,631.649" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<rect x="534.327" y="541.515" width="262.069" height="166.634" rx="7.57426" fill="#EFDDCE" stroke="#C6AA96" stroke-width="2.27228"/>
+<text x="665.361" y="615.621" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Bounded</text>
+<text x="665.361" y="662.582" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">reasoner</text>
+<polyline points="796.396,624.832 873.653,624.832" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="873.653,624.832 859.338,618.015 859.338,631.649" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="913.04" cy="624.832" rx="39.3861" ry="39.3861" fill="#EDF4F1" stroke="#3D7168" stroke-width="2.57525"/>
+<text x="913.04" y="637.678" font-family="Times New Roman,Times,serif" font-size="48.4752" font-weight="400" font-style="italic" text-anchor="middle" fill="#3D7168">V</text>
+<text x="913.04" y="715.087" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#3D7168">Validate</text>
+<polyline points="952.426,624.832 1013.02,624.832" fill="none" stroke="#23364A" stroke-width="3.40842" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1013.02,624.832 998.704,618.015 998.704,631.649" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<rect x="1013.02" y="541.515" width="257.525" height="166.634" rx="4.54455" fill="#EDF4F1" stroke="#94B3A9" stroke-width="2.34802"/>
+<text x="1141.78" y="592.05" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Typed artifacts</text>
+<polyline points="1032.71,612.713 1250.85,612.713" fill="none" stroke="#94B3A9" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1141.78" y="655.841" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">type · value</text>
+<text x="1141.78" y="699.771" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">+ evidence</text>
+<polyline points="1141.78,541.515 1141.78,461.228 720.653,461.228 720.653,400.634" fill="none" stroke="#3D7168" stroke-width="2.34802" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="720.653,400.634 715.957,410.495 725.35,410.495" fill="#3D7168" stroke="none" stroke-width="2.72673"/>
+<rect x="897.891" y="433.96" width="225.713" height="46.9604" rx="0" fill="#FBF7F2" stroke="none" stroke-width="2.34802"/>
+<text x="1010.75" y="468.332" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="middle" fill="#3D7168">Inject artifacts</text>
+<polyline points="634.307,708.149 634.307,767.228" fill="none" stroke="#995D3C" stroke-width="2.72673" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="634.307,767.228 639.76,755.775 628.853,755.775" fill="#995D3C" stroke="none" stroke-width="2.72673"/>
+<text x="604.01" y="759.017" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="end" fill="#995D3C">if needed</text>
+<rect x="534.327" y="767.228" width="262.069" height="92.4059" rx="7.57426" fill="#FFFFFF" stroke="#C6AA96" stroke-width="2.27228"/>
+<text x="665.361" y="825.004" font-family="Times New Roman,Times,serif" font-size="39.3861" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Allowed tools</text>
+<polyline points="796.396,812.673 826.693,812.673 826.693,673.307 796.396,673.307" fill="none" stroke="#995D3C" stroke-width="2.57525" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="796.396,673.307 807.212,678.457 807.212,668.156" fill="#995D3C" stroke="none" stroke-width="2.72673"/>
+<polyline points="1273.57,400.634 1343.26,400.634 1343.26,567.267 1408.4,567.267" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1408.4,567.267 1398.22,562.42 1398.22,572.115" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<rect x="1408.4" y="518.792" width="249.95" height="189.356" rx="3.0297" fill="#FFFFFF" stroke="#A8B6C4" stroke-width="2.27228"/>
+<text x="1533.37" y="565.283" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="700" font-style="normal" text-anchor="middle" fill="#23364A">Execution ledger</text>
+<polyline points="1425.06,596.05 1641.68,596.05" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1425.06,626.347 1641.68,626.347" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1425.06,656.644 1641.68,656.644" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1425.06,686.941 1641.68,686.941" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1484.14,586.96 1484.14,697.545" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="1565.94,586.96 1565.94,697.545" fill="none" stroke="#A8B6C4" stroke-width="1.51485" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1534.13" y="757.502" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="400" font-style="normal" text-anchor="middle" fill="#506274">Auditable trace</text>
+<text x="261.653" y="914.047" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">a</text>
+<text x="282.861" y="925.136" font-family="Times New Roman,Times,serif" font-size="24.2376" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">t</text>
+<text x="313.158" y="914.047" font-family="Cambria,serif" font-size="42.4158" font-weight="400" font-style="normal" text-anchor="start" fill="#23364A">∈</text>
+<text x="366.178" y="914.047" font-family="Times New Roman,Times,serif" font-size="42.4158" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">A</text>
+<text x="396.475" y="925.136" font-family="Times New Roman,Times,serif" font-size="24.2376" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">allow</text>
+<text x="261.653" y="961.674" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">n</text>
+<text x="282.861" y="972.43" font-family="Times New Roman,Times,serif" font-size="21.2079" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">LLM</text>
+<text x="360.119" y="959.993" font-family="Cambria,serif" font-size="37.8713" font-weight="400" font-style="normal" text-anchor="start" fill="#23364A">≤</text>
+<text x="414.653" y="961.674" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">B</text>
+<text x="438.891" y="972.43" font-family="Times New Roman,Times,serif" font-size="21.2079" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">LLM</text>
+<text x="537.356" y="961.674" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">n</text>
+<text x="558.564" y="972.43" font-family="Times New Roman,Times,serif" font-size="21.2079" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">tool</text>
+<text x="635.822" y="959.993" font-family="Cambria,serif" font-size="37.8713" font-weight="400" font-style="normal" text-anchor="start" fill="#23364A">≤</text>
+<text x="690.356" y="961.674" font-family="Times New Roman,Times,serif" font-size="36.3564" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">B</text>
+<text x="714.594" y="972.43" font-family="Times New Roman,Times,serif" font-size="21.2079" font-weight="400" font-style="italic" text-anchor="start" fill="#23364A">tool</text>
+<text x="504.03" y="959.993" font-family="Times New Roman,Times,serif" font-size="37.8713" font-weight="400" font-style="normal" text-anchor="start" fill="#23364A">,</text>
+<text x="902.436" y="793.692" font-family="Times New Roman,Times,serif" font-size="34.8416" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">Illustrative execution patterns</text>
+<text x="905.465" y="845.364" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">REUSE</text>
+<ellipse cx="1125.12" cy="836.911" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<polyline points="1147.84,836.911 1199.35,836.911" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1199.35,836.911 1189.17,832.063 1189.17,841.758" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1222.07" cy="836.911" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<polyline points="1244.79,836.911 1296.3,836.911" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1296.3,836.911 1286.12,832.063 1286.12,841.758" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1319.02" cy="836.911" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<text x="905.465" y="902.928" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">HYBRID</text>
+<ellipse cx="1125.12" cy="894.475" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<polyline points="1147.84,894.475 1199.35,894.475" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1199.35,894.475 1189.17,889.628 1189.17,899.323" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1222.07" cy="894.475" rx="19.6931" ry="19.6931" fill="#FBF7F2" stroke="#995D3C" stroke-width="2.42376" stroke-dasharray="10 7"/>
+<polyline points="1244.79,894.475 1296.3,894.475" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1296.3,894.475 1286.12,889.628 1286.12,899.323" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1319.02" cy="894.475" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<text x="905.465" y="960.492" font-family="Times New Roman,Times,serif" font-size="33.3267" font-weight="700" font-style="normal" text-anchor="start" fill="#23364A">NEW</text>
+<ellipse cx="1125.12" cy="952.04" rx="19.6931" ry="19.6931" fill="#FBF7F2" stroke="#995D3C" stroke-width="2.42376" stroke-dasharray="10 7"/>
+<polyline points="1147.84,952.04 1199.35,952.04" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1199.35,952.04 1189.17,947.192 1189.17,956.887" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1222.07" cy="952.04" rx="19.6931" ry="19.6931" fill="#E1EAF2" stroke="#365F83" stroke-width="2.42376"/>
+<polyline points="1244.79,952.04 1296.3,952.04" fill="none" stroke="#23364A" stroke-width="2.42376" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="1296.3,952.04 1286.12,947.192 1286.12,956.887" fill="#23364A" stroke="none" stroke-width="2.72673"/>
+<ellipse cx="1319.02" cy="952.04" rx="19.6931" ry="19.6931" fill="#FBF7F2" stroke="#995D3C" stroke-width="2.42376" stroke-dasharray="10 7"/>
+<ellipse cx="1419" cy="958.099" rx="10.604" ry="10.604" fill="#E1EAF2" stroke="#365F83" stroke-width="1.96931"/>
+<text x="1440.21" y="968.233" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="start" fill="#506274">Known</text>
+<ellipse cx="1573.51" cy="958.099" rx="10.604" ry="10.604" fill="#FBF7F2" stroke="#995D3C" stroke-width="1.96931" stroke-dasharray="10 7"/>
+<text x="1594.72" y="968.233" font-family="Times New Roman,Times,serif" font-size="31.8119" font-weight="400" font-style="normal" text-anchor="start" fill="#506274">Gap</text>
+</svg>

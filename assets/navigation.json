@@ -251,13 +251,24 @@
       "href": "projects/compilelight.html",
       "title": "CompileLight",
       "title_en": "CompileLight",
-      "description": "可编译的企业客服 Agent",
-      "description_en": "A compilable customer-service agent",
+      "description": "版本化资产检索与契约对齐、确定性编译、有界缺口解析和固定父图执行",
+      "description_en": "Versioned assets, contract alignment, deterministic compilation, bounded gap resolution and fixed-graph execution",
       "keywords": [
         "Agent",
         "LangGraph",
         "Blueprint",
-        "编译"
+        "编译",
+        "版本化资产",
+        "Route Header",
+        "Contract",
+        "RRF",
+        "Compiler",
+        "System 2",
+        "有界推理",
+        "固定父图",
+        "Typed artifacts",
+        "Ledger",
+        "资产复用"
       ],
       "type": "project"
     },

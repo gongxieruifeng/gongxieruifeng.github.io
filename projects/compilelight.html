@@ -7,6 +7,7 @@
     <meta name="description" content="CompileLight：LLM 提议，代码批准。通过版本化资产、确定性编译门禁和有界推理降低 Agent 重复规划开销，业务版回放综合成功率 89.4%、端到端 P95 54.2 秒、Token 开销节省 74.8%。">
     <link rel="stylesheet" href="../assets/site.css">
     <link rel="stylesheet" href="../assets/project-showcase.css">
+    <link rel="stylesheet" href="../assets/compilelight-case-study.css">
     <link rel="stylesheet" href="../assets/motion.css">
     <script src="../assets/motion.js" defer></script>
     <script src="../assets/site.js" defer></script>
@@ -19,7 +20,7 @@
     <link rel="stylesheet" href="../assets/term-help.css">
     <script src="../assets/term-help.js" defer></script>
 </head>
-<body data-page="project" class="project-showcase">
+<body data-page="project" class="project-showcase compilelight-case-study">
     <nav class="navbar" aria-label="主导航">
         <div class="nav-inner">
             <a href="../index.html" class="nav-logo">龚谢蕊烽</a>
@@ -31,8 +32,8 @@
         <header class="project-hero">
             <span class="project-badge">Agent 系统 · 实习项目</span>
             <h1 class="project-title"><span aria-hidden="true">⚡</span> CompileLight</h1>
-            <p class="project-lead">让 LLM 提议计划，让代码决定能否执行。</p>
-            <p class="project-subtitle">轻量级智能编译守卫 Agent。围绕企业客服中的重复任务，优先复用版本化资产，仅对未知缺口使用有界推理，再由固定执行器消费经校验的计划与产物。</p>
+            <p class="project-lead">LLM 提议，代码批准。已知能力复用，未知缺口有界解析。</p>
+            <p class="project-subtitle">围绕企业客服的重复任务，把工具、状态机与工作流组织为版本化资产；将模型提案编译为绑定资产版本的计划，再由固定 LangGraph 父图消费已知能力与经过验证的缺口产物。</p>
             <p class="project-meta">KN Group · 算法实习生 · 业务版项目介绍</p>
             <div class="project-links">
                 <a class="ui-btn ui-btn-primary" href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer">
@@ -63,118 +64,118 @@
         </header>
 
         <nav class="toc" aria-label="本页目录">
-            <h2>阅读导航</h2>
+            <h2>沿核心机制阅读</h2>
             <ul>
-                <li><a href="#overview">问题与设计原则</a></li>
-                <li><a href="#architecture">架构与主流程</a></li>
-                <li><a href="#highlights">资产复用与编译门禁</a></li>
-                <li><a href="#execution">三种模式与有界执行</a></li>
-                <li><a href="#results">业务版量化成果</a></li>
-                <li><a href="#versions">业务版与公开轻量版</a></li>
+                <li><a href="#overview">01 · 问题与设计</a></li>
+                <li><a href="#architecture">02 · 架构总图</a></li>
+                <li><a href="#highlights">03 · 资产召回与对齐</a></li>
+                <li><a href="#compiler">04 · 计划编译</a></li>
+                <li><a href="#execution">05 · 有界执行</a></li>
+                <li><a href="#results">06 · 业务效果</a></li>
+                <li><a href="#versions">07 · 公开实现</a></li>
             </ul>
         </nav>
 
         <section class="section" id="overview">
-            <h2>把重复规划变成资产复用</h2>
-            <p>企业客服 Agent 的高频任务往往具有相似的知识需求与执行路径。如果每次都让模型重新规划，会重复消耗 Token，并使工具权限、状态变化和执行证据难以统一管理。</p>
-            <div class="project-grid">
-                <article class="project-card">
-                    <h3>复用已经验证的能力</h3>
-                    <p>将工具、状态机片段和工作流整理为版本化资产，先检索候选能力，再通过契约匹配确认它们能否覆盖当前任务。</p>
-                </article>
-                <article class="project-card">
-                    <h3>批准之后再执行</h3>
-                    <p>模型可以提出 Blueprint，代码负责检查结构、作用域、风险与预算。计划与具体资产版本绑定后，才交由固定执行器消费。</p>
-                </article>
-            </div>
-            <div class="highlight-box">
-                <strong>核心原则：LLM 提议，代码批准。</strong>
-                分析、对齐和规划仍可能使用模型；确定性 Compiler 负责批准执行计划。减少重复决策推理，同时保留应对未知任务的能力。
+            <span class="cl-section-label">01 · 问题与设计</span>
+            <h2>从重复推理到能力复用</h2>
+            <p>企业客服的高频任务经常复用相同工具、业务规则和执行路径。让模型逐次决定每一步，会反复支付规划成本，也让权限、状态变化与执行结果的核验分散在推理过程中。CompileLight 将这些稳定能力沉淀为可检索、可组合、可验证的资产。</p>
+            <div class="cl-principles">
+                <article><span class="cl-pill cl-known">能力复用</span><h3>让已知能力进入资产库</h3><p>Header 帮助找到能力，Contract 判断能否适配，Body 提供实现。版本引用让本次计划有明确的执行依据。</p></article>
+                <article><span class="cl-pill cl-approved">计划批准</span><h3>让模型和代码分别负责</h3><p>模型理解任务并提出 Blueprint；Compiler 校验结构、绑定、政策与预算，批准后才进入执行。</p></article>
+                <article><span class="cl-pill cl-gap">缺口解析</span><h3>把推理集中在未覆盖部分</h3><p>已知能力由固定父图调度；缺口在冻结上下文内解析，经验证成为类型化产物，再供执行器消费。</p></article>
             </div>
         </section>
 
         <section class="section" id="architecture">
-            <h2>一条主流程，分清每层职责</h2>
-            <p>请求经过任务分析、资产检索和契约对齐，形成 Blueprint 提案；Compiler 将通过校验的提案绑定为版本化 DAG，固定 Meta-Executor 再执行已批准的步骤。</p>
-            <figure class="project-figure">
-                <a class="figure-open" href="../assets/projects/compilelight/main-flow.svg" data-figure-title="CompileLight：资产复用与受控执行主流程">
-                    <img src="../assets/projects/compilelight/main-flow.svg" width="1920" height="1080" alt="CompileLight 概念主流程：任务分析、资产检索、Blueprint 提案、确定性 Compiler、固定执行器与输出；版本化资产和运行账本在下方提供支撑。" loading="lazy" decoding="async">
+            <span class="cl-section-label">02 · 架构总图</span>
+            <h2>三张图读懂核心机制</h2>
+            <p>总图按一次请求的生命周期展开：任务分析与资产检索提供规划依据，模型生成 Blueprint 提案，确定性编译器批准版本绑定的 DAG，固定执行器消费计划并留下运行证据。</p>
+            <figure class="project-figure cl-method-figure">
+                <a class="figure-open" href="../assets/projects/compilelight/academic-overview.png" data-figure-title="CompileLight 学术总图：资产规划、确定性编译与有界执行">
+                    <img src="../assets/projects/compilelight/academic-overview.svg" width="1920" height="1080" alt="CompileLight 学术架构总图：(a) 请求经任务分析、资产检索、模型提案和确定性编译成为版本绑定的计划；(b) 资产检索与契约对齐支撑编译；(c) 固定父图消费已知步骤与验证后的缺口产物。" loading="lazy" decoding="async">
                 </a>
-                <figcaption>主流程概念图：突出模型提案与代码批准的分工，以及资产版本、执行计划和运行证据的关联。点击可放大查看。</figcaption>
+                <figcaption>图 1 · (a) 总流程；(b) 资产规划与编译；(c) 固定执行与有界缺口解析。蓝色实线表示已有能力，铜棕虚线表示缺口，灰绿表示校验与批准产物。</figcaption>
             </figure>
-            <ol class="project-steps">
-                <li><strong>规划边界：</strong>模型提出候选计划，编译器检查依赖、契约、权限与预算，并确定资产版本及输入输出绑定。</li>
-                <li><strong>执行边界：</strong>LangGraph 使用固定父图，通过运行状态消费不同请求的 Blueprint 与步骤数据。</li>
-                <li><strong>证据边界：</strong>Runtime Ledger 留存执行与消耗信息。本次运行保持冻结快照，经验经审阅和验证后进入后续资产版本。</li>
-            </ol>
+            <div class="cl-reading-map">
+                <a href="#highlights"><span>(b) 控制面</span><strong>能力如何变成计划</strong><small>检索 → 对齐 → 提案 → 编译</small></a>
+                <a href="#execution"><span>(c) 执行面</span><strong>计划与产物如何被消费</strong><small>固定调度 → 步骤校验 → 状态与证据</small></a>
+            </div>
+            <div class="cl-contract-line"><span>控制面交付</span><strong>批准的 Blueprint + 固定资产版本 + 输入输出绑定</strong><span>执行面产出</span><strong>经过校验的结果 + 可审计的执行账本</strong></div>
+            <p class="project-note">图中的 DAG 表示请求的步骤依赖与资产绑定。LangGraph 父图的调度拓扑保持固定，不随每个请求重新生成。</p>
         </section>
 
         <section class="section" id="highlights">
-            <h2>让资产可检索，让计划可校验</h2>
-            <p>资产将召回信息、接口契约和执行内容分开组织：Route Header 用于检索候选，Contract 用于任务对齐，Body 保存对应能力的实现或结构。稀疏与稠密检索通过 RRF 融合排名，后续再进行契约匹配与计划编译。</p>
-            <figure class="project-figure">
-                <a class="figure-open" href="../assets/projects/compilelight/asset-planning.svg" data-figure-title="CompileLight：版本化资产、规划与确定性编译">
-                    <img src="../assets/projects/compilelight/asset-planning.svg" width="1920" height="1080" alt="资产规划与编译概念图：五类版本化资产经稀疏稠密检索和 RRF 融合，再进行契约对齐、模型 Blueprint 提案及 Schema、Scope、Risk、Budget 编译校验。" loading="lazy" decoding="async">
+            <span class="cl-section-label">03 · 资产召回与对齐</span>
+            <h2>资产如何召回并对齐</h2>
+            <p>要复用一个能力，需要同时解决“找得到”“能接上”和“版本明确”三个问题。资产以 <code>asset_ref@version</code> 引用，Header、Contract、Body 分别服务于召回、适配与执行。</p>
+            <figure class="project-figure cl-method-figure">
+                <a class="figure-open" href="../assets/projects/compilelight/academic-planning.png" data-figure-title="CompileLight：资产检索、契约对齐与计划编译">
+                    <img src="../assets/projects/compilelight/academic-planning.svg" width="1920" height="1080" alt="版本化资产包含 Route Header、Contract、Body。硬过滤后的候选参与稀疏和稠密排名，通过 RRF 融合、Contract 对齐交给模型提案；确定性 Compiler 检查后输出批准的 Blueprint，失败进入受限修复或安全停止。" loading="lazy" decoding="async">
                 </a>
-                <figcaption>从资产召回到代码批准。RRF 是排名融合环节，最终执行计划仍需通过契约与编译检查。</figcaption>
+                <figcaption>图 2 · 沿箭头看控制面：资产与查询经硬过滤、双路召回、RRF 排名融合和 Contract 对齐后，才进入模型提案与编译批准。</figcaption>
             </figure>
-            <h3>五类资产，统一版本管理</h3>
-            <div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的资产类型表">
-                <table>
-                    <thead><tr><th scope="col">资产类型</th><th scope="col">承担的职责</th></tr></thead>
-                    <tbody>
-                        <tr><th scope="row">Primitive Tool</th><td>可调用的基础工具能力</td></tr>
-                        <tr><th scope="row">FSM Shard</th><td>可复用的确定性状态机片段</td></tr>
-                        <tr><th scope="row">Workflow Skeleton</th><td>用于规划复用的工作流骨架</td></tr>
-                        <tr><th scope="row">Adapter</th><td>对齐不同步骤的输入输出</td></tr>
-                        <tr><th scope="row">Validator</th><td>校验中间产物与输出契约</td></tr>
-                    </tbody>
-                </table>
+            <div class="cl-asset-layers">
+                <article><span class="cl-layer-name">Route Header</span><h3>先定位候选能力</h3><p>提供用于召回和路由的能力描述，支撑稀疏与稠密检索。</p></article>
+                <article><span class="cl-layer-name">Contract</span><h3>再确认输入输出适配</h3><p>声明输入、输出、作用域与约束，判断步骤之间能否绑定、能力能否覆盖当前子目标。</p></article>
+                <article><span class="cl-layer-name">Body</span><h3>最后消费对应实现</h3><p>保存工具实现、状态机片段或工作流结构，与资产版本共同构成本次执行依据。</p></article>
             </div>
-            <h3>四组门禁，批准计划的实际约束</h3>
-            <div class="project-grid">
-                <article class="project-card"><h4>Schema · 结构</h4><p>校验计划结构、参数类型、依赖关系与输入输出绑定。</p></article>
-                <article class="project-card"><h4>Scope · 作用域</h4><p>核对资产快照与工具授权范围，约束本次运行可使用的能力。</p></article>
-                <article class="project-card"><h4>Risk · 风险</h4><p>检查风险与副作用策略，禁止不满足执行政策的计划进入执行。</p></article>
-                <article class="project-card"><h4>Budget · 预算</h4><p>约束计划步骤与调用预算；失败计划受限修复或进入安全停止。</p></article>
+            <ol class="cl-mechanism-steps">
+                <li><h3>硬过滤限定可选范围</h3><p>先依据任务和政策边界筛选资产，避免把不允许使用的能力带入候选规划。</p></li>
+                <li><h3>双路召回用 RRF 统一排名</h3><p>稀疏检索保留关键词匹配，稠密检索补充语义相似；按两路排名累加倒数贡献，不直接混加不同检索器的原始分数。</p><div class="project-formula"><code>s_RRF(a) = Σ_{r: a ∈ r} 1 / (k + rank_r(a))，k = 60</code></div><p class="project-note">这是排名融合阶段的分数；候选后续仍要经过契约对齐、修正与扩展。</p></li>
+                <li><h3>契约对齐明确覆盖和缺口</h3><p>把子目标需要的输入输出，与候选能力的 Contract 对照。能覆盖的步骤进入复用计划，未覆盖的部分保留为需要解析的缺口。</p></li>
+            </ol>
+            <details class="cl-detail">
+                <summary>五类资产如何参与复用</summary>
+                <div class="cl-detail-content"><dl class="cl-asset-types"><div><dt>Primitive Tool</dt><dd>提供可调用的基础工具能力。</dd></div><div><dt>FSM Shard</dt><dd>复用确定性状态机片段。</dd></div><div><dt>Workflow Skeleton</dt><dd>为规划提供工作流骨架。</dd></div><div><dt>Adapter</dt><dd>适配不同步骤的输入输出。</dd></div><div><dt>Validator</dt><dd>校验中间产物与输出契约。</dd></div></dl></div>
+            </details>
+        </section>
+
+        <section class="section" id="compiler">
+            <span class="cl-section-label">04 · 计划编译</span>
+            <h2>LLM 提案如何成为可执行计划</h2>
+            <p>模型根据对齐后的资产提出 Blueprint，描述子任务、依赖和能力组合。Compiler 将提案逐项校验，绑定具体资产版本与输入输出，使执行器能够按明确的计划消费能力。</p>
+            <div class="cl-approval-flow" aria-label="计划批准过程"><span>模型提案</span><span aria-hidden="true">→</span><strong>代码校验与版本绑定</strong><span aria-hidden="true">→</span><span>批准的计划</span></div>
+            <div class="project-grid cl-gates">
+                <article class="project-card"><h3>Schema · 结构与绑定</h3><p>校验计划结构、DAG 依赖、参数类型、输入输出绑定及资产引用，确保步骤可以被解释和调度。</p></article>
+                <article class="project-card"><h3>Scope · 能力与作用域</h3><p>核对注册视图、资产快照、工具授权及任务覆盖，确定本次运行可以使用的能力。</p></article>
+                <article class="project-card"><h3>Risk · 政策与副作用</h3><p>检查风险和副作用约束，禁止不满足执行政策的提案直接进入执行。</p></article>
+                <article class="project-card"><h3>Budget · 调用约束</h3><p>检查计划与调用预算，使步骤数量及后续解析的调用范围处于可检查的约束内。</p></article>
             </div>
-            <p class="project-note">Schema / Scope / Risk / Budget 是展示分组；编译检查还覆盖资产绑定、覆盖情况和 Validator 等。执行开始时固定 Snapshot，运行中不热切换资产版本。</p>
+            <div class="cl-outcomes"><p><strong>通过：</strong>交付绑定资产版本的 Blueprint、步骤依赖与输入输出关系。</p><p><strong>失败：</strong>可修复问题进入受限修复；硬策略不满足时安全停止。</p></div>
+            <p class="project-note">四组门禁是展示分组；实际检查还包含 Validator、覆盖与副作用等。“代码批准”限定 Compiler 的确定性校验，任务分析、契约对齐与提案仍可能调用模型。</p>
         </section>
 
         <section class="section" id="execution">
-            <h2>已知能力优先，只为缺口推理</h2>
-            <p>三种模式描述已有资产对任务的覆盖程度。模式决定哪些步骤可以复用、哪些部分需要解析；最终都由固定执行器消费经批准的计划与校验产物。</p>
-            <div class="project-grid project-grid-three">
-                <article class="project-card">
-                    <span class="project-kicker">全部覆盖</span>
-                    <h3>REUSE</h3>
-                    <p>已有资产覆盖任务步骤，执行阶段复用确定性能力，减少额外决策推理。</p>
-                    <p class="project-note">前置任务分析与规划的模型消耗仍计入本次请求。</p>
-                </article>
-                <article class="project-card">
-                    <span class="project-kicker">部分覆盖</span>
-                    <h3>HYBRID</h3>
-                    <p>保留已有资产步骤，对未覆盖部分进行有界解析，再将校验产物交给执行器。</p>
-                    <p class="project-note">根据实际缺口分配资产复用与推理步骤。</p>
-                </article>
-                <article class="project-card">
-                    <span class="project-kicker">覆盖不足</span>
-                    <h3>NEW</h3>
-                    <p>在冻结上下文与工具约束下完成新的规划或探索，仍可沿用任务中已有的资产步骤。</p>
-                    <p class="project-note">新任务也受编译、验证与调用预算约束。</p>
-                </article>
+            <span class="cl-section-label">05 · 有界执行</span>
+            <h2>固定父图如何消费缺口产物</h2>
+            <p>执行器把批准的 Blueprint 作为运行数据，使用固定的调度、校验和状态更新流程。已有能力按资产调用；未覆盖部分在冻结目标、政策和资产快照内解析，形成经过校验的类型化产物。</p>
+            <figure class="project-figure cl-method-figure">
+                <a class="figure-open" href="../assets/projects/compilelight/academic-execution.png" data-figure-title="CompileLight：固定父图、有界缺口解析与类型化产物注入">
+                    <img src="../assets/projects/compilelight/academic-execution.svg" width="1920" height="1080" alt="有界执行图：上层固定父图进行 Dispatch、已知 Tool/FSM、步骤校验、状态更新、下一步与输出；下层在冻结上下文中进行有界缺口解析，可选调用白名单工具，经 Validator 产生含类型、值与证据的产物供固定图消费，执行过程进入 Ledger。" loading="lazy" decoding="async">
+                </a>
+                <figcaption>图 3 · 上层是固定执行职责，下层是缺口解析职责。灰绿回注箭头强调：经过验证的类型化产物供固定父图消费；铜棕工具循环只在需要时发生。</figcaption>
+            </figure>
+            <div class="cl-runtime-paths">
+                <article><span class="cl-pill cl-known">已知步骤</span><h3>调度 → 能力调用 → 校验</h3><p>父图选择就绪步骤，调用绑定的 Tool / FSM 能力，对输出进行步骤校验，再推进状态和后续依赖。</p></article>
+                <article><span class="cl-pill cl-gap">未知缺口</span><h3>冻结上下文 → 解析 → 产物</h3><p>System 2 围绕明确目标进行有界推理，按需调用允许的工具；解析结果通过 Validator 后，成为带有类型、值和证据的产物。</p></article>
             </div>
-            <h3>有界 System 2：约束输入、动作与产物</h3>
-            <ol class="project-steps">
-                <li><strong>冻结上下文：</strong>在明确的任务与资产视图下识别缺口。</li>
-                <li><strong>限制动作：</strong>允许动作与只读工具由白名单限定，LLM 与工具调用数分别受预算约束；工具调用是可选分支。</li>
-                <li><strong>验证产物：</strong>解析结果转为类型化产物，经契约校验后供固定执行器消费；不通过校验的结果不直接执行。</li>
-            </ol>
-            <p class="project-note">此处呈现职责关系。公开轻量版参考实现先由控制服务解析缺口，再向固定执行器提交预计算结果。</p>
+            <div class="cl-artifact"><span class="cl-section-label">两层之间交付什么</span><h3>Typed artifacts：类型 + 值 + 证据</h3><p>缺口产物需要通过契约校验，才能参与后续执行。固定父图消费这些结果、完成步骤校验与状态更新，并将执行结果和消耗信息写入 Ledger。</p></div>
+            <h3>“有界”落在可检查的动作和调用数上</h3>
+            <ul class="cl-bounds"><li><strong>输入视图固定：</strong>本次解析使用明确的目标、政策与资产 Snapshot。</li><li><strong>动作白名单：</strong>允许动作与工具范围受限，工具调用是可选分支。</li><li><strong>两类调用预算：</strong>LLM 调用数与工具调用数分别受约束。</li><li><strong>输出校验：</strong>未经验证的解析结果不直接作为可执行产物。</li></ul>
+            <div class="project-formula"><code>aₜ ∈ A_allow；n_LLM ≤ B_LLM；n_tool ≤ B_tool</code></div>
+            <h3>三种模式描述资产覆盖程度</h3>
+            <div class="project-grid project-grid-three cl-modes"><article class="project-card"><h3>REUSE</h3><p>已有能力覆盖步骤，执行阶段优先复用确定性能力，减少额外决策推理。</p></article><article class="project-card"><h3>HYBRID</h3><p>保留已知步骤，只为未覆盖部分解析产物，再与已有能力共同完成任务。</p></article><article class="project-card"><h3>NEW</h3><p>在覆盖不足时进行受控规划或探索，任务中仍可包含已有资产步骤。</p></article></div>
+            <p class="project-note">REUSE 的前置分析与提案仍可能消耗 Token。有界约束在这里指动作和调用次数，不将 Token 总量或耗时额外表述为已验证的硬上界。</p>
+            <details class="cl-detail">
+                <summary>对照公开代码：固定图与缺口解析的实际顺序</summary>
+                <div class="cl-detail-content"><p>学术图表达的是职责和数据交付关系。固定公开参考版本中，控制服务先完成 System 2 缺口预解析，再将预计算结果提交给固定执行器；执行器从运行状态中消费这些产物。</p><p>固定父图按加载计划、选择就绪步骤、调度、校验输出、写入账本与路由下一步运行，请求 Blueprint 作为状态数据传入。图中的缺口支路用于解释产物供固定图消费的关系。</p><p class="project-note">实现入口：<a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/control_plane/service.py" target="_blank" rel="noopener noreferrer">control_plane/service.py</a> · <a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/execution/graph.py" target="_blank" rel="noopener noreferrer">execution/graph.py</a> · <a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/execution/meta_executor.py" target="_blank" rel="noopener noreferrer">execution/meta_executor.py</a>。</p></div>
+            </details>
+            <div class="cl-ledger-note"><strong>证据与经验各有生命周期。</strong><p>Ledger 留存本次执行的结果、消耗与审计轨迹。经验经过审核和验证后，才成为后续版本的资产；本次运行的资产快照保持固定。</p></div>
         </section>
 
         <section class="section" id="results">
-            <h2>业务版成果：更少开销，更高成功率</h2>
+            <h2>业务版效果</h2>
             <p>在业务版 <strong>10,284 次流量回放</strong>中，与 ReAct 基线比较，综合成功率、端到端 P95 和 Token 开销采用以下口径。</p>
             <figure class="project-figure">
                 <a class="figure-open" href="../assets/projects/compilelight/results.svg" data-figure-title="CompileLight 业务版：成功率、P95 与 Token 开销比较">
@@ -196,7 +197,7 @@
         </section>
 
         <section class="section" id="versions">
-            <h2>业务版与公开轻量版</h2>
+            <h2>业务版与公开实现</h2>
             <p>本页展示企业场景中的业务版设计与成果；GitHub 仓库提供便于本地运行和理解机制的轻量公开版。两者保留资产复用、计划编译和固定执行器的主线，数据库与模型选型有所区别。</p>
             <div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的业务版与公开轻量版对照表">
                 <table>
@@ -210,6 +211,7 @@
                 </table>
             </div>
             <p class="project-note">架构图为结合业务介绍与公开核心实现整理的概念图。公开实现参考固定提交 <a href="https://github.com/gongxieruifeng/CompileLight/tree/f5c9f03bf2b98a287f744c3d9611b985fbd1e192" target="_blank" rel="noopener noreferrer">f5c9f03</a>。</p>
+            <details class="cl-detail"><summary>核心机制的公开实现入口</summary><div class="cl-detail-content"><ul class="cl-code-links"><li>排名融合：<a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/registry/rrf.py" target="_blank" rel="noopener noreferrer">registry/rrf.py</a></li><li>计划校验与批准：<a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/control_plane/blueprint_compiler.py" target="_blank" rel="noopener noreferrer">control_plane/blueprint_compiler.py</a></li><li>缺口动作与调用预算：<a href="https://github.com/gongxieruifeng/CompileLight/blob/f5c9f03bf2b98a287f744c3d9611b985fbd1e192/src/reduce_token_agent/system2/executor.py" target="_blank" rel="noopener noreferrer">system2/executor.py</a></li></ul></div></details>
             <div class="project-links">
                 <a class="ui-btn ui-btn-primary" href="https://github.com/gongxieruifeng/CompileLight" target="_blank" rel="noopener noreferrer">查看公开实现与运行说明</a>
                 <a class="ui-btn" href="../posts/compilelight-agent-evaluation.html">阅读 Agent 评估方法</a>

@@ -9,15 +9,15 @@
     compilelight: {
       zh: {
         problem: '企业客服任务反复规划，已知能力难以复用，执行过程需要清晰的审计证据。',
-        method: '模型分析任务并提出 Blueprint，确定性 Compiler 执行 Schema / Scope / Risk / Budget 门禁；固定 LangGraph Meta-Executor 按 REUSE / HYBRID / NEW 完成执行。',
+        method: 'Route Header / Contract / Body 分离召回信息、接口约束与执行内容。双路检索经 RRF 融合、契约对齐后，LLM 提出 Blueprint，Compiler 校验批准；冻结快照下的已知步骤与经验证的类型化缺口产物由固定 LangGraph 父图消费，并写入 Ledger。',
         result: '业务版 10,284 次回放：成功率 78.2%→89.4%，整体 P95 103.64s→54.2s，Token 节省 74.8%。',
-        note: '业务版成果与公开轻量版分开呈现；公开代码用于理解架构。'
+        note: '业务版成果与公开轻量版分开呈现；图示表达职责关系，公开参考版在提交执行前解析缺口。'
       },
       en: {
         problem: 'Enterprise service tasks repeat planning, underuse known capabilities, and need clear evidence for execution audits.',
-        method: 'Models analyze tasks and propose Blueprints. A deterministic Compiler applies Schema / Scope / Risk / Budget gates, and a fixed LangGraph Meta-Executor runs REUSE / HYBRID / NEW plans.',
+        method: 'Route Header / Contract / Body separate retrieval metadata, interface constraints and execution content. RRF and contract alignment ground LLM Blueprint proposals and compiler approval. A fixed LangGraph parent graph consumes known steps and validated, typed gap artifacts under a frozen snapshot, with a Ledger recording evidence.',
         result: 'Across 10,284 business traffic replays: success 78.2%→89.4%, overall P95 103.64s→54.2s, and 74.8% token savings.',
-        note: 'These results belong to the business version. The public lightweight code illustrates the architecture.'
+        note: 'Results belong to the business version. The diagrams show responsibilities; the referenced public version resolves gaps before submitting execution.'
       }
     },
     geome: {

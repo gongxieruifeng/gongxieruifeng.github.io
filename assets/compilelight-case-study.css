@@ -1,0 +1,148 @@
+/* CompileLight method narrative; other project layouts retain their shared styles. */
+.compilelight-case-study .cl-section-label {
+  display: block;
+  margin: 0 0 10px;
+  color: #526259;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .035em;
+}
+.compilelight-case-study .cl-principles,
+.compilelight-case-study .cl-asset-layers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 26px 0;
+}
+.compilelight-case-study :is(.cl-principles, .cl-asset-layers) > article {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #dce2da;
+  border-radius: 12px;
+  background: #f7f8f4;
+}
+.compilelight-case-study :is(.cl-principles, .cl-asset-layers, .cl-runtime-paths) h3 {
+  margin: 15px 0 10px;
+  font-size: 18px;
+  line-height: 1.55;
+}
+.compilelight-case-study :is(.cl-principles, .cl-asset-layers, .cl-runtime-paths) p { margin-bottom: 0; }
+.compilelight-case-study .cl-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.compilelight-case-study .cl-known { color: #365f83; background: #f2f6fa; }
+.compilelight-case-study .cl-approved { color: #3d7168; background: #edf4f1; }
+.compilelight-case-study .cl-gap { color: #995d3c; background: #fbf7f2; }
+.compilelight-case-study .cl-layer-name { color: #365f83; font-size: 14px; font-weight: 650; }
+.compilelight-case-study .cl-method-figure { margin: 28px 0; }
+.compilelight-case-study .cl-method-figure figcaption { color: #43584d; font-size: 14px; }
+.compilelight-case-study .cl-reading-map,
+.compilelight-case-study .cl-runtime-paths {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.compilelight-case-study .cl-reading-map a {
+  display: grid;
+  gap: 7px;
+  padding: 20px 22px;
+  border: 1px solid #cad7cb;
+  border-radius: 12px;
+  background: #f5f8f4;
+  text-decoration: none;
+}
+.compilelight-case-study .cl-reading-map a:hover { border-color: #1b6550; background: #edf4ee; }
+.compilelight-case-study .cl-reading-map span { color: #1b6550; font-size: 13px; font-weight: 650; }
+.compilelight-case-study .cl-reading-map strong { color: #172a26; font-size: 18px; }
+.compilelight-case-study .cl-reading-map small { color: #526259; font-size: 14px; }
+.compilelight-case-study .cl-contract-line {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 8px 18px;
+  padding: 20px 22px;
+  border-left: 3px solid #3d7168;
+  background: #f3f6f0;
+}
+.compilelight-case-study .cl-contract-line span { color: #526259; font-size: 14px; }
+.compilelight-case-study .cl-contract-line strong { font-size: 15px; font-weight: 600; }
+.compilelight-case-study .cl-mechanism-steps { margin: 26px 0; padding-left: 28px; }
+.compilelight-case-study .cl-mechanism-steps > li { padding: 0 0 16px 7px; }
+.compilelight-case-study .cl-mechanism-steps > li::marker { color: #365f83; font-weight: 650; }
+.compilelight-case-study .cl-mechanism-steps h3 { margin: 0 0 10px; }
+.compilelight-case-study .cl-approval-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 26px 0;
+  padding: 18px;
+  border: 1px solid #cad7cb;
+  border-radius: 10px;
+  background: #f3f7f2;
+  font-size: 15px;
+}
+.compilelight-case-study .cl-approval-flow strong { color: #1b6550; }
+.compilelight-case-study .cl-gates h3 { font-size: 18px; }
+.compilelight-case-study .cl-outcomes {
+  padding: 18px 22px;
+  border-left: 3px solid #3d7168;
+  background: #f4f7f2;
+}
+.compilelight-case-study .cl-outcomes p { margin: 0 0 8px; }
+.compilelight-case-study .cl-outcomes p:last-child { margin-bottom: 0; }
+.compilelight-case-study .cl-runtime-paths > article {
+  padding: 23px;
+  border: 1px solid #d4dedb;
+  border-radius: 12px;
+  background: #f2f6fa;
+  min-width: 0;
+}
+.compilelight-case-study .cl-runtime-paths > article:last-child { background: #fbf7f2; border-style: dashed; }
+.compilelight-case-study :is(.cl-artifact, .cl-ledger-note) {
+  margin: 24px 0;
+  padding: 22px;
+  border: 1px solid #cad9d2;
+  border-radius: 12px;
+  background: #edf4f1;
+}
+.compilelight-case-study .cl-artifact h3 { margin: 0 0 10px; }
+.compilelight-case-study :is(.cl-artifact, .cl-ledger-note) p:last-child { margin: 0; }
+.compilelight-case-study .cl-ledger-note { background: #f5f7f2; }
+.compilelight-case-study .cl-ledger-note strong { display: block; margin-bottom: 9px; }
+.compilelight-case-study .cl-bounds { padding-left: 24px; }
+.compilelight-case-study .cl-bounds li { margin-bottom: 8px; }
+.compilelight-case-study .cl-detail {
+  margin: 22px 0;
+  border: 1px solid #cbd8ce;
+  border-radius: 10px;
+  background: #f7f9f5;
+}
+.compilelight-case-study .cl-detail summary { padding: 16px 20px; font-weight: 650; cursor: pointer; }
+.compilelight-case-study .cl-detail summary::marker { color: #1b6550; }
+.compilelight-case-study .cl-detail[open] summary { border-bottom: 1px solid #dce2da; }
+.compilelight-case-study .cl-detail-content { padding: 20px 22px; }
+.compilelight-case-study .cl-detail-content p:last-child { margin-bottom: 0; }
+.compilelight-case-study .cl-asset-types { margin: 0; }
+.compilelight-case-study .cl-asset-types > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 12px; padding: 10px 0; }
+.compilelight-case-study .cl-asset-types dt { color: #365f83; font-weight: 650; }
+.compilelight-case-study .cl-asset-types dd { margin: 0; }
+.compilelight-case-study .cl-code-links { margin: 0; padding-left: 22px; }
+.compilelight-case-study .cl-detail a { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .compilelight-case-study :is(.cl-principles, .cl-asset-layers, .cl-reading-map, .cl-runtime-paths) { grid-template-columns: minmax(0, 1fr); }
+  .compilelight-case-study .cl-contract-line { grid-template-columns: minmax(0, 1fr); }
+  .compilelight-case-study .cl-contract-line strong { margin-bottom: 7px; }
+  .compilelight-case-study .cl-asset-types > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .compilelight-case-study :is(.cl-principles, .cl-asset-layers, .cl-runtime-paths) > article { padding: 20px; }
+  .compilelight-case-study .cl-detail-content { padding: 18px; }
+}
+@media print {
+  .compilelight-case-study .cl-reading-map { display: none; }
+  .compilelight-case-study :is(.cl-principles, .cl-asset-layers, .cl-runtime-paths) > article { break-inside: avoid; }
+}
